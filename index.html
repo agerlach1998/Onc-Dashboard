@@ -408,7 +408,7 @@ body.dark .notepad-title{color:#c8b84a}
 .notepad-body{padding:8px 6px;min-height:120px;max-height:340px;overflow-y:auto}
 .notepad-body::-webkit-scrollbar{width:3px}
 .notepad-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:2px}
-.todo-item{display:flex;align-items:flex-start;gap:8px;padding:5px 7px;border-radius:5px;transition:background .1s;cursor:default;position:relative}
+.todo-item{display:flex;align-items:flex-start;gap:8px;padding:5px 7px;border-radius:5px;transition:background .1s;cursor:default}
 .todo-item:hover{background:rgba(0,0,0,.04)}
 body.dark .todo-item:hover{background:rgba(255,255,255,.05)}
 .todo-cb{width:15px;height:15px;border-radius:3px;border:1.5px solid #c8b84a;background:#fff;flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;transition:all .15s}
@@ -417,8 +417,8 @@ body.dark .todo-cb{background:#1a1f0f;border-color:#c8b84a}
 .todo-text{flex:1;font-size:12px;color:#3a3300;line-height:1.5;outline:none;min-height:18px;cursor:text;font-family:inherit}
 body.dark .todo-text{color:#d4c87a}
 .todo-text.done{text-decoration:line-through;opacity:.45}
-.todo-del{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:transparent;font-size:13px;padding:0;line-height:1;transition:color .1s}
-.todo-item:hover .todo-del{color:rgba(0,0,0,.25)}
+.todo-del{background:none;border:none;cursor:pointer;color:transparent;font-size:13px;padding:0;line-height:1;transition:color .1s;flex-shrink:0}
+.todo-item:hover .todo-del{color:rgba(0,0,0,.3)}
 body.dark .todo-item:hover .todo-del{color:rgba(255,255,255,.25)}
 .todo-del:hover{color:var(--red) !important}
 .notepad-footer{padding:6px 10px;border-top:1px dashed #e0d9b0;display:flex;align-items:center;gap:6px}
@@ -537,7 +537,7 @@ body.dark .home-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12)
 .proj-tab-btn.active{color:var(--gold-d);border-bottom-color:var(--gold)}
 .proj-panel{display:none}.proj-panel.active{display:block}
 /* PROJECT DETAIL */
-.proj-section{background:var(--surface);border:0.5px solid var(--border);border-radius:9px;padding:14px 16px;margin-bottom:12px}
+.proj-section{background:rgba(255,255,255,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0.5px solid rgba(255,255,255,.55);border-radius:9px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 8px rgba(0,0,0,.06)}
 .proj-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 /* TASK LIST */
 .proj-task{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border)}
@@ -812,7 +812,7 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 .todo-sub-cb.checked{background:var(--green);border-color:var(--green);color:#fff}
 .todo-sub-txt{flex:1;font-size:11px;color:var(--text);outline:none;background:none;border:none;font-family:inherit}
 .todo-sub-txt.done{text-decoration:line-through;opacity:.45}
-.todo-add-sub{background:none;border:none;cursor:pointer;color:transparent;font-size:11px;padding:0 2px;flex-shrink:0;line-height:1}
+.todo-add-sub{background:none;border:none;cursor:pointer;color:transparent;font-size:11px;padding:0 3px;flex-shrink:0;line-height:1;margin-top:1px}
 .todo-item:hover .todo-add-sub{color:var(--muted)}
 .todo-add-sub:hover{color:var(--gold-d) !important}
 .todo-subitems{border-left:2px solid var(--border);margin-left:10px;padding-left:4px}
@@ -820,6 +820,76 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 .sched-cb{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border-s);background:rgba(255,255,255,.5);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;cursor:pointer;transition:all .15s;margin-right:4px}
 .sched-cb.checked{background:var(--green);border-color:var(--green);color:#fff}
 .sched-row.done .sched-inp{text-decoration:line-through;opacity:.45}
+
+
+/* ── FROSTED GLASS PAGE HEADERS & TAB TITLES ────────────
+   .pg-header wraps any page title/subtitle row
+   .tab-pill wraps tab bars on Projects, Team, PPFO etc   */
+.pg-header {
+  background: rgba(255,255,255,.75);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 0.5px solid rgba(255,255,255,.6);
+  border-radius: 12px; padding: 12px 18px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+  margin-bottom: 14px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.tab-pill-bar {
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 0.5px solid rgba(255,255,255,.55);
+  border-radius: 10px; padding: 6px 8px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.07);
+  margin-bottom: 12px;
+  display: flex; gap: 4px; overflow-x: auto; flex-wrap: nowrap;
+}
+/* Proj tab buttons inside pill bar */
+.tab-pill-bar .proj-tab-btn {
+  border-bottom: none; border-radius: 7px; margin-bottom: 0;
+  background: transparent;
+}
+.tab-pill-bar .proj-tab-btn.active {
+  background: rgba(255,255,255,.85);
+  box-shadow: 0 1px 4px rgba(0,0,0,.1);
+  color: var(--gold-d);
+}
+/* Team tabs */
+.tab-pill-bar .team-tab {
+  border-bottom: none; border-radius: 7px;
+}
+.tab-pill-bar .team-tab.active {
+  background: rgba(255,255,255,.85);
+  box-shadow: 0 1px 4px rgba(0,0,0,.1);
+}
+/* PPFO tabs */
+.tab-pill-bar .ppfo-tab {
+  border-bottom: none; border-radius: 7px;
+}
+
+
+/* ── DRAG AND DROP ───────────────────────────────────────
+   Cards get a drag handle and visual feedback            */
+.card[draggable="true"] { cursor: grab; }
+.card[draggable="true"]:active { cursor: grabbing; }
+.card.dnd-dragging {
+  opacity: .4;
+  transform: scale(.98);
+  box-shadow: 0 0 0 2px var(--gold) !important;
+}
+.card.dnd-over {
+  outline: 2px dashed var(--gold);
+  outline-offset: 3px;
+}
+.drag-handle {
+  display: inline-flex; flex-direction: column; justify-content: center;
+  gap: 3px; cursor: grab; opacity: .25; width: 16px; height: 16px;
+  transition: opacity .15s; flex-shrink: 0; margin-left: 6px;
+}
+.drag-handle:hover { opacity: .6; }
+.drag-handle span {
+  display: block; width: 100%; height: 2px;
+  background: currentColor; border-radius: 1px;
+}
 
 </style>
 </head>
@@ -832,11 +902,17 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
     <div class="logo-div"></div>
     <div class="logo-sub">Content Intelligence</div>
   </div>
-  <div class="topbar-r">
-    <button class="ibtni" onclick="openModal('data-modal')" title="Export / Import data" style="font-size:11px;padding:0 8px;width:auto;border-radius:6px;color:rgba(255,255,255,.6)"><i class="ti ti-database-export"></i></button> <button class="ibtni" onclick="openQuickAdd()" id="quick-add-btn" title="Quick-add content (N)"><i class="ti ti-plus"></i></button> <div id="save-pill" class="save-pill"><span id="save-icon">⟳</span><span id="save-txt">Saving…</span></div>
-    <div class="topbar-date" id="top-date"></div>
-    <button class="ibtni" onclick="toggleDark()" title="Toggle dark mode"><i class="ti ti-moon" id="dark-ic"></i></button>
-    <button class="ibtni" onclick="clearSaved()" title="Reset to defaults"><i class="ti ti-refresh"></i></button>
+  <div class="topbar-r" style="display:flex;align-items:center;gap:6px">
+    <button class="ibtni" id="quick-add-btn" title="Quick-add content (N)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <button class="ibtni" onclick="toggleDark()" title="Toggle dark mode"><span id="dark-ic">🌙</span></button>
+    <button class="ibtni" onclick="clearSaved()" title="Reset to defaults"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+    <button class="ibtni" onclick="openModal('data-modal')" title="Export / Import data"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><line x1="18" y1="18" x2="22" y2="18"/><polyline points="20 16 22 18 20 20"/></svg></button>
+    <button class="ibtni" onclick="window.print()" title="Print"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+    <div id="save-pill" class="save-pill"><span id="save-icon">⟳</span><span id="save-txt">Saving…</span></div>
+    <div id="top-datetime" style="font-size:11px;color:rgba(255,255,255,.7);text-align:right;line-height:1.4;padding-left:6px;border-left:0.5px solid rgba(255,255,255,.15)">
+      <div id="top-date" style="font-weight:600"></div>
+      <div id="top-time" style="font-size:10px;opacity:.8"></div>
+    </div>
   </div>
 </div>
 
@@ -867,12 +943,27 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
 <div id="page-home" class="pg active">
 
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-  <div style="background:rgba(255,255,255,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0.5px solid rgba(255,255,255,.6);border-radius:12px;padding:10px 18px;box-shadow:0 2px 10px rgba(0,0,0,.08)">
-    <div style="font-size:20px;font-weight:700;color:var(--text)">Today</div>
-    <div style="font-size:12px;color:var(--muted)" id="home-date-sub">—</div>
+<div style="background:rgba(255,255,255,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0.5px solid rgba(255,255,255,.6);border-radius:12px;padding:12px 20px;box-shadow:0 2px 10px rgba(0,0,0,.08);display:flex;align-items:center;gap:0;margin-bottom:14px">
+  <!-- Date -->
+  <div style="flex-shrink:0;padding-right:20px;border-right:0.5px solid var(--border)">
+    <div style="font-size:18px;font-weight:700;color:var(--text)">Today</div>
+    <div style="font-size:11px;color:var(--muted)" id="home-date-sub">—</div>
   </div>
-  <button class="btn btn-sm" onclick="window.print()"><i class="ti ti-printer"></i> Print</button>
+  <!-- Word of the day -->
+  <div style="flex-shrink:0;padding:0 20px;border-right:0.5px solid var(--border)">
+    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:1px">Word of the day</div>
+    <div id="wotd-word" style="font-size:14px;font-weight:700;color:var(--gold-d)">—</div>
+    <div id="wotd-def" style="font-size:10px;color:var(--muted);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+  </div>
+  <!-- Quote -->
+  <div style="flex:1;padding-left:20px;display:flex;align-items:center;gap:10px">
+    <div style="flex:1">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:1px">Daily quote</div>
+      <div id="quote-text" style="font-size:12px;font-style:italic;color:var(--text);line-height:1.4">Loading…</div>
+      <div id="quote-author" style="font-size:10px;color:var(--muted);text-align:right">—</div>
+    </div>
+    <button class="btn btn-sm" onclick="refreshDailyInspiration()" style="flex-shrink:0"><i class="ti ti-refresh"></i></button>
+  </div>
 </div>
 
 <!-- ROW 1: DAILY SCHEDULE + TO-DO -->
@@ -928,23 +1019,20 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
   </div>
 </div>
 
+<!-- ROW 2b: REMINDERS -->
+<div style="margin-bottom:12px">
+  <div class="card card-accent" style="height:180px;display:flex;flex-direction:column">
+    <div class="card-hdr" style="flex-shrink:0;margin-bottom:6px">
+      <div class="card-title"><i class="ti ti-bell"></i> Reminders</div>
+      <button class="btn btn-sm btn-primary" onclick="openReminderModal(null)"><i class="ti ti-plus"></i> Add</button>
+    </div>
+    <div id="reminders-list" style="flex:1;overflow-y:auto;min-height:0"></div>
+  </div>
+</div>
+
 <!-- ROW 3: INSPIRATION + PUBMED -->
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-  <div class="card card-accent" style="height:200px;display:flex;flex-direction:column;margin-bottom:0">
-    <div class="card-hdr" style="flex-shrink:0;margin-bottom:4px">
-      <div class="card-title"><i class="ti ti-feather"></i> Daily inspiration</div>
-      <button class="btn btn-sm" onclick="refreshDailyInspiration()"><i class="ti ti-refresh"></i></button>
-    </div>
-    <div style="flex:1;overflow-y:auto;min-height:0">
-      <div style="margin-bottom:8px;padding-bottom:8px;border-bottom:0.5px dashed var(--border)">
-        <div id="quote-text" style="font-size:12px;font-style:italic;line-height:1.6;margin-bottom:2px">Loading…</div>
-        <div id="quote-author" style="font-size:10px;color:var(--muted);text-align:right">—</div>
-      </div>
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:2px">Word of the day</div>
-      <div id="wotd-word" style="font-size:13px;font-weight:600;color:var(--gold-d)">—</div>
-      <div id="wotd-def" style="font-size:11px;color:var(--text);line-height:1.5;margin-top:2px">—</div>
-    </div>
-  </div>
+
   <div class="card card-accent" style="height:200px;display:flex;flex-direction:column;margin-bottom:0">
     <div class="card-hdr" style="flex-shrink:0;margin-bottom:4px">
       <div class="card-title"><i class="ti ti-microscope"></i> Recent research</div>
@@ -960,9 +1048,9 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 </div>
 
 <div id="page-calendar" class="pg" style="display:none">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">
+  <div class="pg-header" style="">
     <div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"><i class="ti ti-calendar" style="color:var(--gold)"></i> Content calendar</div>
+      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> Content calendar</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Click a day to add an event · click an event to edit or delete</div>
     </div>
     <div style="display:flex;gap:6px">
@@ -992,9 +1080,9 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 </div>
 <!-- ═══ ANALYTICS ═══ -->
 <div id="page-analytics" class="pg" style="display:none">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">
+  <div class="pg-header" style="">
     <div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"><i class="ti ti-chart-bar" style="color:var(--gold)"></i> Analytics</div>
+      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> Analytics</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Performance metrics, content coverage &amp; RC pacing</div>
     </div>
   </div>
@@ -1068,9 +1156,9 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 </div>
 
 <div id="page-trending" class="pg" style="display:none">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">
+  <div class="pg-header" style="">
     <div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"><i class="ti ti-trending-up" style="color:var(--gold)"></i> Trends</div>
+      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> Trends</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Field trends · awareness windows · emerging content angles</div>
     </div>
   </div>
@@ -1170,9 +1258,9 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
 <!-- ═══ KOLs ═══ -->
 <div id="page-kols" class="pg" style="display:none">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">
+  <div class="pg-header" style="">
     <div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"><i class="ti ti-users" style="color:var(--gold)"></i> KOL network</div>
+      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> KOL network</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Click any card to edit · project count drives tier · opportunities below</div>
     </div>
     <div style="display:flex;gap:6px">
@@ -1233,9 +1321,9 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
 <!-- ═══ PITCH QUEUE ═══ -->
 <div id="page-pitches" class="pg" style="display:none">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">
+  <div class="pg-header" style="">
     <div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"><i class="ti ti-bulb" style="color:var(--gold)"></i> Pitch queue</div>
+      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> Pitch queue</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Drag cards between columns · click to edit · click + to add</div>
     </div>
     <button class="btn btn-sm btn-primary" onclick="openPitchModal(null,null)"><i class="ti ti-plus"></i> Add pitch</button>
@@ -1277,9 +1365,9 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
 <!-- ═══ CONFERENCES ═══ -->
 <div id="page-conferences" class="pg" style="display:none">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">
+  <div class="pg-header" style="">
     <div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"><i class="ti ti-map-pin" style="color:var(--gold)"></i> Conference coverage</div>
+      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> Conference coverage</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Track abstracts, interviews &amp; sessions per conference</div>
     </div>
     <button class="btn btn-sm btn-primary" onclick="openConfModal()"><i class="ti ti-plus"></i> Add conference</button>
@@ -1296,9 +1384,9 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
 <!-- ═══ PPFO ═══ -->
 <div id="page-ppfo" class="pg" style="display:none">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">
+  <div class="pg-header" style="">
     <div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"><i class="ti ti-book" style="color:var(--gold)"></i> Pharmacy Practice in Focus: Oncology</div>
+      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> Pharmacy Practice in Focus: Oncology</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Issue trackers · editorial board · committees</div>
     </div>
     <div id="ppfo-actions" style="display:flex;gap:6px"></div>
@@ -1371,10 +1459,9 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
 <!-- ═══ PROJECTS ═══ -->
 <div id="page-projects" class="pg" style="display:none">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+  <div class="pg-header" style="">
     <div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px">
-        <i class="ti ti-layout-kanban" style="color:var(--gold)"></i> Projects
+      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> Projects
       </div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Click a project tab to view details</div>
     </div>
@@ -1383,7 +1470,7 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
     </button>
   </div>
   <!-- Tab bar -->
-  <div class="proj-tab-bar" id="proj-tab-bar"></div>
+  <div class="tab-pill-bar" id="proj-tab-bar"></div>
   <!-- Panels rendered here -->
   <div id="proj-panels"></div>
 </div>
@@ -1391,10 +1478,9 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
 <!-- ═══ MY GOALS ═══ -->
 <div id="page-goals" class="pg" style="display:none">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">
+  <div class="pg-header" style="">
     <div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px">
-        <i class="ti ti-target" style="color:var(--gold)"></i> My goals
+      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> My goals
       </div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Click any item to toggle · click the edit button to update a goal</div>
     </div>
@@ -1411,10 +1497,9 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
 <!-- ═══ MY TEAM ═══ -->
 <div id="page-team" class="pg" style="display:none">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">
+  <div class="pg-header" style="">
     <div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px">
-        <i class="ti ti-users-group" style="color:var(--gold)"></i> My team
+      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> My team
       </div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Oncology content team · 2026</div>
     </div>
@@ -1526,6 +1611,24 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 </div><!-- /app -->
 
 <!-- ═══ MODALS ═══ -->
+
+<!-- Reminder Modal -->
+<div id="reminder-modal" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('reminder-modal')">
+<div class="modal modal-md">
+  <div class="modal-hdr"><h3><i class="ti ti-bell"></i> Add reminder</h3><button class="modal-close" onclick="closeModal('reminder-modal')">✕</button></div>
+  <input type="hidden" id="rem-id">
+  <div class="field"><label>Reminder text</label><input type="text" id="rem-text" placeholder="e.g. Submit PPFO manuscript"></div>
+  <div class="g2f">
+    <div class="field"><label>Date</label><input type="date" id="rem-date"></div>
+    <div class="field"><label>Time</label><input type="time" id="rem-time" value="09:00"></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-danger btn-sm" id="rem-del" style="display:none;margin-right:auto" onclick="deleteReminder()"><i class="ti ti-trash"></i> Delete</button>
+    <button class="btn" onclick="closeModal('reminder-modal')">Cancel</button>
+    <button class="btn btn-primary" onclick="saveReminder()"><i class="ti ti-check"></i> Save</button>
+  </div>
+</div></div>
+
 
 <!-- AdCom Modal -->
 <div id="adcom-modal" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('adcom-modal')">
@@ -2257,7 +2360,7 @@ function toggleDark() {
 }
 function applyDark() {
   document.body.classList.toggle('dark', DB.darkMode);
-  document.getElementById('dark-ic').className = DB.darkMode ? 'ti ti-sun' : 'ti ti-moon';
+  const dic = document.getElementById('dark-ic'); if(dic) dic.textContent = DB.darkMode ? '☀️' : '🌙';
   try { localStorage.setItem('pt_dark_mode', DB.darkMode ? '1' : '0'); } catch(_) {}
 }
 document.getElementById('top-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
@@ -2714,6 +2817,8 @@ function clearSaved() {
 // ══════════════════════════════════════════
 
 function wireAutosave() {
+  const qab = document.getElementById('quick-add-btn');
+  if (qab) qab.addEventListener('click', openQuickAdd);
   document.addEventListener('input',  ()=>saveState(), {passive:true});
   document.addEventListener('change', ()=>saveState(), {passive:true});
   document.addEventListener('blur', e=>{if(e.target.contentEditable==='true') saveState();}, true);
@@ -2737,6 +2842,7 @@ function showPage(name, el) {
     analyticsRendered = true;
   }
   if (name === 'pitches') { renderSWOT(); }
+  setTimeout(wireDragAndDrop, 150);
   if (name === 'kols') {
     renderKOLs();
     const ts = document.getElementById('kol-tier-sel');     if(ts) ts.value = currentKOLFilter;
@@ -4885,7 +4991,7 @@ function buildProjectPanel(p) {
 
   // ── Header row ────────────────────────────────────────
   const hdr = document.createElement('div');
-  hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px';
+  hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;background:rgba(255,255,255,.72);backdrop-filter:blur(10px);border:0.5px solid rgba(255,255,255,.55);border-radius:10px;padding:10px 14px;box-shadow:0 1px 6px rgba(0,0,0,.06)';
 
   const titleWrap = document.createElement('div');
   titleWrap.style.cssText = 'display:flex;align-items:center;gap:10px';
@@ -5057,8 +5163,10 @@ function openProjectTableModal(p) {
     {name:'Owner', type:'kol'},
     {name:'Due Date', type:'date'},
   ];
-  const modal = document.getElementById('proj-table-modal');
-  if (!modal) { buildProjectTableModal(); }
+  // Always rebuild to ensure fresh DOM
+  const existing = document.getElementById('proj-table-modal');
+  if (existing) existing.remove();
+  buildProjectTableModal();
   document.getElementById('ptm-title').value = 'New tracker';
   renderProjColDefs();
   openModal('proj-table-modal');
@@ -7966,6 +8074,241 @@ function updatePickerPhotoUI() {
 }
 
 
+
+// ══════════════════════════════════════════════════════════
+// REMINDERS — timed browser notifications
+// ══════════════════════════════════════════════════════════
+if (!DB.reminders) DB.reminders = [];
+
+function renderReminders() {
+  const cont = document.getElementById('reminders-list'); if (!cont) return;
+  cont.innerHTML = '';
+  const now = new Date();
+  const sorted = [...(DB.reminders||[])].sort((a,b) => {
+    const da = new Date(a.date + 'T' + (a.time||'00:00'));
+    const db_ = new Date(b.date + 'T' + (b.time||'00:00'));
+    return da - db_;
+  });
+  if (!sorted.length) {
+    cont.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:8px 0;text-align:center">No reminders set</div>';
+    return;
+  }
+  sorted.forEach(rem => {
+    const remDate = new Date(rem.date + 'T' + (rem.time||'00:00'));
+    const past = remDate < now;
+    const diffMs = remDate - now;
+    const diffMins = Math.round(diffMs / 60000);
+    let timeLabel = '';
+    if (past) timeLabel = 'Past';
+    else if (diffMins < 60) timeLabel = 'In ' + diffMins + 'm';
+    else if (diffMins < 1440) timeLabel = 'In ' + Math.round(diffMins/60) + 'h';
+    else timeLabel = rem.date + (rem.time ? ' ' + rem.time : '');
+
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:0.5px solid var(--border)' + (past ? ';opacity:.45' : '');
+    row.innerHTML = `
+      <i class="ti ti-bell${past?'-off':''}" style="color:${past?'var(--muted)':'var(--gold-d)'};font-size:13px;flex-shrink:0"></i>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${rem.text}</div>
+        <div style="font-size:10px;color:var(--muted)">${timeLabel}</div>
+      </div>
+      <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0;flex-shrink:0" onclick="openReminderModal('${rem.id}')"><i class="ti ti-edit"></i></button>`;
+    cont.appendChild(row);
+  });
+}
+
+function openReminderModal(id) {
+  const rem = id ? (DB.reminders||[]).find(r=>r.id===id) : null;
+  document.getElementById('rem-id').value   = rem?.id || '';
+  document.getElementById('rem-text').value = rem?.text || '';
+  document.getElementById('rem-date').value = rem?.date || '';
+  document.getElementById('rem-time').value = rem?.time || '09:00';
+  document.getElementById('rem-del').style.display = rem ? '' : 'none';
+  openModal('reminder-modal');
+  setTimeout(() => document.getElementById('rem-text').focus(), 50);
+}
+
+function saveReminder() {
+  const id = document.getElementById('rem-id').value || ('rem-' + Date.now());
+  const text = document.getElementById('rem-text').value.trim();
+  if (!text) return;
+  const obj = {
+    id, text,
+    date: document.getElementById('rem-date').value,
+    time: document.getElementById('rem-time').value,
+    fired: false,
+  };
+  if (!DB.reminders) DB.reminders = [];
+  const idx = DB.reminders.findIndex(r=>r.id===id);
+  idx >= 0 ? DB.reminders[idx] = obj : DB.reminders.push(obj);
+  closeModal('reminder-modal');
+  renderReminders(); saveState();
+  // Request notification permission
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function deleteReminder() {
+  const id = document.getElementById('rem-id').value;
+  DB.reminders = (DB.reminders||[]).filter(r=>r.id!==id);
+  closeModal('reminder-modal'); renderReminders(); saveState();
+}
+
+function checkReminders() {
+  if (!DB.reminders?.length) return;
+  const now = new Date();
+  let changed = false;
+  DB.reminders.forEach(rem => {
+    if (rem.fired || !rem.date) return;
+    const remDate = new Date(rem.date + 'T' + (rem.time||'00:00'));
+    if (now >= remDate) {
+      rem.fired = true; changed = true;
+      // Browser notification
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('PT Dashboard Reminder', {
+          body: rem.text,
+          icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text y="18" font-size="18">🔔</text></svg>'
+        });
+      }
+      // Fallback: in-page alert pill
+      showPill('🔔', rem.text, 'rgba(223,173,14,.6)', 8000);
+    }
+  });
+  if (changed) { renderReminders(); saveState(); }
+}
+
+// Start reminder checker — runs every minute
+function startReminderChecker() {
+  checkReminders();
+  setInterval(checkReminders, 60000);
+  // Request notification permission on startup
+  if ('Notification' in window && Notification.permission === 'default') {
+    // Don't ask immediately — wait until they add first reminder
+  }
+}
+
+
+// ══════════════════════════════════════════════════════════
+// DRAG AND DROP TILE REORDERING
+// ══════════════════════════════════════════════════════════
+if (!DB.tileOrder) DB.tileOrder = {};
+
+let _dndSrc = null; // the card being dragged
+
+function makeTilesDraggable(containerId) {
+  const cont = containerId ? document.getElementById(containerId) : null;
+  const cards = cont
+    ? cont.querySelectorAll(':scope > .card, :scope > div > .card')
+    : document.querySelectorAll('.pg.active .card');
+
+  cards.forEach((card, i) => {
+    if (card.dataset.dndWired) return;
+    card.dataset.dndWired = 'true';
+    card.draggable = true;
+
+    // Add drag handle to card header right side (not overlapping content)
+    if (!card.querySelector('.drag-handle')) {
+      const handle = document.createElement('div');
+      handle.className = 'drag-handle';
+      handle.title = 'Drag to reorder';
+      handle.innerHTML = '<span></span><span></span><span></span>';
+      // Try to append to the card-hdr right side
+      const hdr = card.querySelector('.card-hdr');
+      if (hdr) hdr.appendChild(handle);
+      else card.insertBefore(handle, card.firstChild);
+    }
+
+    card.addEventListener('dragstart', e => {
+      _dndSrc = card;
+      card.classList.add('dnd-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dnd-dragging');
+      document.querySelectorAll('.dnd-over').forEach(c => c.classList.remove('dnd-over'));
+      _dndSrc = null;
+    });
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (_dndSrc && _dndSrc !== card) card.classList.add('dnd-over');
+    });
+    card.addEventListener('dragleave', () => card.classList.remove('dnd-over'));
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.classList.remove('dnd-over');
+      if (!_dndSrc || _dndSrc === card) return;
+      // Swap in DOM
+      const parent = card.parentNode;
+      const srcNext = _dndSrc.nextSibling;
+      const targetNext = card.nextSibling;
+      // Insert src before card, and card where src was
+      if (srcNext === card) {
+        parent.insertBefore(card, _dndSrc);
+      } else {
+        parent.insertBefore(_dndSrc, card);
+        if (targetNext) parent.insertBefore(card, targetNext);
+        else parent.appendChild(card);
+      }
+    });
+  });
+}
+
+// Wire drag-and-drop whenever a page becomes active
+function wireDragAndDrop() {
+  // Run on the currently visible page
+  const active = document.querySelector('.pg.active');
+  if (active) {
+    active.querySelectorAll('.card').forEach((card, i) => {
+      if (!card.dataset.dndWired) {
+        card.dataset.dndWired = 'true';
+        card.draggable = true;
+
+        if (!card.querySelector('.drag-handle')) {
+          const h = document.createElement('div');
+          h.className = 'drag-handle';
+          h.title = 'Drag to reorder';
+          h.innerHTML = '<span></span><span></span><span></span>';
+          const hdr2 = card.querySelector('.card-hdr');
+          if (hdr2) hdr2.appendChild(h);
+          else card.insertBefore(h, card.firstChild);
+        }
+
+        card.addEventListener('dragstart', e => {
+          _dndSrc = card;
+          card.classList.add('dnd-dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dnd-dragging');
+          document.querySelectorAll('.dnd-over').forEach(c => c.classList.remove('dnd-over'));
+          _dndSrc = null;
+        });
+        card.addEventListener('dragover', e => {
+          e.preventDefault();
+          if (_dndSrc && _dndSrc !== card) card.classList.add('dnd-over');
+        });
+        card.addEventListener('dragleave', () => card.classList.remove('dnd-over'));
+        card.addEventListener('drop', e => {
+          e.preventDefault();
+          card.classList.remove('dnd-over');
+          if (!_dndSrc || _dndSrc === card) return;
+          const parent = card.parentNode;
+          const srcNext = _dndSrc.nextSibling;
+          const targetNext = card.nextSibling;
+          if (srcNext === card) {
+            parent.insertBefore(card, _dndSrc);
+          } else {
+            parent.insertBefore(_dndSrc, card);
+            if (targetNext) parent.insertBefore(card, targetNext);
+            else parent.appendChild(card);
+          }
+        });
+      }
+    });
+  }
+}
+
 // ══════════════════════════════════════════
 // STARTUP
 // ══════════════════════════════════════════
@@ -7998,6 +8341,18 @@ async function startup() {
   if (typeof renderCalMonthStats === 'function') renderCalMonthStats();
   applyBackground();
   setupThemePicker();
+  renderReminders();
+  startReminderChecker();
+  setTimeout(wireDragAndDrop, 300);
+  // Live clock in topbar
+  function updateTopClock() {
+    const now = new Date();
+    const dateEl = document.getElementById('top-date');
+    const timeEl = document.getElementById('top-time');
+    if (dateEl) dateEl.textContent = now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    if (timeEl) timeEl.textContent = now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  }
+  updateTopClock(); setInterval(updateTopClock, 30000);
   wireAutosave();
   console.log('Home page ready ✓');
 }
