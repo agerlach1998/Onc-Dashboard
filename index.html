@@ -8335,15 +8335,22 @@ function buildPPROPanel(p) {
   // ── Header ────────────────────────────────────────────
   const hdr = document.createElement('div');
   hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;background:rgba(255,255,255,.72);backdrop-filter:blur(10px);border:0.5px solid rgba(255,255,255,.55);border-radius:10px;padding:10px 14px;box-shadow:0 1px 6px rgba(0,0,0,.06)';
-  hdr.innerHTML = `
-    <div>
-      <div style="font-size:16px;font-weight:700;color:var(--text)">Pathway to Peer Review</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px">PPFO Resident Peer Review Program</div>
-    </div>
-    <div style="display:flex;gap:6px">
-      <button class="btn btn-sm" onclick="openPPROImport()" title="Import from Excel"><i class="ti ti-upload"></i> Import</button>
-      <button class="btn btn-sm btn-primary" onclick="exportPPROData()" title="Export data"><i class="ti ti-download"></i> Export</button>
-    </div>`;
+  const hdrLeft = document.createElement('div');
+  hdrLeft.innerHTML = '<div style="font-size:16px;font-weight:700;color:var(--text)">Pathway to Peer Review</div><div style="font-size:11px;color:var(--muted);margin-top:2px">PPFO Resident Peer Review Program</div>';
+  const hdrBtns = document.createElement('div');
+  hdrBtns.style.cssText = 'display:flex;gap:6px';
+  const importBtn = document.createElement('button');
+  importBtn.className = 'btn btn-sm';
+  importBtn.innerHTML = '↑ Import';
+  importBtn.title = 'Import CSV data';
+  importBtn.addEventListener('click', openPPROImport);
+  const exportBtn = document.createElement('button');
+  exportBtn.className = 'btn btn-sm btn-primary';
+  exportBtn.innerHTML = '↓ Export';
+  exportBtn.title = 'Export PPRO data as JSON';
+  exportBtn.addEventListener('click', exportPPROData);
+  hdrBtns.appendChild(importBtn); hdrBtns.appendChild(exportBtn);
+  hdr.appendChild(hdrLeft); hdr.appendChild(hdrBtns);
   wrap.appendChild(hdr);
 
   // ── Sub-tabs ──────────────────────────────────────────
@@ -8546,28 +8553,32 @@ function buildPPROImportModal() {
   m.addEventListener('click', e => { if(e.target===m) closeModal('ppro-import-modal'); });
   const inner = document.createElement('div'); inner.className='modal modal-lg';
   inner.addEventListener('click', e => e.stopPropagation());
-  inner.innerHTML = `
-    <div class="modal-hdr"><h3>Import PPRO data</h3><button class="modal-close" onclick="closeModal('ppro-import-modal')">✕</button></div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">
-      Export your Excel as a CSV (one sheet at a time), then paste the CSV content below. Select which sheet the data belongs to.
-    </p>
-    <div class="field">
-      <label>Target sheet</label>
-      <select id="ppro-import-target">
-        <option value="roadmap">Program Roadmap</option>
-        <option value="partners">Partner Institutions</option>
-        <option value="outreach">Outreach Log</option>
-        <option value="pipeline">Submission Pipeline</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Paste CSV data here</label>
-      <textarea id="ppro-import-csv" rows="10" placeholder="Paste CSV content…" style="font-family:monospace;font-size:11px"></textarea>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('ppro-import-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="runPPROImport()"><i class="ti ti-upload"></i> Import</button>
-    </div>`;
+  // Build modal content without inline handlers
+  const mhdr = document.createElement('div'); mhdr.className='modal-hdr';
+  const mh3 = document.createElement('h3'); mh3.textContent='Import PPRO data';
+  const mclose = document.createElement('button'); mclose.className='modal-close'; mclose.textContent='✕';
+  mclose.addEventListener('click', () => closeModal('ppro-import-modal'));
+  mhdr.appendChild(mh3); mhdr.appendChild(mclose);
+
+  const desc = document.createElement('p');
+  desc.style.cssText='font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6';
+  desc.textContent='Export your Excel sheet as CSV (File → Save As → CSV), then paste the content below and select the target sheet.';
+
+  const f1 = document.createElement('div'); f1.className='field';
+  f1.innerHTML='<label>Target sheet</label><select id="ppro-import-target"><option value="roadmap">Program Roadmap</option><option value="partners">Partner Institutions</option><option value="outreach">Outreach Log</option><option value="pipeline">Submission Pipeline</option></select>';
+
+  const f2 = document.createElement('div'); f2.className='field';
+  f2.innerHTML='<label>Paste CSV data here</label><textarea id="ppro-import-csv" rows="10" placeholder="Paste CSV content…" style="font-family:monospace;font-size:11px"></textarea>';
+
+  const foot = document.createElement('div'); foot.className='modal-foot';
+  const cancelBtn = document.createElement('button'); cancelBtn.className='btn'; cancelBtn.textContent='Cancel';
+  cancelBtn.addEventListener('click', () => closeModal('ppro-import-modal'));
+  const runBtn = document.createElement('button'); runBtn.className='btn btn-primary'; runBtn.textContent='↑ Import';
+  runBtn.addEventListener('click', runPPROImport);
+  foot.appendChild(cancelBtn); foot.appendChild(runBtn);
+
+  inner.appendChild(mhdr); inner.appendChild(desc); inner.appendChild(f1);
+  inner.appendChild(f2); inner.appendChild(foot);
   m.appendChild(inner); document.body.appendChild(m);
 }
 
