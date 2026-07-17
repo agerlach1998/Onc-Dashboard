@@ -4319,6 +4319,19 @@ function createTracker() {
     buildTrackerTable(data, 'ppfo-trackers-cont');
   } else {
     if (!DB.projectTrackers) DB.projectTrackers = [];
+// Seed Pathway to Peer Review project if not already present
+if (!DB.ppro) {
+  DB.ppro = {
+    roadmap:  [{"Task / Milestone": "Meet with Arianne", "Category": "Outreach", "Owner": "Alex/Dani", "Start Date": "2026-07-29 00:00:00", "Due Date": "", "Status": "In Progress", "Priority": "High", "Notes / To dos": "Schedule call to discuss residency programs"}, {"Task / Milestone": "Create SOP", "Category": "Internal Ops", "Owner": "Alex/Dani/Gillian", "Start Date": "", "Due Date": "", "Status": "Not Started", "Priority": "High", "Notes / To dos": ""}, {"Task / Milestone": "Team presentation", "Category": "Internal Ops", "Owner": "Alex", "Start Date": "", "Due Date": "", "Status": "Not Started", "Priority": "Medium", "Notes / To dos": ""}, {"Task / Milestone": "Create email templates", "Category": "Internal Ops", "Owner": "Dani", "Start Date": "", "Due Date": "", "Status": "Not Started", "Priority": "Medium", "Notes / To dos": ""}, {"Task / Milestone": "Email EABs", "Category": "Internal Ops", "Owner": "Alex/Gillian", "Start Date": "", "Due Date": "", "Status": "Not Started", "Priority": "Medium", "Notes / To dos": ""}, {"Task / Milestone": "Identify initial outreach institutions", "Category": "Outreach", "Owner": "Dani", "Start Date": "", "Due Date": "", "Status": "In Progress", "Priority": "High", "Notes / To dos": "Meet with Erica to target SAPs"}, {"Task / Milestone": "Marketing assets", "Category": "Marketing/Comms", "Owner": "Alex/Dani", "Start Date": "", "Due Date": "", "Status": "Not Started", "Priority": "Medium", "Notes / To dos": ""}, {"Task / Milestone": "Educational seminars", "Category": "Internal Ops", "Owner": "Alex/Dani", "Start Date": "", "Due Date": "", "Status": "Not Started", "Priority": "Low", "Notes / To dos": "Talk to marketing; Live?; find someone to lead the seminars"}, {"Task / Milestone": "Draft partnership MOU / commissioning agreement template", "Category": "Agreements/Legal", "Owner": "Alex", "Start Date": "", "Due Date": "", "Status": "In Progress", "Priority": "High", "Notes / To dos": "Determine need for contract"}, {"Task / Milestone": "Give Dani access to Scholastica", "Category": "Internal Ops", "Owner": "Alex", "Start Date": "", "Due Date": "", "Status": "Complete", "Priority": "High", "Notes / To dos": ""}, {"Task / Milestone": "Proposal doc for Allie and Gil", "Category": "Internal Ops", "Owner": "Alex", "Start Date": "", "Due Date": "", "Status": "Complete", "Priority": "High", "Notes / To dos": ""}],
+    partners: [{"Inst. ID": "I1", "Institution / Health System": "Fred Hutch", "Program Type": "PGY1 & PGY2", "State": "WA", "RPD / Key Contact": "Arianne Duong", "Contact Title": "", "Email": "", "Relationship Status": "In Discussion", "# Residents/Yr": "", "Specialty Focus": "", "Source / Referral": "", "Notes": "guinea pig"}],
+    outreach: [{"Date": "2026-07-10", "Institution": "City of Hope", "Contact Name": "Dr. Jane Smith", "Method": "Email", "Summary": "Sent overview of the peer review program and a sample published resident piece", "Outcome": "Positive - wants a call", "Next Step": "Schedule intro call week of 7/21", "Owner": "Alex"}, {"Date": "", "Institution": "Yale", "Contact Name": "", "Method": "", "Summary": "", "Outcome": "", "Next Step": "", "Owner": ""}, {"Date": "2026-07-15 00:00:00", "Institution": "Fred Hutch", "Contact Name": "Arianne Duong", "Method": "Email", "Summary": "", "Outcome": "", "Next Step": "", "Owner": ""}],
+    pipeline: [],
+  };
+}
+// Ensure the PPRO project exists in projectTrackers
+if (!DB.projectTrackers.find(p => p.id === 'proj-ppro')) {
+  DB.projectTrackers.unshift({"id": "proj-ppro", "title": "Pathway to Peer Review", "color": "#534AB7", "details": "A network of partnerships with pharmacy residency programs to commission resident final-project submissions for peer-reviewed publication in PPFO. Building relationships with RPDs, creating SOPs, and developing a sustainable pipeline of resident-authored content.", "parties": [{"name": "Alex Gerlach", "role": "Editorial Manager / Program Lead", "email": "agerlach@mjhlifesciences.com"}, {"name": "Dani", "role": "Content Producer / Outreach", "email": ""}, {"name": "Gillian", "role": "SOP Development", "email": ""}], "tasks": [{"text": "Meet with Arianne", "done": false}, {"text": "Create SOP", "done": false}, {"text": "Team presentation", "done": false}, {"text": "Create email templates", "done": false}, {"text": "Email EABs", "done": false}, {"text": "Identify initial outreach institutions", "done": false}, {"text": "Marketing assets", "done": false}, {"text": "Educational seminars", "done": false}, {"text": "Draft partnership MOU / commissioning agreement template", "done": false}, {"text": "Give Dani access to Scholastica", "done": true}, {"text": "Proposal doc for Allie and Gil", "done": true}], "trackers": [], "isPPRO": true});
+}
     DB.projectTrackers.push(data);
     buildTrackerTable(data, 'projects-trackers-cont');
   }
@@ -4987,6 +5000,8 @@ function renderProjects() {
 }
 
 function buildProjectPanel(p) {
+  // Special rendering for Pathway to Peer Review
+  if (p.isPPRO) return buildPPROPanel(p);
   const wrap = document.createElement('div');
 
   // ── Header row ────────────────────────────────────────
@@ -8307,6 +8322,283 @@ function wireDragAndDrop() {
       }
     });
   }
+}
+
+
+// ══════════════════════════════════════════════════════════
+// PATHWAY TO PEER REVIEW — dedicated project panel
+// ══════════════════════════════════════════════════════════
+
+function buildPPROPanel(p) {
+  const wrap = document.createElement('div');
+
+  // ── Header ────────────────────────────────────────────
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;background:rgba(255,255,255,.72);backdrop-filter:blur(10px);border:0.5px solid rgba(255,255,255,.55);border-radius:10px;padding:10px 14px;box-shadow:0 1px 6px rgba(0,0,0,.06)';
+  hdr.innerHTML = `
+    <div>
+      <div style="font-size:16px;font-weight:700;color:var(--text)">Pathway to Peer Review</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">PPFO Resident Peer Review Program</div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-sm" onclick="openPPROImport()" title="Import from Excel"><i class="ti ti-upload"></i> Import</button>
+      <button class="btn btn-sm btn-primary" onclick="exportPPROData()" title="Export data"><i class="ti ti-download"></i> Export</button>
+    </div>`;
+  wrap.appendChild(hdr);
+
+  // ── Sub-tabs ──────────────────────────────────────────
+  const tabBar = document.createElement('div');
+  tabBar.style.cssText = 'display:flex;gap:4px;margin-bottom:12px;background:rgba(255,255,255,.72);backdrop-filter:blur(10px);border:0.5px solid rgba(255,255,255,.55);border-radius:10px;padding:6px;box-shadow:0 1px 6px rgba(0,0,0,.06)';
+  const tabs = ['Program Roadmap','Partner Institutions','Outreach Log','Submission Pipeline'];
+  const panels = [];
+  
+  tabs.forEach((tab, ti) => {
+    const btn = document.createElement('button');
+    btn.className = 'proj-tab-btn' + (ti === 0 ? ' active' : '');
+    btn.style.cssText = 'flex:1;padding:6px 8px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:500;background:' + (ti===0?'rgba(255,255,255,.85)':'transparent') + ';color:' + (ti===0?'var(--navy)':'var(--muted)');
+    btn.textContent = tab;
+    btn.addEventListener('click', () => {
+      tabBar.querySelectorAll('.proj-tab-btn').forEach((b,i) => {
+        b.style.background = i===ti ? 'rgba(255,255,255,.85)' : 'transparent';
+        b.style.color = i===ti ? 'var(--navy)' : 'var(--muted)';
+        b.classList.toggle('active', i===ti);
+      });
+      panels.forEach((pan, i) => pan.style.display = i===ti ? '' : 'none');
+    });
+    tabBar.appendChild(btn);
+  });
+  wrap.appendChild(tabBar);
+
+  // ── Panel: Program Roadmap ─────────────────────────────
+  const p0 = buildPPROTable('roadmap', 
+    ['Task / Milestone','Category','Owner','Start Date','Due Date','Status','Priority','Notes / To dos'],
+    ['text','text','text','date','date','status-ppro','priority','text'],
+    () => ({
+      'Task / Milestone':'','Category':'','Owner':'','Start Date':'',
+      'Due Date':'','Status':'Not Started','Priority':'Medium','Notes / To dos':''
+    })
+  );
+  panels.push(p0); wrap.appendChild(p0);
+
+  // ── Panel: Partner Institutions ───────────────────────
+  const p1 = buildPPROTable('partners',
+    ['Inst. ID','Institution / Health System','Program Type','State','RPD / Key Contact','Contact Title','Email','Relationship Status','# Residents/Yr','Specialty Focus'],
+    ['text','text','text','text','text','text','text','status-rel','text','text'],
+    () => ({
+      'Inst. ID':'I'+((DB.ppro?.partners?.length||0)+1),
+      'Institution / Health System':'','Program Type':'','State':'',
+      'RPD / Key Contact':'','Contact Title':'','Email':'',
+      'Relationship Status':'Not Contacted','# Residents/Yr':'','Specialty Focus':''
+    })
+  );
+  p1.style.display = 'none'; panels.push(p1); wrap.appendChild(p1);
+
+  // ── Panel: Outreach Log ───────────────────────────────
+  const p2 = buildPPROTable('outreach',
+    ['Date','Institution','Contact Name','Method','Summary','Outcome','Next Step','Owner'],
+    ['date','text','text','text','text','text','text','text'],
+    () => ({
+      'Date': new Date().toISOString().slice(0,10),
+      'Institution':'','Contact Name':'','Method':'Email',
+      'Summary':'','Outcome':'','Next Step':'','Owner':'Alex'
+    })
+  );
+  p2.style.display = 'none'; panels.push(p2); wrap.appendChild(p2);
+
+  // ── Panel: Submission Pipeline ────────────────────────
+  const p3 = buildPPROTable('pipeline',
+    ['Sub. ID','Institution','Resident Name','Resident Email','Faculty Mentor','Project Topic','Commission Date','Draft Due','Draft Received','Peer Review Status'],
+    ['text','text','text','text','text','text','date','date','date','status-sub'],
+    () => ({
+      'Sub. ID':'S'+((DB.ppro?.pipeline?.length||0)+1),
+      'Institution':'','Resident Name':'','Resident Email':'',
+      'Faculty Mentor':'','Project Topic':'','Commission Date':'',
+      'Draft Due':'','Draft Received':'','Peer Review Status':'Commissioned'
+    })
+  );
+  p3.style.display = 'none'; panels.push(p3); wrap.appendChild(p3);
+
+  return wrap;
+}
+
+function buildPPROTable(key, headers, types, newRowFn) {
+  if (!DB.ppro) DB.ppro = {};
+  if (!DB.ppro[key]) DB.ppro[key] = [];
+  const rows = DB.ppro[key];
+
+  const STATUS_PPRO = ['Not Started','In Progress','Complete','Blocked','Deferred'];
+  const STATUS_REL  = ['Not Contacted','Contacted','In Discussion','Active Partner','Declined'];
+  const STATUS_SUB  = ['Commissioned','Draft Received','Under Review','Revision Needed','Accepted','Published'];
+  const PRIORITY    = ['High','Medium','Low'];
+
+  const section = document.createElement('div');
+  section.className = 'card card-accent';
+  section.style.cssText = 'margin-bottom:12px;overflow:hidden';
+
+  const tblWrap = document.createElement('div');
+  tblWrap.style.cssText = 'overflow-x:auto;max-height:400px;overflow-y:auto';
+
+  const renderTable = () => {
+    tblWrap.innerHTML = '';
+    const tbl = document.createElement('table');
+    tbl.className = 'dtbl'; tbl.style.fontSize = '11px';
+
+    // Header
+    const thead = document.createElement('thead');
+    const hrow  = document.createElement('tr');
+    headers.forEach(h => {
+      const th = document.createElement('th'); th.textContent = h;
+      th.style.cssText = 'white-space:nowrap;font-size:10px';
+      hrow.appendChild(th);
+    });
+    const actionTh = document.createElement('th'); actionTh.style.width='30px';
+    hrow.appendChild(actionTh);
+    thead.appendChild(hrow); tbl.appendChild(thead);
+
+    // Body
+    const tbody = document.createElement('tbody');
+    rows.forEach((row, ri) => {
+      const tr = document.createElement('tr');
+      headers.forEach((h, ci) => {
+        const td = document.createElement('td');
+        const type = types[ci] || 'text';
+        const val  = row[h] || '';
+
+        if (type === 'date') {
+          const inp = document.createElement('input'); inp.type='date';
+          inp.value = val; inp.style.cssText='border:none;background:none;font-size:11px;color:var(--text);font-family:inherit;outline:none;min-width:110px';
+          inp.addEventListener('change', () => { DB.ppro[key][ri][h]=inp.value; saveState(); });
+          td.appendChild(inp);
+        } else if (type.startsWith('status')) {
+          const opts = type==='status-ppro' ? STATUS_PPRO : type==='status-rel' ? STATUS_REL : type==='status-sub' ? STATUS_SUB : PRIORITY;
+          const sel = document.createElement('select');
+          sel.style.cssText='border:none;background:none;font-size:11px;color:var(--text);font-family:inherit;outline:none;cursor:pointer;min-width:100px';
+          opts.forEach(o => {
+            const opt=document.createElement('option'); opt.value=o; opt.textContent=o;
+            if(o===val) opt.selected=true; sel.appendChild(opt);
+          });
+          sel.addEventListener('change', () => { DB.ppro[key][ri][h]=sel.value; saveState(); });
+          td.appendChild(sel);
+        } else if (type === 'priority') {
+          const sel = document.createElement('select');
+          sel.style.cssText='border:none;background:none;font-size:11px;color:var(--text);font-family:inherit;outline:none;cursor:pointer;min-width:80px';
+          PRIORITY.forEach(o => {
+            const opt=document.createElement('option'); opt.value=o; opt.textContent=o;
+            if(o===val) opt.selected=true; sel.appendChild(opt);
+          });
+          sel.addEventListener('change', () => { DB.ppro[key][ri][h]=sel.value; saveState(); });
+          td.appendChild(sel);
+        } else {
+          const div = document.createElement('div');
+          div.contentEditable='true'; div.textContent=val;
+          div.style.cssText='outline:none;min-width:80px;white-space:nowrap;padding:2px 0';
+          div.addEventListener('blur', () => { DB.ppro[key][ri][h]=div.textContent.trim(); saveState(); });
+          td.appendChild(div);
+        }
+        tr.appendChild(td);
+      });
+      // Delete row button
+      const delTd = document.createElement('td');
+      const delBtn = document.createElement('button');
+      delBtn.style.cssText='background:none;border:none;cursor:pointer;color:transparent;font-size:12px;padding:0';
+      delBtn.textContent='✕';
+      delBtn.addEventListener('click', () => { DB.ppro[key].splice(ri,1); renderTable(); saveState(); });
+      tr.addEventListener('mouseenter', () => delBtn.style.color='var(--muted)');
+      tr.addEventListener('mouseleave', () => delBtn.style.color='transparent');
+      delTd.appendChild(delBtn); tr.appendChild(delTd);
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    tblWrap.appendChild(tbl);
+  };
+  renderTable();
+  section.appendChild(tblWrap);
+
+  // Footer: Add row
+  const foot = document.createElement('div');
+  foot.style.cssText='padding:8px 12px;border-top:0.5px solid var(--border)';
+  const addBtn = document.createElement('button');
+  addBtn.className='btn btn-sm';
+  addBtn.innerHTML='<i class="ti ti-row-insert-bottom"></i> Add row';
+  addBtn.addEventListener('click', () => {
+    DB.ppro[key].push(newRowFn()); renderTable(); saveState();
+  });
+  foot.appendChild(addBtn);
+  section.appendChild(foot);
+
+  return section;
+}
+
+// ── Import from Excel (JSON data pasted as text) ──────────────────────────
+function openPPROImport() {
+  const modal = document.getElementById('ppro-import-modal');
+  if (!modal) {
+    buildPPROImportModal();
+  }
+  openModal('ppro-import-modal');
+}
+
+function buildPPROImportModal() {
+  const m = document.createElement('div');
+  m.id='ppro-import-modal'; m.className='overlay'; m.style.display='none';
+  m.addEventListener('click', e => { if(e.target===m) closeModal('ppro-import-modal'); });
+  const inner = document.createElement('div'); inner.className='modal modal-lg';
+  inner.addEventListener('click', e => e.stopPropagation());
+  inner.innerHTML = `
+    <div class="modal-hdr"><h3>Import PPRO data</h3><button class="modal-close" onclick="closeModal('ppro-import-modal')">✕</button></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+      Export your Excel as a CSV (one sheet at a time), then paste the CSV content below. Select which sheet the data belongs to.
+    </p>
+    <div class="field">
+      <label>Target sheet</label>
+      <select id="ppro-import-target">
+        <option value="roadmap">Program Roadmap</option>
+        <option value="partners">Partner Institutions</option>
+        <option value="outreach">Outreach Log</option>
+        <option value="pipeline">Submission Pipeline</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Paste CSV data here</label>
+      <textarea id="ppro-import-csv" rows="10" placeholder="Paste CSV content…" style="font-family:monospace;font-size:11px"></textarea>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('ppro-import-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="runPPROImport()"><i class="ti ti-upload"></i> Import</button>
+    </div>`;
+  m.appendChild(inner); document.body.appendChild(m);
+}
+
+function runPPROImport() {
+  const target = document.getElementById('ppro-import-target').value;
+  const csv    = document.getElementById('ppro-import-csv').value.trim();
+  if (!csv) return;
+  const lines  = csv.split('\n').filter(l => l.trim());
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
+  const rows = lines.slice(1).map(line => {
+    const vals = line.match(/(".*?"|[^,]+|(?<=,)(?=,))/g) || line.split(',');
+    const obj = {};
+    headers.forEach((h, i) => {
+      obj[h] = (vals[i]||'').replace(/^"|"$/g,'').trim();
+    });
+    return obj;
+  }).filter(r => Object.values(r).some(v => v));
+  if (!DB.ppro) DB.ppro = {};
+  DB.ppro[target] = [...(DB.ppro[target]||[]), ...rows];
+  closeModal('ppro-import-modal');
+  renderProjects();
+  saveState();
+  showPill('✓', 'Imported ' + rows.length + ' rows into ' + target, 'rgba(29,158,117,.5)', 3000);
+}
+
+function exportPPROData() {
+  const data = DB.ppro || {};
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url;
+  a.download = 'ppro-data.json'; a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ══════════════════════════════════════════
