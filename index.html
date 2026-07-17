@@ -8623,6 +8623,41 @@ async function startup() {
   await loadState();
   applyDark();
   patchKOLEmails();
+  // Seed PPRO project AFTER loadState (Supabase may not have it yet)
+  if (!DB.projectTrackers) DB.projectTrackers = [];
+  if (!DB.projectTrackers.find(p => p.id === 'proj-ppro')) {
+    DB.projectTrackers.unshift({
+      id:'proj-ppro', title:'Pathway to Peer Review', color:'#534AB7',
+      details:'A network of partnerships with pharmacy residency programs to commission resident final-project submissions for peer-reviewed publication in PPFO.',
+      parties:[{name:'Alex Gerlach',role:'Editorial Manager / Program Lead',email:'agerlach@mjhlifesciences.com'},{name:'Dani',role:'Content Producer / Outreach',email:''},{name:'Gillian',role:'SOP Development',email:''}],
+      tasks:[{text:'Meet with Arianne',done:false},{text:'Create SOP',done:false},{text:'Team presentation',done:false},{text:'Create email templates',done:false},{text:'Email EABs',done:false},{text:'Identify target residency programs',done:false},{text:'Set up tracking system',done:false},{text:'Publish first resident-authored piece',done:false}],
+      trackers:[], isPPRO:true
+    });
+    saveState();
+  }
+  if (!DB.ppro) {
+    DB.ppro = {
+      roadmap:[
+        {'Task / Milestone':'Meet with Arianne','Category':'Outreach','Owner':'Alex/Dani','Start Date':'2026-07-29','Due Date':'','Status':'In Progress','Priority':'High','Notes / To dos':'Schedule call to discuss residency programs'},
+        {'Task / Milestone':'Create SOP','Category':'Internal Ops','Owner':'Alex/Dani/Gillian','Start Date':'','Due Date':'','Status':'Not Started','Priority':'High','Notes / To dos':''},
+        {'Task / Milestone':'Team presentation','Category':'Internal Ops','Owner':'Alex','Start Date':'','Due Date':'','Status':'Not Started','Priority':'Medium','Notes / To dos':''},
+        {'Task / Milestone':'Create email templates','Category':'Internal Ops','Owner':'Dani','Start Date':'','Due Date':'','Status':'Not Started','Priority':'Medium','Notes / To dos':''},
+        {'Task / Milestone':'Email EABs','Category':'Internal Ops','Owner':'Alex/Gillian','Start Date':'','Due Date':'','Status':'Not Started','Priority':'Medium','Notes / To dos':''},
+        {'Task / Milestone':'Identify target residency programs','Category':'Outreach','Owner':'Alex','Start Date':'','Due Date':'','Status':'Not Started','Priority':'High','Notes / To dos':''},
+        {'Task / Milestone':'Set up tracking system','Category':'Internal Ops','Owner':'Alex','Start Date':'','Due Date':'','Status':'Not Started','Priority':'High','Notes / To dos':''},
+        {'Task / Milestone':'Publish first resident-authored piece','Category':'Content','Owner':'Alex','Start Date':'','Due Date':'','Status':'Not Started','Priority':'High','Notes / To dos':''}
+      ],
+      partners:[
+        {'Inst. ID':'I1','Institution / Health System':'Fred Hutch','Program Type':'PGY1 & PGY2','State':'WA','RPD / Key Contact':'Arianne Duong','Contact Title':'','Email':'arianned@fredhutch.org','Relationship Status':'In Discussion','# Residents/Yr':'','Specialty Focus':'','Source / Referral':'','Notes':'Pilot partner'}
+      ],
+      outreach:[
+        {'Date':'2026-07-10','Institution':'City of Hope','Contact Name':'Dr. Jane Smith','Method':'Email','Summary':'Sent overview of peer review program and a sample published resident piece','Outcome':'Positive - wants a call','Next Step':'Schedule intro call week of 7/21','Owner':'Alex'},
+        {'Date':'2026-07-15','Institution':'Fred Hutch','Contact Name':'Arianne Duong','Method':'Email','Summary':'','Outcome':'','Next Step':'','Owner':''}
+      ],
+      pipeline:[]
+    };
+    saveState();
+  }
   renderTodos();
   renderUpcomingArticles();
   renderSeries();
