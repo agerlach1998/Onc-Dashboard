@@ -903,6 +903,7 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
     <div class="logo-sub">Content Intelligence</div>
   </div>
   <div class="topbar-r" style="display:flex;align-items:center;gap:6px">
+    <button class="ibtni" id="global-search-btn" title="Search dashboard (Ctrl+K)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg></button>
     <button class="ibtni" id="quick-add-btn" title="Quick-add content (N)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
     <button class="ibtni" onclick="toggleDark()" title="Toggle dark mode"><span id="dark-ic">🌙</span></button>
     <button class="ibtni" onclick="clearSaved()" title="Reset to defaults"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
@@ -1083,10 +1084,17 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
   <div class="pg-header" style="">
     <div>
       <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> Analytics</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">Performance metrics, content coverage &amp; RC pacing</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">Performance metrics, content coverage &amp; engagement</div>
     </div>
   </div>
 
+  <!-- Analytics sub-tabs -->
+  <div class="tab-pill-bar">
+    <button class="an-subtab active" data-tab="content" style="flex:0 0 auto;padding:6px 14px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:600;background:rgba(255,255,255,.85);color:var(--navy)">Content metrics</button>
+    <button class="an-subtab" data-tab="kol" style="flex:0 0 auto;padding:6px 14px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:400;background:transparent;color:var(--muted)">KOL engagement</button>
+  </div>
+
+  <div id="an-tab-content">
   <!-- STAT STRIP -->
   <div class="g4" style="margin-bottom:12px">
     <div class="stat-card" style="cursor:pointer" onclick="showPage('calendar',document.querySelector('[onclick*=calendar]'))">
@@ -1154,6 +1162,39 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
     <div id="gap-cont" class="home-scroll"></div>
   </div>
 </div>
+  </div><!-- /an-tab-content -->
+
+  <!-- KOL ENGAGEMENT TAB -->
+  <div id="an-tab-kol" style="display:none">
+    <div class="g4" style="margin-bottom:12px">
+      <div class="stat-card">
+        <div class="stat-lbl">Interactions (30d)</div><div class="stat-val" id="eng-stat-30d">—</div>
+        <div class="stat-sub">logged + auto-counted</div></div>
+      <div class="stat-card">
+        <div class="stat-lbl">Active relationships</div><div class="stat-val" id="eng-stat-active">—</div>
+        <div class="stat-sub">any contact in 90d</div></div>
+      <div class="stat-card">
+        <div class="stat-lbl">Needs attention</div><div class="stat-val" id="eng-stat-stale" style="color:#D85A30">—</div>
+        <div class="stat-sub">T1 with no contact 90d+</div></div>
+      <div class="stat-card">
+        <div class="stat-lbl">Conference interviews YTD</div><div class="stat-val" id="eng-stat-conf">—</div>
+        <div class="stat-sub">auto-counted</div></div>
+    </div>
+    <div class="g2">
+      <div class="card card-accent">
+        <div class="card-hdr"><div class="card-title">Most engaged (90 days)</div></div>
+        <div id="eng-most-engaged" class="home-scroll" style="max-height:300px"></div>
+      </div>
+      <div class="card card-accent" style="border-top-color:#D85A30">
+        <div class="card-hdr"><div class="card-title">Needs attention — stale relationships</div></div>
+        <div id="eng-stale-list" class="home-scroll" style="max-height:300px"></div>
+      </div>
+    </div>
+    <div class="card card-accent">
+      <div class="card-hdr"><div class="card-title">Interactions by type (90 days)</div></div>
+      <div id="eng-type-breakdown" style="display:flex;gap:14px;flex-wrap:wrap;padding:6px 0"></div>
+    </div>
+  </div>
 
 <div id="page-trending" class="pg" style="display:none">
   <div class="pg-header" style="">
@@ -1261,7 +1302,7 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
   <div class="pg-header" style="">
     <div>
       <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> KOL network</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">Click any card to edit · project count drives tier · opportunities below</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">Directory of your KOL network · interaction tracking · engagement</div>
     </div>
     <div style="display:flex;gap:6px">
       <button class="btn btn-sm" onclick="openImportContactsModal()"><i class="ti ti-download"></i> Import contacts</button>
@@ -1269,6 +1310,13 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
     </div>
   </div>
 
+  <!-- KOL sub-tabs -->
+  <div class="tab-pill-bar">
+    <button class="kol-subtab active" data-tab="dir" style="flex:0 0 auto;padding:6px 14px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:600;background:rgba(255,255,255,.85);color:var(--navy)">Directory</button>
+    <button class="kol-subtab" data-tab="int" style="flex:0 0 auto;padding:6px 14px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-weight:400;background:transparent;color:var(--muted)">Interactions</button>
+  </div>
+
+  <div id="kol-tab-dir">
   <!-- FILTER BAR -->
   <!-- KOL Filter dropdowns -->
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:14px" id="kol-filter-row">
@@ -1310,6 +1358,30 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
   <!-- KOL GRID -->
   <div id="kol-grid"></div>
+  </div><!-- /kol-tab-dir -->
+
+  <!-- INTERACTIONS TAB -->
+  <div id="kol-tab-int" style="display:none">
+    <div class="card card-accent">
+      <div class="card-hdr">
+        <div class="card-title">Interaction log</div>
+        <button class="btn btn-sm btn-primary" id="log-interaction-btn">+ Log interaction</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Conference interviews and KOL-tagged calendar events are auto-counted in engagement metrics — log ad-hoc meetings, calls, and emails here.</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+        <select id="int-filter-kol" style="font-size:11px;padding:4px 8px"><option value="">All KOLs</option></select>
+        <input type="date" id="int-filter-from" style="font-size:11px;padding:3px 6px" title="From date">
+        <span style="font-size:10px;color:var(--muted)">to</span>
+        <input type="date" id="int-filter-to" style="font-size:11px;padding:3px 6px" title="To date">
+        <button class="btn btn-sm" id="int-filter-clear" style="font-size:10px">Clear filters</button>
+        <button class="btn btn-sm btn-danger" id="int-bulk-delete" style="font-size:10px;margin-left:auto">Delete shown</button>
+      </div>
+      <div style="overflow-x:auto;max-height:440px;overflow-y:auto">
+        <table class="dtbl"><thead><tr><th>Date</th><th>KOL</th><th>Type</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="interactions-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
 
   <!-- OPPORTUNITIES (always shown, hidden when opp filter active it becomes the focus) -->
   <div id="kol-opps-section">
@@ -1504,11 +1576,7 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Oncology content team · 2026</div>
     </div>
   </div>
-  <div class="team-tab-bar">
-    <button class="team-tab-btn active" onclick="switchTeamTab('home',this)">Team home</button>
-    <button class="team-tab-btn" onclick="switchTeamTab('dani',this)">Dani</button>
-    <button class="team-tab-btn" onclick="switchTeamTab('ryu',this)">Ryu</button>
-  </div>
+  <div class="team-tab-bar" id="team-tab-bar"></div>
 
   <!-- TEAM HOME TAB -->
   <div class="team-panel active" id="team-panel-home">
@@ -1526,91 +1594,40 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
     </div>
     <div class="card card-accent">
       <div class="card-hdr"><div class="card-title"><i class="ti ti-users"></i> Team members</div></div>
-      <div class="g2">
-        <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:9px;padding:12px;display:flex;gap:12px;align-items:center;cursor:pointer" onclick="switchTeamTab('dani',document.querySelector('.team-tab-btn:nth-child(2)'))">
-          <div style="width:42px;height:42px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--gold);flex-shrink:0">D</div>
-          <div><div style="font-size:13px;font-weight:600;color:var(--text)" id="team-dani-name-home">Dani</div><div style="font-size:11px;color:var(--muted)" id="team-dani-role-home">Content Producer</div><div style="font-size:11px;color:var(--gold-d);font-style:italic" id="team-dani-spec-home">Breast cancer · Lung cancer · Skin cancer · HER2 BC</div></div>
-        </div>
-        <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:9px;padding:12px;display:flex;gap:12px;align-items:center;cursor:pointer" onclick="switchTeamTab('ryu',document.querySelector('.team-tab-btn:nth-child(3)'))">
-          <div style="width:42px;height:42px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--gold);flex-shrink:0">R</div>
-          <div><div style="font-size:13px;font-weight:600;color:var(--text)" id="team-ryu-name-home">Ryu</div><div style="font-size:11px;color:var(--muted)" id="team-ryu-role-home">Content Producer</div><div style="font-size:11px;color:var(--gold-d);font-style:italic" id="team-ryu-spec-home">Hematology · Multiple myeloma · Lymphoma · CLL · AML</div></div>
-        </div>
-      </div>
+      <div class="g2" id="team-home-members"></div>
     </div>
   </div>
 
-  <!-- DANI TAB -->
-  <div class="team-panel" id="team-panel-dani">
-    <div class="member-hero" id="dani-hero">
-      <div class="member-av">D</div>
-      <div style="flex:1">
-        <div class="member-name" id="dani-name">Dani</div>
-        <div class="member-role" id="dani-role">Content Producer</div>
-        <div class="member-spec" id="dani-spec">Breast cancer · Lung cancer · Skin cancer · HER2 BC</div>
-        <div class="member-meta" id="dani-meta"></div>
-      </div>
-      <button class="btn btn-sm" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.7);flex-shrink:0" onclick="openMemberModal('dani')"><i class="ti ti-edit"></i> Edit</button>
-    </div>
-    <div class="g2" style="margin-bottom:12px">
-      <div class="card card-accent">
-        <div class="card-hdr"><div class="card-title"><i class="ti ti-target"></i> Annual goals</div>
-          <button class="btn btn-sm btn-primary" onclick="openGoalModal(null,'dani')"><i class="ti ti-plus"></i> Add goal</button>
-        </div>
-        <div id="dani-goals-list"></div>
-      </div>
-      <div class="card card-accent">
-        <div class="card-hdr"><div class="card-title"><i class="ti ti-notes"></i> Performance notes</div></div>
-        <textarea class="perf-notes-area" id="dani-notes" placeholder="Add performance notes, observations, feedback…" onblur="savePerfNotes('dani',this.value)"></textarea>
-      </div>
-    </div>
-    <!-- METRICS SCORING TILE -->
-    <div class="card card-accent">
-      <div class="card-hdr">
-        <div class="card-title"><i class="ti ti-chart-bar"></i> Metrics scoring</div>
-        <div style="font-size:11px;color:var(--muted)">Score 1–5 per metric · weighted total auto-calculated</div>
-      </div>
-      <div id="dani-metrics-tile"></div>
-    </div>
-  </div>
-
-  <!-- RYU TAB -->
-  <div class="team-panel" id="team-panel-ryu">
-    <div class="member-hero" id="ryu-hero">
-      <div class="member-av">R</div>
-      <div style="flex:1">
-        <div class="member-name" id="ryu-name">Ryu</div>
-        <div class="member-role" id="ryu-role">Content Producer</div>
-        <div class="member-spec" id="ryu-spec">Hematology · Multiple myeloma · Lymphoma · CLL · AML</div>
-        <div class="member-meta" id="ryu-meta"></div>
-      </div>
-      <button class="btn btn-sm" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.7);flex-shrink:0" onclick="openMemberModal('ryu')"><i class="ti ti-edit"></i> Edit</button>
-    </div>
-    <div class="g2" style="margin-bottom:12px">
-      <div class="card card-accent">
-        <div class="card-hdr"><div class="card-title"><i class="ti ti-target"></i> Goals</div>
-          <button class="btn btn-sm btn-primary" onclick="openGoalModal(null,'ryu')"><i class="ti ti-plus"></i> Add</button>
-        </div>
-        <div id="ryu-goals-list"></div>
-      </div>
-      <div class="card card-accent">
-        <div class="card-hdr"><div class="card-title"><i class="ti ti-notes"></i> Performance notes</div></div>
-        <textarea class="perf-notes-area" id="ryu-notes" placeholder="Add performance notes, observations, feedback…" onblur="savePerfNotes('ryu',this.value)"></textarea>
-      </div>
-    </div>
-    <div class="card card-accent">
-      <div class="card-hdr">
-        <div class="card-title"><i class="ti ti-chart-bar"></i> Metrics scoring</div>
-        <div style="font-size:11px;color:var(--muted)">Score 1–5 per metric · weighted total auto-calculated</div>
-      </div>
-      <div id="ryu-metrics-tile"></div>
-    </div>
-  </div>
-</div>
+  <div id="team-member-panels"></div>
 
 </div><!-- /main -->
 </div><!-- /app -->
 
 <!-- ═══ MODALS ═══ -->
+
+<!-- Interaction Modal -->
+<div id="interaction-modal" class="overlay" style="display:none">
+<div class="modal modal-md">
+  <div class="modal-hdr"><h3>Log interaction</h3><button class="modal-close" id="int-modal-close">✕</button></div>
+  <input type="hidden" id="int-id">
+  <div class="g2f">
+    <div class="field"><label>Date</label><input type="date" id="int-date"></div>
+    <div class="field"><label>Type</label>
+      <select id="int-type">
+        <option>Meeting</option><option>Call</option><option>Email exchange</option>
+        <option>Conference chat</option><option>Interview</option><option>Other</option>
+      </select>
+    </div>
+  </div>
+  <div class="field"><label>KOL</label><select id="int-kol"></select></div>
+  <div class="field"><label>Notes <span style="font-weight:400;color:var(--muted)">(optional)</span></label><textarea id="int-notes" rows="2" placeholder="What was discussed, follow-ups…"></textarea></div>
+  <div class="modal-foot">
+    <button class="btn btn-danger btn-sm" id="int-del" style="display:none;margin-right:auto">Delete</button>
+    <button class="btn" id="int-cancel">Cancel</button>
+    <button class="btn btn-primary" id="int-save">Save</button>
+  </div>
+</div></div>
+
 
 <!-- Reminder Modal -->
 <div id="reminder-modal" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('reminder-modal')">
@@ -2066,48 +2083,136 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
 <!-- KOL modal -->
 <div id="kol-modal" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('kol-modal')">
-<div class="modal modal-lg">
+<div class="modal modal-lg" onclick="event.stopPropagation()">
   <div class="modal-hdr">
-    <h3><i class="ti ti-user"></i><span id="kol-modal-title">Add KOL</span></h3>
-    <button class="modal-close" onclick="closeModal('kol-modal')">✕</button>
-  </div>
-  <div class="g2f">
-    <div class="field"><label>Full name</label><input id="km-name" type="text" placeholder="e.g. Zahra Mahmoudjafari"></div>
-    <div class="field"><label>Credentials</label><input id="km-cred" type="text" placeholder="e.g. PharmD, BCOP, FHOPA"></div>
-  </div>
-  <div class="g2f">
-    <div class="field"><label>Title / role</label><input id="km-title" type="text" placeholder="e.g. Clinical Pharmacist"></div>
-    <div class="field"><label>Institution</label><input id="km-inst" type="text" placeholder="e.g. Mayo Clinic · Rochester, MN"></div>
-  </div>
-  <div class="field"><label>Specialty / focus areas</label><input id="km-spec" type="text" placeholder="e.g. Hematologic malignancies, CAR-T, cGVHD"></div>
-  <div class="field"><label>Specialty tags <span style="font-weight:400;color:var(--muted)">(comma-separated, used for filtering)</span></label><input id="km-specialty-tags" type="text" placeholder="e.g. Breast Cancer, HER2, ADC"></div>
-  <div class="field"><label>Email</label><input id="km-email" type="email" placeholder="e.g. name@institution.edu"></div>
-  <div class="field"><label>Tags <span style="font-weight:400;color:var(--muted)">(comma-separated, shown on card)</span></label><input id="km-tags" type="text" placeholder="e.g. CAR-T, Lymphoma, BMT"></div>
-  <div class="g2f">
-    <div class="field"><label>Tier</label>
-      <select id="km-tier">
-        <option value="auto">Auto (based on project count)</option>
-        <option value="T1">T1 — Top network</option>
-        <option value="T2">T2 — Active contributor</option>
-        <option value="T3">T3 — Emerging voice</option>
-      </select>
+    <h3><span id="kol-modal-title">KOL</span></h3>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="kol-edit-btn" title="Edit" style="background:none;border:0.5px solid var(--border-s);border-radius:6px;cursor:pointer;color:var(--muted);font-size:13px;padding:4px 10px;display:none">✎ Edit</button>
+      <button class="modal-close" onclick="closeModal('kol-modal')">✕</button>
     </div>
-    <div class="field"><label>Project count</label><input id="km-count" type="number" min="0" value="0"></div>
   </div>
-  <div class="g2f">
-    <div class="field"><label>Last touchpoint</label><input id="km-last" type="text" placeholder="e.g. Apr 2026 — PPFO proof review"></div>
-    <div class="field"><label>Next action</label><input id="km-next" type="text" placeholder="e.g. Working Diagnosis recording"></div>
-  </div>
-  <div class="field">
-    <label>Notes log <span style="font-weight:400;color:var(--muted)">(auto-dated)</span></label>
-    <div style="display:flex;gap:6px;margin-bottom:6px">
-      <input id="km-note-inp" type="text" placeholder="Add a note…" style="flex:1">
-      <button class="btn btn-sm" onclick="appendKOLNote()"><i class="ti ti-plus"></i> Log</button>
+
+  <!-- ═══ VIEW MODE ═══ -->
+  <div id="kol-view-mode" style="display:none">
+    <div style="display:flex;gap:14px;margin-bottom:14px">
+      <div id="kv-avatar" style="width:52px;height:52px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0"></div>
+      <div style="flex:1;min-width:0">
+        <div id="kv-name" style="font-size:17px;font-weight:700;color:var(--text)"></div>
+        <div id="kv-cred" style="font-size:11px;color:var(--gold-d);font-weight:600"></div>
+        <div id="kv-title-inst" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <div style="text-align:center;flex-shrink:0">
+        <div id="kv-count" style="font-size:24px;font-weight:700;color:var(--navy)"></div>
+        <div style="font-size:9px;color:var(--muted)">projects</div>
+      </div>
     </div>
-    <textarea id="km-notes" rows="3" placeholder="Engagement history, content produced, relationship notes…"></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="background:rgba(25,46,87,.04);border-radius:8px;padding:10px 12px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:3px">Primary specialty</div>
+        <div id="kv-primary" style="font-size:12px;font-weight:600;color:var(--text)">—</div>
+      </div>
+      <div style="background:rgba(25,46,87,.04);border-radius:8px;padding:10px 12px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:3px">Subspecialty</div>
+        <div id="kv-sub" style="font-size:12px;font-weight:600;color:var(--text)">—</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div>
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:2px">Email</div>
+        <div id="kv-email" style="font-size:12px;color:var(--text);word-break:break-all">—</div>
+      </div>
+      <div>
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:2px">Tier</div>
+        <div id="kv-tier" style="font-size:12px;color:var(--text)">—</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div>
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:2px">Last touchpoint</div>
+        <div id="kv-last" style="font-size:12px;color:var(--text)">—</div>
+      </div>
+      <div>
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:2px">Next action</div>
+        <div id="kv-next" style="font-size:12px;color:var(--text)">—</div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px">Projects</div>
+      <div id="kv-projects" style="max-height:120px;overflow-y:auto"></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px">Content</div>
+      <div id="kv-content" style="max-height:140px;overflow-y:auto"></div>
+    </div>
+    <div>
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px">Notes</div>
+      <div id="kv-notes" style="font-size:11px;color:var(--text);line-height:1.7;white-space:pre-wrap;background:rgba(25,46,87,.03);border-radius:8px;padding:10px 12px;max-height:120px;overflow-y:auto">—</div>
+    </div>
+  </div>
+
+  <!-- ═══ EDIT MODE ═══ -->
+  <div id="kol-edit-mode" style="display:none">
+    <div class="g2f">
+      <div class="field"><label>Full name</label><input id="km-name" type="text" placeholder="e.g. Zahra Mahmoudjafari"></div>
+      <div class="field"><label>Credentials</label><input id="km-cred" type="text" placeholder="e.g. PharmD, BCOP, FHOPA"></div>
+    </div>
+    <div class="g2f">
+      <div class="field"><label>Title / role</label><input id="km-title" type="text" placeholder="e.g. Clinical Pharmacist"></div>
+      <div class="field"><label>Institution</label><input id="km-inst" type="text" placeholder="e.g. Mayo Clinic · Rochester, MN"></div>
+    </div>
+    <div class="g2f">
+      <div class="field"><label>Primary specialty</label>
+        <select id="km-primary"><option value="">— Select —</option></select>
+      </div>
+      <div class="field"><label>Subspecialty</label>
+        <select id="km-sub">
+          <option value="">— Select —</option>
+          <optgroup label="Therapy / Modality">
+            <option>CAR-T</option><option>Bispecifics</option><option>BMT / Transplant</option>
+            <option>ADCs</option><option>Radiopharmaceuticals</option><option>Immunotherapy</option>
+            <option>Targeted therapy</option><option>Cell &amp; gene therapy</option><option>Precision medicine</option>
+          </optgroup>
+          <optgroup label="Setting">
+            <option>Academic medical center</option><option>Community oncology</option>
+            <option>Ambulatory care</option><option>Inpatient</option><option>Specialty pharmacy</option>
+            <option>Industry</option><option>Managed care</option>
+          </optgroup>
+          <optgroup label="Focus">
+            <option>Supportive care</option><option>Palliative care</option><option>Survivorship</option>
+            <option>Clinical trials</option><option>Health outcomes</option><option>Education / Residency</option>
+            <option>Policy / Advocacy</option><option>Informatics</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Email</label><input id="km-email" type="email" placeholder="e.g. name@institution.edu"></div>
+    <div class="g2f">
+      <div class="field"><label>Tier</label>
+        <select id="km-tier">
+          <option value="auto">Auto (based on project count)</option>
+          <option value="T1">T1 — Top network</option>
+          <option value="T2">T2 — Active contributor</option>
+          <option value="T3">T3 — Emerging voice</option>
+        </select>
+      </div>
+      <div class="field"><label>Project count</label><input id="km-count" type="number" min="0" value="0"></div>
+    </div>
+    <div class="g2f">
+      <div class="field"><label>Last touchpoint</label><input id="km-last" type="text" placeholder="e.g. Apr 2026 — PPFO proof review"></div>
+      <div class="field"><label>Next action</label><input id="km-next" type="text" placeholder="e.g. Working Diagnosis recording"></div>
+    </div>
+    <div class="field">
+      <label>Notes log <span style="font-weight:400;color:var(--muted)">(auto-dated)</span></label>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <input id="km-note-inp" type="text" placeholder="Add a note…" style="flex:1">
+        <button class="btn btn-sm" onclick="appendKOLNote()">+ Log</button>
+      </div>
+      <textarea id="km-notes" rows="3" placeholder="Engagement history, content produced, relationship notes…"></textarea></div>
+  </div>
+
   <input type="hidden" id="km-id">
-  <div class="modal-foot">
-    <button class="btn btn-danger" id="km-del" style="display:none;margin-right:auto" onclick="deleteKOL()"><i class="ti ti-trash"></i> Delete</button>
+  <div class="modal-foot" id="kol-edit-foot" style="display:none">
+    <button class="btn btn-danger" id="km-del" style="display:none;margin-right:auto" onclick="deleteKOL()">Delete</button>
     <button class="btn" onclick="closeModal('kol-modal')">Cancel</button>
     <button class="btn btn-primary" onclick="saveKOL()">Save</button>
   </div>
@@ -2255,6 +2360,12 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 </div></div>
 
 <script>
+// Safe dbgLog stub — real implementation loads later in the debug panel block.
+// Queues messages so nothing is lost and, critically, nothing throws.
+window._dbgQueue = [];
+if (typeof window.dbgLog !== 'function') {
+  window.dbgLog = function(msg, success) { window._dbgQueue.push([msg, success]); };
+}
 // ══════════════════════════════════════════
 // DEFAULT DATA
 // ══════════════════════════════════════════
@@ -2739,7 +2850,7 @@ async function _doSave() {
       const errText = await res.text();
       console.error('[PT Dashboard] Upsert failed:', res.status, errText);
       dbgLog('Upsert ' + res.status + ': ' + errText.slice(0, 120));
-      showPill('⚠', 'Cloud save failed — see debug', 'rgba(216,90,48,.5)', 8000);
+      showPill('⚠', 'Cloud save FAILED — changes may be lost on reload (large background photo?)', 'rgba(216,90,48,.6)', 10000);
       document.getElementById('debug-panel').style.display = 'block';
     }
   } catch(e) {
@@ -2842,7 +2953,7 @@ function showPage(name, el) {
     analyticsRendered = true;
   }
   if (name === 'pitches') { renderSWOT(); }
-  setTimeout(wireDragAndDrop, 150);
+  setTimeout(() => { applyTileOrder(name); wireDragAndDrop(); }, 150);
   if (name === 'kols') {
     renderKOLs();
     const ts = document.getElementById('kol-tier-sel');     if(ts) ts.value = currentKOLFilter;
@@ -3416,7 +3527,94 @@ function getKOLCount(kolName) {
       }
     });
   });
-  return calCount + trackerExtra + projExtra;
+  // Count projects where this KOL is in the involved parties list
+  let partyCount = 0;
+  (DB.projectTrackers || []).forEach(proj => {
+    (proj.parties || []).forEach(party => {
+      if ((party.name||'').trim().toLowerCase() === name) partyCount++;
+    });
+  });
+  return calCount + trackerExtra + projExtra + partyCount;
+}
+
+// Returns named associations for a KOL: projects + content items
+function getKOLAssociations(kolName) {
+  if (!kolName) return { projects: [], content: [] };
+  const name = kolName.trim().toLowerCase();
+  const projects = [];
+  const content = [];
+  const seenProj = new Set();
+  const seenContent = new Set();
+
+  // Projects via Involved Parties
+  (DB.projectTrackers || []).forEach(proj => {
+    (proj.parties || []).forEach(party => {
+      if ((party.name||'').trim().toLowerCase() === name && !seenProj.has(proj.id)) {
+        projects.push({ title: proj.title, role: party.role || 'Involved party', color: proj.color });
+        seenProj.add(proj.id);
+      }
+    });
+    // Projects via workbook tab KOL columns
+    (proj.tabs || []).forEach(tab => {
+      if (tab.type !== 'table' || !tab.colDefs) return;
+      tab.colDefs.forEach((col, ci) => {
+        if (col.type !== 'kol') return;
+        (tab.rows || []).forEach(row => {
+          if ((row.cells?.[ci] || '').trim().toLowerCase() === name && !seenProj.has(proj.id)) {
+            projects.push({ title: proj.title, role: 'Tagged in ' + tab.title, color: proj.color });
+            seenProj.add(proj.id);
+          }
+        });
+      });
+    });
+    // Legacy tracker rows
+    (proj.rows || []).forEach(row => {
+      if ((row.cells?.[2] || '').trim().toLowerCase() === name && !seenProj.has(proj.id)) {
+        projects.push({ title: proj.title, role: 'Author', color: proj.color });
+        seenProj.add(proj.id);
+      }
+    });
+  });
+
+  // Content: calendar events
+  (DB.calEvents || []).forEach(e => {
+    if (!e.author) return;
+    const authors = e.author.split(',').map(s => s.trim().toLowerCase());
+    if (authors.includes(name) && e.label && !seenContent.has(e.label)) {
+      const d = e.y && e.m && e.d ? (e.y + '-' + String(e.m).padStart(2,'0') + '-' + String(e.d).padStart(2,'0')) : '';
+      content.push({ title: e.label, kind: e.type || 'Content', date: d });
+      seenContent.add(e.label);
+    }
+  });
+
+  // Content: PPFO tracker rows
+  (DB.ppfoTrackers || []).forEach(t => {
+    (t.rows || []).forEach(row => {
+      const rowAuthor = (row.cells?.[2] || '').trim().toLowerCase();
+      const rowTitle  = (row.cells?.[1] || '').trim();
+      if (rowAuthor === name && rowTitle && !seenContent.has(rowTitle)) {
+        content.push({ title: rowTitle, kind: 'PPFO — ' + (t.title || 'Issue'), date: '' });
+        seenContent.add(rowTitle);
+      }
+    });
+  });
+
+  // Content: conference interviews
+  (DB.conferences || []).forEach(conf => {
+    (conf.interviews || []).forEach(iv => {
+      if ((iv.kol||'').trim().toLowerCase() === name) {
+        const key = 'iv-' + (iv.topic || conf.name);
+        if (!seenContent.has(key)) {
+          content.push({ title: iv.topic || 'Interview', kind: conf.name + ' interview', date: iv.date || '' });
+          seenContent.add(key);
+        }
+      }
+    });
+  });
+
+  // Sort content newest first
+  content.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  return { projects, content };
 }
 
 function getKOLTier(k) {
@@ -3531,7 +3729,6 @@ function filterKOLSource(val) {
 function buildKOLCard(k, idx, tierMeta) {
   const initials  = getKOLInitials(k.name);
   const tier      = getKOLTier(k);
-  const tagsHtml  = (k.tags || []).map(t => `<span class="tag tag-gold">${t}</span>`).join('');
   const liveCount = getKOLCount(k.name);
   const card = document.createElement('div'); card.className = 'kol-card';
   card.innerHTML = `
@@ -3542,9 +3739,9 @@ function buildKOLCard(k, idx, tierMeta) {
       <div class="kol-affil">${k.inst || ''}</div>
       ${k.email ? `<div style="font-size:10px;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px"><a href="mailto:${k.email}" onclick="event.stopPropagation()" style="color:var(--muted);text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><i class="ti ti-mail" style="font-size:11px;margin-right:2px"></i>${k.email}</a><button onclick="event.stopPropagation();copyEmail('${k.email}',this)" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px;padding:0;flex-shrink:0" title="Copy email"><i class="ti ti-copy"></i></button></div>` : ''}
       <div class="kol-tags">
-        ${tagsHtml}
+        ${k.primarySpec || k.spec ? `<span class="tag tag-gold">${k.primarySpec || (k.spec||'').split(',')[0]}</span>` : ''}
+        ${k.subSpec ? `<span class="tag" style="background:rgba(83,74,183,.1);color:#3c3489">${k.subSpec}</span>` : ''}
         <span class="tag ${tierMeta[tier]?.tagCls || 'tag-t3'}">${tier}</span>
-        ${k.category ? `<span class="tag" style="background:rgba(83,74,183,.1);color:#3c3489;font-size:9px">${k.category}</span>` : ''}
       </div>
     </div>
     <div class="kol-right">
@@ -3585,7 +3782,9 @@ function renderKOLs(filter) {
   const filteredKols = kols.filter(k => {
     if (currentKOLSpecialty === 'all') return true;
     const specVal = currentKOLSpecialty.toLowerCase();
-    return (k.specialtyTags || []).some(t => t.toLowerCase().includes(specVal))
+    return (k.primarySpec||'').toLowerCase().includes(specVal)
+      || (k.subSpec||'').toLowerCase().includes(specVal)
+      || (k.specialtyTags || []).some(t => t.toLowerCase().includes(specVal))
       || (k.spec || '').toLowerCase().includes(specVal)
       || (k.category || '').toLowerCase().includes(specVal);
   });
@@ -3690,64 +3889,160 @@ function incrementKOL(idx) {
 }
 
 function openKOLModal(idx) {
-  const k = (idx !== null && idx >= 0) ? DB.kols[idx] : null;
-  document.getElementById('kol-modal-title').textContent = k ? 'Edit KOL' : 'Add KOL';
-  document.getElementById('km-name').value  = k?.name  || '';
-  document.getElementById('km-cred').value  = k?.cred  || '';
+  const k = idx !== null && idx !== undefined ? DB.kols[idx] : null;
+  document.getElementById('km-id').value = idx !== null && idx !== undefined ? idx : '';
+
+  // Populate primary specialty dropdown from CANCER_GROUPS
+  const primSel = document.getElementById('km-primary');
+  if (primSel && primSel.options.length <= 1) {
+    if (typeof CANCER_GROUPS !== 'undefined') {
+      Object.entries(CANCER_GROUPS).forEach(([group, types]) => {
+        const og = document.createElement('optgroup'); og.label = group;
+        types.forEach(t => {
+          const o = document.createElement('option'); o.value = t; o.textContent = t;
+          og.appendChild(o);
+        });
+        primSel.appendChild(og);
+      });
+    }
+  }
+
+  if (k) {
+    // ── VIEW MODE first ──────────────────────────────
+    document.getElementById('kol-modal-title').textContent = '';
+    document.getElementById('kv-avatar').textContent = getKOLInitials(k.name);
+    document.getElementById('kv-name').textContent = k.name || '';
+    document.getElementById('kv-cred').textContent = k.cred || '';
+    document.getElementById('kv-title-inst').textContent = [k.title, k.inst].filter(Boolean).join(' · ');
+    document.getElementById('kv-count').textContent = getKOLCount(k.name);
+    document.getElementById('kv-primary').textContent = k.primarySpec || k.spec || '—';
+    document.getElementById('kv-sub').textContent = k.subSpec || '—';
+    document.getElementById('kv-email').textContent = k.email || '—';
+    document.getElementById('kv-tier').textContent = getKOLTier(k);
+    document.getElementById('kv-last').textContent = k.last || '—';
+    document.getElementById('kv-next').textContent = k.next || '—';
+    document.getElementById('kv-notes').textContent = k.notes || '—';
+    // Associated projects & content
+    const assoc = getKOLAssociations(k.name);
+    const projCont = document.getElementById('kv-projects');
+    if (projCont) {
+      projCont.innerHTML = '';
+      if (!assoc.projects.length) {
+        projCont.innerHTML = '<div style="font-size:11px;color:var(--muted);font-style:italic">Not tagged on any projects</div>';
+      }
+      assoc.projects.forEach(pr => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:0.5px solid var(--border)';
+        const dot = document.createElement('span');
+        dot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:' + (pr.color||'var(--navy)') + ';flex-shrink:0';
+        const txt = document.createElement('div');
+        txt.style.cssText = 'flex:1;min-width:0';
+        txt.innerHTML = '<div style="font-size:11px;font-weight:600;color:var(--text)">' + pr.title + '</div>' +
+          '<div style="font-size:10px;color:var(--muted)">' + pr.role + '</div>';
+        row.appendChild(dot); row.appendChild(txt);
+        projCont.appendChild(row);
+      });
+    }
+    const contCont = document.getElementById('kv-content');
+    if (contCont) {
+      contCont.innerHTML = '';
+      if (!assoc.content.length) {
+        contCont.innerHTML = '<div style="font-size:11px;color:var(--muted);font-style:italic">No content items yet</div>';
+      }
+      assoc.content.slice(0, 20).forEach(c => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--border)';
+        row.innerHTML = '<div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + c.title + '</div>' +
+          '<div style="font-size:10px;color:var(--muted)">' + c.kind + '</div></div>' +
+          (c.date ? '<div style="font-size:10px;color:var(--muted);flex-shrink:0">' + c.date + '</div>' : '');
+        contCont.appendChild(row);
+      });
+      if (assoc.content.length > 20) {
+        const more = document.createElement('div');
+        more.style.cssText = 'font-size:10px;color:var(--muted);padding:4px 0;text-align:center';
+        more.textContent = '+ ' + (assoc.content.length - 20) + ' more';
+        contCont.appendChild(more);
+      }
+    }
+
+    document.getElementById('kol-view-mode').style.display = '';
+    document.getElementById('kol-edit-mode').style.display = 'none';
+    document.getElementById('kol-edit-foot').style.display = 'none';
+    document.getElementById('kol-edit-btn').style.display = '';
+  } else {
+    // ── New KOL → straight to edit mode ─────────────
+    document.getElementById('kol-modal-title').textContent = 'Add KOL';
+    switchKOLModalToEdit();
+  }
+
+  // Fill edit fields (whether shown or not)
+  document.getElementById('km-name').value  = k?.name || '';
+  document.getElementById('km-cred').value  = k?.cred || '';
   document.getElementById('km-title').value = k?.title || '';
-  document.getElementById('km-inst').value  = k?.inst  || '';
-  document.getElementById('km-spec').value  = k?.spec  || '';
-  const emailEl = document.getElementById('km-email'); if (emailEl) emailEl.value = k?.email || '';
-  const stEl = document.getElementById('km-specialty-tags'); if (stEl) stEl.value = (k?.specialtyTags || []).join(', ');
-  document.getElementById('km-tags').value  = k ? (k.tags || []).join(', ') : '';
+  document.getElementById('km-inst').value  = k?.inst || '';
+  const pv = document.getElementById('km-primary'); if (pv) pv.value = k?.primarySpec || '';
+  const sv = document.getElementById('km-sub');     if (sv) sv.value = k?.subSpec || '';
+  document.getElementById('km-email').value = k?.email || '';
   document.getElementById('km-tier').value  = k?.tierOverride || 'auto';
-  document.getElementById('km-count').value = k?.projectCount || 0;
+  document.getElementById('km-count').value = k?.count || 0;
+  document.getElementById('km-last').value  = k?.last || '';
+  document.getElementById('km-next').value  = k?.next || '';
   document.getElementById('km-notes').value = k?.notes || '';
-  document.getElementById('km-id').value    = idx !== null ? idx : '';
   document.getElementById('km-del').style.display = k ? '' : 'none';
 
-  // Show auto-tier preview
-  if (k) {
-    const auto = getKOLTier(k);
-    const liveC = getKOLCount(k.name);
-    document.getElementById('km-tier').title = `Auto would assign: ${auto} (${liveC} live projects · T1≥${TIER_T1}, T2≥${TIER_T2})`;
-  }
   openModal('kol-modal');
-  setTimeout(() => document.getElementById('km-name').focus(), 50);
 }
 
+function switchKOLModalToEdit() {
+  document.getElementById('kol-view-mode').style.display = 'none';
+  document.getElementById('kol-edit-mode').style.display = '';
+  document.getElementById('kol-edit-foot').style.display = '';
+  document.getElementById('kol-edit-btn').style.display = 'none';
+  document.getElementById('kol-modal-title').textContent = 'Edit KOL';
+}
 function saveKOL() {
   const idxRaw = document.getElementById('km-id').value;
-  const idx    = idxRaw !== '' ? parseInt(idxRaw) : null;
   const obj = {
-    id:           idx !== null && DB.kols[idx] ? DB.kols[idx].id : Date.now(),
-    name:         document.getElementById('km-name').value.trim(),
-    cred:         document.getElementById('km-cred').value.trim(),
-    title:        document.getElementById('km-title').value.trim(),
-    inst:         document.getElementById('km-inst').value.trim(),
-    spec:         document.getElementById('km-spec').value.trim(),
-    tags:         document.getElementById('km-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+    name:  document.getElementById('km-name').value.trim(),
+    cred:  document.getElementById('km-cred').value.trim(),
+    title: document.getElementById('km-title').value.trim(),
+    inst:  document.getElementById('km-inst').value.trim(),
+    primarySpec: document.getElementById('km-primary')?.value || '',
+    subSpec:     document.getElementById('km-sub')?.value || '',
+    email: document.getElementById('km-email').value.trim(),
     tierOverride: document.getElementById('km-tier').value,
-    projectCount: parseInt(document.getElementById('km-count').value) || 0,
-    notes:        document.getElementById('km-notes').value.trim(),
-    email:        document.getElementById('km-email')?.value.trim() || '',
-    specialtyTags: (document.getElementById('km-specialty-tags')?.value || '').split(',').map(s=>s.trim()).filter(Boolean),
+    count: parseInt(document.getElementById('km-count').value) || 0,
+    last:  document.getElementById('km-last').value.trim(),
+    next:  document.getElementById('km-next').value.trim(),
+    notes: document.getElementById('km-notes').value.trim(),
   };
-  if (idx !== null && DB.kols[idx]) {
-    DB.kols[idx] = obj;
+  if (!obj.name) return;
+  // Preserve legacy fields for backwards compat
+  if (idxRaw !== '') {
+    const existing = DB.kols[parseInt(idxRaw)];
+    obj.spec = obj.primarySpec || existing.spec || '';
+    obj.tags = existing.tags || [];
+    obj.specialtyTags = existing.specialtyTags || [];
+    obj.category = existing.category || '';
+    obj.source = existing.source || '';
+    DB.kols[parseInt(idxRaw)] = {...existing, ...obj};
   } else {
-    if (!DB.kols) DB.kols = [];
+    obj.spec = obj.primarySpec;
+    obj.tags = []; obj.specialtyTags = [];
     DB.kols.push(obj);
   }
   closeModal('kol-modal');
   renderKOLs();
   saveState();
 }
-
 function deleteKOL() {
   const idx = parseInt(document.getElementById('km-id').value);
   if (!isNaN(idx) && DB.kols[idx]) {
-    DB.kols.splice(idx, 1);
+    const removed = DB.kols.splice(idx, 1)[0];
+    showUndoPill('Deleted KOL "' + removed.name + '"', () => {
+      DB.kols.splice(Math.min(idx, DB.kols.length), 0, removed);
+      renderKOLs();
+    });
   }
   closeModal('kol-modal');
   renderKOLs();
@@ -3910,7 +4205,18 @@ function renderConferences() {
   delBtn.className = 'btn btn-sm btn-danger';
   delBtn.style.cssText = 'margin-left:auto;align-self:center';
   delBtn.innerHTML = '<i class="ti ti-trash"></i> Delete conference';
-  delBtn.onclick = () => { if (confirm('Delete this conference?')) { DB.conferences.splice(activeConfTab, 1); if (activeConfTab > 0) activeConfTab--; renderConferences(); saveState(); } };
+  delBtn.onclick = () => {
+    if (!confirm('Delete this conference?')) return;
+    const ci = activeConfTab;
+    const removed = DB.conferences.splice(ci, 1)[0];
+    if (activeConfTab > 0) activeConfTab--;
+    renderConferences(); saveState();
+    showUndoPill('Deleted conference "' + removed.name + '"', () => {
+      DB.conferences.splice(Math.min(ci, DB.conferences.length), 0, removed);
+      activeConfTab = Math.min(ci, DB.conferences.length - 1);
+      renderConferences();
+    });
+  };
   tabBar.appendChild(delBtn);
 
   // Active panel
@@ -5002,12 +5308,26 @@ function renderProjects() {
 function buildProjectPanel(p) {
   // Special rendering for Pathway to Peer Review
   if (p.isPPRO) return buildPPROPanel(p);
+
+  // Ensure project has tabs structure
+  if (!p.tabs) {
+    // Migrate existing data into Details tab
+    p.tabs = [];
+  }
+  // Always ensure Details tab exists as first tab
+  if (!p.tabs.find(t => t.id === 'details')) {
+    p.tabs.unshift({
+      id: 'details',
+      title: 'Project Details',
+      type: 'details'
+    });
+  }
+
   const wrap = document.createElement('div');
 
-  // ── Header row ────────────────────────────────────────
+  // ── Project header ────────────────────────────────────
   const hdr = document.createElement('div');
-  hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;background:rgba(255,255,255,.72);backdrop-filter:blur(10px);border:0.5px solid rgba(255,255,255,.55);border-radius:10px;padding:10px 14px;box-shadow:0 1px 6px rgba(0,0,0,.06)';
-
+  hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;background:rgba(255,255,255,.72);backdrop-filter:blur(10px);border:0.5px solid rgba(255,255,255,.55);border-radius:10px;padding:10px 14px;box-shadow:0 1px 6px rgba(0,0,0,.06)';
   const titleWrap = document.createElement('div');
   titleWrap.style.cssText = 'display:flex;align-items:center;gap:10px';
   const colorDot = document.createElement('div');
@@ -5020,60 +5340,172 @@ function buildProjectPanel(p) {
   titleEl.textContent = p.title;
   titleEl.addEventListener('blur', () => { p.title = titleEl.textContent.trim(); renderProjects(); saveState(); });
   titleWrap.appendChild(colorDot); titleWrap.appendChild(titleEl);
-
-  const btnRow = document.createElement('div');
-  btnRow.style.cssText = 'display:flex;gap:6px';
-  const addTrackerBtn = document.createElement('button');
-  addTrackerBtn.className = 'btn btn-sm';
-  addTrackerBtn.innerHTML = '<i class="ti ti-table-plus"></i> Add tracker table';
-  addTrackerBtn.addEventListener('click', () => addTrackerToProject(p));
   const delBtn = document.createElement('button');
   delBtn.className = 'btn btn-sm btn-danger';
-  delBtn.innerHTML = '<i class="ti ti-trash"></i> Delete project';
+  delBtn.textContent = 'Delete project';
   delBtn.addEventListener('click', () => deleteProject(p.id));
-  btnRow.appendChild(addTrackerBtn); btnRow.appendChild(delBtn);
-
-  hdr.appendChild(titleWrap); hdr.appendChild(btnRow);
+  hdr.appendChild(titleWrap); hdr.appendChild(delBtn);
   wrap.appendChild(hdr);
 
-  // ── Details ───────────────────────────────────────────
-  const detailSec = document.createElement('div'); detailSec.className = 'proj-section';
-  const detailTitle = document.createElement('div'); detailTitle.className = 'proj-section-title';
-  detailTitle.innerHTML = '<i class="ti ti-file-description"></i> Project details';
-  const detailTa = document.createElement('textarea');
-  detailTa.placeholder = 'Add project description, goals, notes, background…';
-  detailTa.style.cssText = 'width:100%;background:none;border:none;outline:none;font-size:12px;color:var(--text);font-family:inherit;line-height:1.7;resize:vertical;min-height:70px';
-  detailTa.value = p.details || '';
-  detailTa.addEventListener('blur', () => { p.details = detailTa.value; saveState(); });
-  detailSec.appendChild(detailTitle); detailSec.appendChild(detailTa);
-  wrap.appendChild(detailSec);
+  // ── Tab bar ───────────────────────────────────────────
+  const tabBar = document.createElement('div');
+  tabBar.style.cssText = 'display:flex;align-items:center;gap:3px;flex-wrap:wrap;margin-bottom:12px;background:rgba(255,255,255,.72);backdrop-filter:blur(10px);border:0.5px solid rgba(255,255,255,.55);border-radius:10px;padding:6px 8px;box-shadow:0 1px 6px rgba(0,0,0,.06)';
+  wrap.appendChild(tabBar);
 
-  // ── Involved parties ─────────────────────────────────
-  const partySec = document.createElement('div'); partySec.className = 'proj-section';
-  const partyTitle = document.createElement('div'); partyTitle.className = 'proj-section-title';
-  partyTitle.innerHTML = '<i class="ti ti-users"></i> Involved parties';
+  // ── Tab panels container ──────────────────────────────
+  const panelCont = document.createElement('div');
+  wrap.appendChild(panelCont);
+
+  // Track active tab
+  if (!p._activeTab) p._activeTab = 'details';
+
+  function switchTab(tabId) {
+    p._activeTab = tabId;
+    // Update tab button styles
+    tabBar.querySelectorAll('.proj-inner-tab').forEach(btn => {
+      const active = btn.dataset.tabId === tabId;
+      btn.style.background = active ? 'rgba(255,255,255,.9)' : 'transparent';
+      btn.style.color = active ? 'var(--navy)' : 'var(--muted)';
+      btn.style.fontWeight = active ? '600' : '400';
+      btn.style.boxShadow = active ? '0 1px 4px rgba(0,0,0,.1)' : 'none';
+    });
+    // Show correct panel
+    panelCont.querySelectorAll('.proj-inner-panel').forEach(pan => {
+      pan.style.display = pan.dataset.tabId === tabId ? '' : 'none';
+    });
+  }
+
+  function buildTabButton(tab) {
+    const btn = document.createElement('div');
+    btn.className = 'proj-inner-tab';
+    btn.dataset.tabId = tab.id;
+    btn.style.cssText = 'display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:400;color:var(--muted);transition:all .15s;user-select:none;white-space:nowrap;position:relative';
+
+    // Tab title (double-click to rename, except Details)
+    const label = document.createElement('span');
+    label.textContent = tab.title;
+    btn.appendChild(label);
+
+    if (tab.type !== 'details') {
+      // Rename on double-click
+      btn.addEventListener('dblclick', e => {
+        e.stopPropagation();
+        const cur = tab.title;
+        const inp = document.createElement('input');
+        inp.type = 'text'; inp.value = cur;
+        inp.style.cssText = 'font-size:11px;border:none;outline:none;background:transparent;width:' + Math.max(60, cur.length * 7) + 'px;color:var(--text)';
+        label.replaceWith(inp); inp.focus(); inp.select();
+        const finish = () => {
+          tab.title = inp.value.trim() || cur;
+          label.textContent = tab.title;
+          inp.replaceWith(label);
+          saveState();
+        };
+        inp.addEventListener('blur', finish);
+        inp.addEventListener('keydown', e2 => { if (e2.key === 'Enter') inp.blur(); });
+      });
+
+      // Delete tab button (×)
+      const x = document.createElement('span');
+      x.textContent = '×'; x.style.cssText = 'font-size:13px;opacity:0;transition:opacity .15s;margin-left:2px;line-height:1';
+      btn.appendChild(x);
+      btn.addEventListener('mouseenter', () => x.style.opacity = '.5');
+      btn.addEventListener('mouseleave', () => x.style.opacity = '0');
+      x.addEventListener('click', e => {
+        e.stopPropagation();
+        if (!confirm('Delete tab "' + tab.title + '" and all its data?')) return;
+        const idx = p.tabs.findIndex(t => t.id === tab.id);
+        if (idx > -1) p.tabs.splice(idx, 1);
+        if (p.activeTab === tab.id) p._activeTab = 'details';
+        rebuildPanel();
+        saveState();
+      });
+    }
+
+    btn.addEventListener('click', () => switchTab(tab.id));
+    return btn;
+  }
+
+  function rebuildPanel() {
+    tabBar.innerHTML = ''; panelCont.innerHTML = '';
+
+    // Build tab buttons
+    p.tabs.forEach(tab => tabBar.appendChild(buildTabButton(tab)));
+
+    // ＋ Add tab button
+    const addTabBtn = document.createElement('button');
+    addTabBtn.style.cssText = 'padding:4px 10px;border-radius:7px;border:1.5px dashed var(--border-s);background:none;color:var(--muted);font-size:13px;cursor:pointer;transition:all .15s;margin-left:2px';
+    addTabBtn.textContent = '＋';
+    addTabBtn.title = 'Add new table tab';
+    addTabBtn.addEventListener('mouseenter', () => { addTabBtn.style.color='var(--navy)'; addTabBtn.style.borderColor='var(--navy)'; });
+    addTabBtn.addEventListener('mouseleave', () => { addTabBtn.style.color='var(--muted)'; addTabBtn.style.borderColor='var(--border-s)'; });
+    addTabBtn.addEventListener('click', () => openAddTabModal(p, rebuildPanel));
+    tabBar.appendChild(addTabBtn);
+
+    // Build panels
+    p.tabs.forEach(tab => {
+      const panel = document.createElement('div');
+      panel.className = 'proj-inner-panel';
+      panel.dataset.tabId = tab.id;
+
+      if (tab.type === 'details') {
+        buildDetailsPanel(p, panel);
+      } else {
+        buildTablePanel(p, tab, panel);
+      }
+      panelCont.appendChild(panel);
+    });
+
+    switchTab(p._activeTab || 'details');
+  }
+
+  rebuildPanel();
+  return wrap;
+}
+
+// ── Details panel (Tab 1) ─────────────────────────────────────────────────
+function buildDetailsPanel(p, panel) {
+  // Details textarea
+  const detSec = document.createElement('div'); detSec.className='proj-section';
+  const detTitle = document.createElement('div'); detTitle.className='proj-section-title';
+  detTitle.textContent='Project details';
+  const detTa = document.createElement('textarea');
+  detTa.placeholder='Add project description, goals, notes, background…';
+  detTa.style.cssText='width:100%;background:none;border:none;outline:none;font-size:12px;color:var(--text);font-family:inherit;line-height:1.7;resize:vertical;min-height:80px';
+  detTa.value = p.details || '';
+  detTa.addEventListener('blur', () => { p.details = detTa.value; saveState(); });
+  detSec.appendChild(detTitle); detSec.appendChild(detTa);
+  panel.appendChild(detSec);
+
+  // Involved parties
+  const partySec = document.createElement('div'); partySec.className='proj-section';
+  const partyTitle = document.createElement('div'); partyTitle.className='proj-section-title';
+  partyTitle.textContent='Involved parties';
   partySec.appendChild(partyTitle);
-  const partyList = document.createElement('div'); partyList.id = 'party-list-' + p.id;
+  const partyList = document.createElement('div');
+  if (!p.parties) p.parties = [];
   renderPartyList(p, partyList);
   const addPartyBtn = document.createElement('button');
-  addPartyBtn.className = 'btn btn-sm'; addPartyBtn.style.marginTop = '8px';
-  addPartyBtn.innerHTML = '<i class="ti ti-plus"></i> Add person';
+  addPartyBtn.className='btn btn-sm'; addPartyBtn.style.marginTop='8px';
+  addPartyBtn.textContent='+ Add person';
   addPartyBtn.addEventListener('click', () => addParty(p, partyList));
   partySec.appendChild(partyList); partySec.appendChild(addPartyBtn);
-  wrap.appendChild(partySec);
+  panel.appendChild(partySec);
 
-  // ── Task list ─────────────────────────────────────────
-  const taskSec = document.createElement('div'); taskSec.className = 'proj-section';
-  const taskTitle = document.createElement('div'); taskTitle.className = 'proj-section-title';
-  taskTitle.innerHTML = '<i class="ti ti-checklist"></i> Tasks';
+  // Tasks
+  const taskSec = document.createElement('div'); taskSec.className='proj-section';
+  const taskTitle = document.createElement('div'); taskTitle.className='proj-section-title';
+  taskTitle.textContent='Tasks';
   taskSec.appendChild(taskTitle);
-  const taskList = document.createElement('div'); taskList.id = 'task-list-' + p.id;
+  if (!p.tasks) p.tasks = [];
+  const taskList = document.createElement('div');
   renderTaskList(p, taskList);
   const taskFoot = document.createElement('div');
-  taskFoot.style.cssText = 'display:flex;gap:6px;margin-top:8px;padding-top:6px;border-top:0.5px dashed var(--border)';
-  const taskInp = document.createElement('input'); taskInp.type='text'; taskInp.placeholder='Add a task…'; taskInp.style.flex='1';
+  taskFoot.style.cssText='display:flex;gap:6px;margin-top:8px;padding-top:6px;border-top:0.5px dashed var(--border)';
+  const taskInp = document.createElement('input'); taskInp.type='text';
+  taskInp.placeholder='Add a task…'; taskInp.style.flex='1';
   const taskAddBtn = document.createElement('button'); taskAddBtn.className='btn btn-sm btn-primary';
-  taskAddBtn.innerHTML='<i class="ti ti-plus"></i> Add';
+  taskAddBtn.textContent='+ Add';
   const addTaskFn = () => {
     const txt = taskInp.value.trim(); if (!txt) return;
     p.tasks.push({text:txt, done:false}); taskInp.value='';
@@ -5083,58 +5515,292 @@ function buildProjectPanel(p) {
   taskInp.addEventListener('keydown', e => { if (e.key==='Enter') addTaskFn(); });
   taskFoot.appendChild(taskInp); taskFoot.appendChild(taskAddBtn);
   taskSec.appendChild(taskList); taskSec.appendChild(taskFoot);
-  wrap.appendChild(taskSec);
+  panel.appendChild(taskSec);
+}
 
-  // ── Tracker tables ────────────────────────────────────
-  const trackerSec = document.createElement('div'); trackerSec.className = 'proj-section';
-  const trackerTitle = document.createElement('div'); trackerTitle.className = 'proj-section-title';
-  trackerTitle.innerHTML = '<i class="ti ti-table"></i> Tracker tables';
-  trackerSec.appendChild(trackerTitle);
-  const trackerCont = document.createElement('div');
-  trackerCont.id = 'proj-trackers-' + p.id;
-  // Render any existing sub-trackers
-  (p.trackers || []).forEach(t => {
-    t._containerId = 'proj-trackers-' + p.id;
-    buildProjectTrackerTable(t, trackerCont);
+// ── Table panel (custom tabs) ─────────────────────────────────────────────
+function buildTablePanel(p, tab, panel) {
+  if (!tab.colDefs || !tab.colDefs.length) {
+    tab.colDefs = [{name:'Item', type:'text'},{name:'Owner', type:'kol'},{name:'Due Date', type:'date'},{name:'Status', type:'status'},{name:'Notes', type:'text'}];
+  }
+  if (!tab.rows) tab.rows = [];
+
+  const TYPE_LABELS = {text:'Text',checkbox:'Check',date:'Date',kol:'Owner/KOL',status:'Status'};
+  const STATUS_OPTS = ['','Not Started','In Progress','Complete','Blocked','Deferred'];
+
+  // Scrollable table wrapper
+  const tblWrap = document.createElement('div');
+  tblWrap.style.cssText = 'overflow-x:auto;border:0.5px solid var(--border);border-radius:8px;max-height:420px;overflow-y:auto';
+
+  const renderTable = () => {
+    tblWrap.innerHTML = '';
+    const tbl = document.createElement('table'); tbl.className='dtbl';
+    tbl.style.cssText = 'width:100%;font-size:11px;table-layout:auto';
+
+    // ── Header row ──────────────────────────────────────
+    const thead = document.createElement('thead');
+    const hrow  = document.createElement('tr');
+
+    tab.colDefs.forEach((col, ci) => {
+      const th = document.createElement('th');
+      th.style.cssText = 'white-space:nowrap;min-width:80px;position:relative;background:var(--navy);color:#fff';
+
+      // Editable column name
+      const nameEl = document.createElement('div');
+      nameEl.contentEditable = 'true';
+      nameEl.textContent = col.name;
+      nameEl.style.cssText = 'display:inline-block;outline:none;min-width:40px;cursor:text';
+      nameEl.addEventListener('blur', () => { col.name = nameEl.textContent.trim() || col.name; saveState(); });
+      nameEl.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); nameEl.blur(); }});
+
+      // Column type selector (small, appears on hover)
+      const typeSel = document.createElement('select');
+      typeSel.style.cssText = 'font-size:9px;background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:3px;margin-left:4px;cursor:pointer;padding:1px';
+      Object.entries(TYPE_LABELS).forEach(([v,l]) => {
+        const o = document.createElement('option'); o.value=v; o.textContent=l;
+        if (v === col.type) o.selected = true;
+        typeSel.appendChild(o);
+      });
+      typeSel.addEventListener('change', () => { col.type = typeSel.value; renderTable(); saveState(); });
+
+      // Delete column button
+      const delCol = document.createElement('span');
+      delCol.textContent = '×'; delCol.style.cssText = 'margin-left:6px;cursor:pointer;opacity:.5;font-size:13px';
+      delCol.title = 'Delete column';
+      delCol.addEventListener('click', () => {
+        if (tab.colDefs.length <= 1) return;
+        tab.colDefs.splice(ci, 1);
+        tab.rows.forEach(r => { if (r.cells) r.cells.splice(ci, 1); });
+        renderTable(); saveState();
+      });
+
+      th.appendChild(nameEl); th.appendChild(typeSel); th.appendChild(delCol);
+      hrow.appendChild(th);
+    });
+
+    // Add column button in header
+    const addColTh = document.createElement('th');
+    addColTh.style.cssText = 'background:var(--navy);width:30px';
+    const addColBtn = document.createElement('button');
+    addColBtn.textContent = '＋';
+    addColBtn.title = 'Add column';
+    addColBtn.style.cssText = 'background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:14px;padding:0;line-height:1';
+    addColBtn.addEventListener('click', () => {
+      tab.colDefs.push({name:'Column', type:'text'});
+      renderTable(); saveState();
+    });
+    addColTh.appendChild(addColBtn);
+    hrow.appendChild(addColTh);
+    thead.appendChild(hrow); tbl.appendChild(thead);
+
+    // ── Body rows ───────────────────────────────────────
+    const tbody = document.createElement('tbody');
+    tab.rows.forEach((row, ri) => {
+      if (!row.cells) row.cells = [];
+      const tr = document.createElement('tr');
+
+      tab.colDefs.forEach((col, ci) => {
+        const td = document.createElement('td');
+        const val = row.cells[ci] !== undefined ? row.cells[ci] : '';
+        const saveCell = v => { row.cells[ci] = v; saveState(); if (col.type==='kol') { const kp=document.getElementById('page-kols'); if(kp&&kp.style.display!=='none') renderKOLs(); } };
+
+        if (col.type === 'checkbox') {
+          td.style.textAlign = 'center';
+          const cb = document.createElement('input'); cb.type='checkbox';
+          cb.checked = val === true || val === 'true';
+          cb.addEventListener('change', () => saveCell(cb.checked));
+          td.appendChild(cb);
+        } else if (col.type === 'date') {
+          const inp = document.createElement('input'); inp.type='date'; inp.value = val;
+          inp.style.cssText='border:none;background:none;font-size:11px;color:var(--text);font-family:inherit;outline:none;width:100%';
+          inp.addEventListener('change', () => saveCell(inp.value));
+          td.appendChild(inp);
+        } else if (col.type === 'kol') {
+          const sel = document.createElement('select');
+          sel.style.cssText='border:none;background:none;font-size:11px;color:var(--text);font-family:inherit;outline:none;width:100%;cursor:pointer';
+          const blk = document.createElement('option'); blk.value=''; blk.textContent='— Unassigned —'; sel.appendChild(blk);
+          buildKOLOptions().forEach(person => {
+            const o = document.createElement('option'); o.value=person.name; o.textContent=person.name;
+            if (person.name === val) o.selected = true; sel.appendChild(o);
+          });
+          sel.addEventListener('change', () => saveCell(sel.value));
+          td.appendChild(sel);
+        } else if (col.type === 'status') {
+          const sel = document.createElement('select');
+          sel.style.cssText='border:none;background:none;font-size:11px;color:var(--text);font-family:inherit;outline:none;width:100%;cursor:pointer';
+          STATUS_OPTS.forEach(s => {
+            const o = document.createElement('option'); o.value=s; o.textContent=s||'— Status —';
+            if (s === val) o.selected = true; sel.appendChild(o);
+          });
+          sel.addEventListener('change', () => saveCell(sel.value));
+          td.appendChild(sel);
+        } else {
+          const div = document.createElement('div');
+          div.contentEditable='true'; div.textContent=val;
+          div.style.cssText='outline:none;min-width:60px;white-space:pre-wrap;padding:1px 0';
+          div.addEventListener('blur', () => saveCell(div.textContent.trim()));
+          td.appendChild(div);
+        }
+        tr.appendChild(td);
+      });
+
+      // Row actions: move up/down + delete
+      const delTd = document.createElement('td');
+      delTd.style.cssText = 'width:60px;text-align:center;white-space:nowrap';
+      const mkMv = (dir, sym) => {
+        const b = document.createElement('button');
+        b.style.cssText='background:none;border:none;cursor:pointer;color:transparent;font-size:10px;padding:0 2px;transition:color .1s';
+        b.textContent = sym; b.title = dir > 0 ? 'Move down' : 'Move up';
+        b.addEventListener('click', () => {
+          const ni = ri + dir;
+          if (ni < 0 || ni >= tab.rows.length) return;
+          const [row2] = tab.rows.splice(ri, 1);
+          tab.rows.splice(ni, 0, row2);
+          renderTable(); saveState();
+        });
+        return b;
+      };
+      const upB2 = mkMv(-1,'▲'), dnB2 = mkMv(1,'▼');
+      const delBtn2 = document.createElement('button');
+      delBtn2.style.cssText = 'background:none;border:none;cursor:pointer;color:transparent;font-size:12px;padding:0 2px;transition:color .1s';
+      delBtn2.textContent = '✕';
+      delBtn2.addEventListener('click', () => { tab.rows.splice(ri,1); renderTable(); saveState(); });
+      tr.addEventListener('mouseenter', () => { delBtn2.style.color='var(--muted)'; upB2.style.color='var(--muted)'; dnB2.style.color='var(--muted)'; });
+      tr.addEventListener('mouseleave', () => { delBtn2.style.color='transparent'; upB2.style.color='transparent'; dnB2.style.color='transparent'; });
+      delTd.appendChild(upB2); delTd.appendChild(dnB2); delTd.appendChild(delBtn2); tr.appendChild(delTd);
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    tblWrap.appendChild(tbl);
+  };
+
+  renderTable();
+  panel.appendChild(tblWrap);
+
+  // Add row button
+  const foot = document.createElement('div');
+  foot.style.cssText = 'margin-top:8px;display:flex;gap:6px';
+  const addRowBtn = document.createElement('button'); addRowBtn.className='btn btn-sm';
+  addRowBtn.textContent = '+ Add row';
+  addRowBtn.addEventListener('click', () => { tab.rows.push({cells:[]}); renderTable(); saveState(); });
+  foot.appendChild(addRowBtn);
+  panel.appendChild(foot);
+}
+
+// ── Add Tab modal ─────────────────────────────────────────────────────────
+function openAddTabModal(p, rebuildFn) {
+  // Simple prompt-style inline modal
+  const name = prompt('Name for new tab:');
+  if (!name || !name.trim()) return;
+  const tabId = 'tab-' + Date.now();
+  p.tabs.push({
+    id: tabId,
+    title: name.trim(),
+    type: 'table',
+    colDefs: [
+      {name:'Item', type:'text'},
+      {name:'Owner', type:'kol'},
+      {name:'Due Date', type:'date'},
+      {name:'Status', type:'status'},
+      {name:'Notes', type:'text'}
+    ],
+    rows: []
   });
-  trackerSec.appendChild(trackerCont);
-  wrap.appendChild(trackerSec);
+  p._activeTab = tabId;
+  rebuildFn();
+  saveState();
+}
 
-  return wrap;
+function buildKOLOptions(selectedName) {
+  // Core team + all KOLs
+  const people = [
+    {name:'Alex', role:'Editorial Manager', email:'agerlach@mjhlifesciences.com'},
+    {name:'Dani', role:'Content Producer', email:''},
+    {name:'Ryu',  role:'Content Producer', email:''},
+    {name:'Gillian', role:'SOP / Operations', email:''},
+    ...(DB.kols||[]).filter(k=>k.name).map(k=>({name:k.name, role:k.title||k.spec||'', email:k.email||''}))
+  ];
+  return people;
 }
 
 function renderPartyList(p, cont) {
   cont.innerHTML = '';
-  if (!p.parties.length) {
-    cont.innerHTML = '<div style="color:var(--muted);font-size:11px;font-style:italic">No one added yet</div>';
+  if (!p.parties || !p.parties.length) {
+    cont.innerHTML = '<div style="color:var(--muted);font-size:11px;font-style:italic;padding:4px 0">No one added yet — click Add person</div>';
     return;
   }
+  const people = buildKOLOptions();
+
   p.parties.forEach((party, pi) => {
     const row = document.createElement('div');
-    row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;align-items:center;margin-bottom:5px';
-    ['name','role','email'].forEach(field => {
-      const inp = document.createElement('input'); inp.type='text';
-      inp.placeholder = field.charAt(0).toUpperCase()+field.slice(1);
-      inp.value = party[field]||''; inp.style.fontSize='11px';
-      inp.addEventListener('blur', () => { p.parties[pi][field]=inp.value.trim(); saveState(); });
-      row.appendChild(inp);
+    row.style.cssText = 'display:grid;grid-template-columns:1.4fr 1fr 1.2fr auto;gap:6px;align-items:center;margin-bottom:6px';
+
+    // ── Name: KOL dropdown ────────────────────────────
+    const nameSel = document.createElement('select');
+    nameSel.style.cssText = 'font-size:11px;padding:4px 6px;border:0.5px solid var(--border-s);border-radius:6px;background:var(--surface);color:var(--text);font-family:inherit';
+    const blankOpt = document.createElement('option'); blankOpt.value=''; blankOpt.textContent='— Select person —';
+    nameSel.appendChild(blankOpt);
+    people.forEach(person => {
+      const o = document.createElement('option'); o.value = person.name;
+      o.textContent = person.name; 
+      if (person.name === party.name) o.selected = true;
+      nameSel.appendChild(o);
     });
+    // Custom name option at bottom
+    const customOpt = document.createElement('option'); customOpt.value='__custom__'; customOpt.textContent='+ Other / type name…';
+    nameSel.appendChild(customOpt);
+    nameSel.addEventListener('change', () => {
+      if (nameSel.value === '__custom__') {
+        const custom = prompt('Enter name:');
+        if (custom) {
+          p.parties[pi].name = custom.trim();
+          // Auto-fill role/email if found in KOL list
+          const found = people.find(x => x.name === custom.trim());
+          if (found) { p.parties[pi].role = found.role; p.parties[pi].email = found.email; }
+        }
+      } else {
+        p.parties[pi].name = nameSel.value;
+        // Auto-fill role + email from KOL list
+        const found = people.find(x => x.name === nameSel.value);
+        if (found) { p.parties[pi].role = found.role; p.parties[pi].email = found.email; }
+      }
+      saveState();
+      renderPartyList(p, cont);
+      // Re-render KOL page if open so project count updates
+      const kolPage = document.getElementById('page-kols');
+      if (kolPage && kolPage.style.display !== 'none') renderKOLs();
+    });
+    row.appendChild(nameSel);
+
+    // ── Role: editable text ───────────────────────────
+    const roleInp = document.createElement('input'); roleInp.type='text';
+    roleInp.placeholder='Role'; roleInp.value=party.role||''; roleInp.style.fontSize='11px';
+    roleInp.addEventListener('blur', () => { p.parties[pi].role=roleInp.value.trim(); saveState(); });
+    row.appendChild(roleInp);
+
+    // ── Email: editable text ──────────────────────────
+    const emailInp = document.createElement('input'); emailInp.type='text';
+    emailInp.placeholder='Email'; emailInp.value=party.email||''; emailInp.style.fontSize='11px';
+    emailInp.addEventListener('blur', () => { p.parties[pi].email=emailInp.value.trim(); saveState(); });
+    row.appendChild(emailInp);
+
+    // ── Delete ────────────────────────────────────────
     const del = document.createElement('button'); del.className='btn btn-sm btn-danger';
-    del.innerHTML='<i class="ti ti-x"></i>';
-    del.addEventListener('click', () => { p.parties.splice(pi,1); renderPartyList(p,cont); saveState(); });
+    del.textContent='✕';
+    del.addEventListener('click', () => {
+      p.parties.splice(pi,1); renderPartyList(p,cont); saveState();
+      const kolPage = document.getElementById('page-kols');
+      if (kolPage && kolPage.style.display !== 'none') renderKOLs();
+    });
     row.appendChild(del);
     cont.appendChild(row);
   });
 }
 
 function addParty(p, cont) {
+  if (!p.parties) p.parties = [];
   p.parties.push({name:'',role:'',email:''});
   renderPartyList(p, cont);
-  // Focus first input of new row
-  setTimeout(() => {
-    const inputs = cont.querySelectorAll('input');
-    if (inputs.length) inputs[inputs.length-3].focus();
-  }, 30);
 }
 
 function renderTaskList(p, cont) {
@@ -5314,8 +5980,14 @@ function createProjectTable() {
 }
 
 function deleteProject(id) {
-  DB.projectTrackers=(DB.projectTrackers||[]).filter(t=>t.id!==id);
+  const idx = (DB.projectTrackers||[]).findIndex(t=>t.id===id);
+  if (idx < 0) return;
+  const removed = DB.projectTrackers.splice(idx, 1)[0];
   renderProjects(); saveState();
+  showUndoPill('Deleted project "' + removed.title + '"', () => {
+    DB.projectTrackers.splice(Math.min(idx, DB.projectTrackers.length), 0, removed);
+    renderProjects();
+  });
 }
 
 function openProjectColorPicker(p, dotEl) {
@@ -5443,6 +6115,7 @@ if (!DB.teamMembers) DB.teamMembers = {
   dani: {name:'Dani', role:'Content Producer', spec:'Breast cancer · Lung cancer · Skin cancer · HER2 BC', email:'', start:'', notes:''},
   ryu:  {name:'Ryu',  role:'Content Producer', spec:'Hematology · Multiple myeloma · Lymphoma · CLL · AML', email:'', start:'', notes:''},
 };
+if (!DB.teamOrder) DB.teamOrder = ['dani','ryu'];
 
 let gmTempItems = [];
 
@@ -5849,8 +6522,7 @@ function deleteGoalConfirm() {
 function refreshGoalViews(scope) {
   if (scope === 'personal') { renderGoals('personal', 'personal-goals-list'); renderGoalsRollup(); }
   if (scope === 'team')     { renderGoals('team', 'team-goals-list'); }
-  if (scope === 'dani')     { renderGoals('dani', 'dani-goals-list'); renderMetricsTile('dani','dani-metrics-tile'); }
-  if (scope === 'ryu')      { renderGoals('ryu',  'ryu-goals-list');  renderMetricsTile('ryu', 'ryu-metrics-tile'); }
+  if ((DB.teamOrder || []).includes(scope)) { renderGoals(scope, scope + '-goals-list'); renderMetricsTile(scope, scope + '-metrics-tile'); }
 }
 
 // ── TEAM ──────────────────────────────────────────────────
@@ -5919,11 +6591,22 @@ function renderTeamHomeProjects() {
   const trackers = DB.projectTrackers || [];
   if (!trackers.length) { cont.innerHTML = '<em style="opacity:.5">No project trackers yet.</em>'; return; }
   cont.innerHTML = trackers.map(t => {
-    const total = t.rows.length;
-    const done  = t.rows.filter(r => r.steps && r.steps.every(s => s === 'done')).length;
+    // Legacy trackers have t.rows; workbook projects have t.tasks; PPRO has neither
+    let total = 0, done = 0, label = '';
+    if (Array.isArray(t.rows)) {
+      total = t.rows.length;
+      done  = t.rows.filter(r => r.steps && r.steps.every(s => s === 'done')).length;
+      label = done + '/' + total + ' complete';
+    } else if (Array.isArray(t.tasks)) {
+      total = t.tasks.length;
+      done  = t.tasks.filter(x => x.done).length;
+      label = total ? (done + '/' + total + ' tasks') : 'No tasks yet';
+    } else {
+      label = 'Active';
+    }
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--border)">
       <span style="font-size:12px;font-weight:500;color:var(--text)">${t.title}</span>
-      <span class="tag tag-navy" style="font-size:10px">${done}/${total} complete</span>
+      <span class="tag tag-navy" style="font-size:10px">${label}</span>
     </div>`;
   }).join('');
 }
@@ -5936,12 +6619,12 @@ function renderGoalsPage() {
 
 function renderTeamPage() {
   renderGoals('team', 'team-goals-list');
-  renderGoals('dani', 'dani-goals-list');
-  renderGoals('ryu',  'ryu-goals-list');
-  renderMetricsTile('dani', 'dani-metrics-tile');
-  renderMetricsTile('ryu',  'ryu-metrics-tile');
-  renderTeamMember('dani');
-  renderTeamMember('ryu');
+  renderTeamTabs();
+  (DB.teamOrder || []).forEach(key => {
+    renderTeamMember(key);
+    renderGoals(key, key + '-goals-list');
+    renderMetricsTile(key, key + '-metrics-tile');
+  });
   renderTeamHomeProjects();
 }
 
@@ -8030,20 +8713,36 @@ function setupThemePicker() {
     document.getElementById('tp-file').click();
   });
 
-  // File chosen — read raw, no canvas compression, maximum quality
+  // File chosen — small files stay raw (no quality loss);
+  // large files get light high-res compression so Supabase saves succeed.
   document.getElementById('tp-file').addEventListener('change', function() {
     const file = this.files[0]; if (!file) return;
-    // Warn if very large (> 3MB) — will be big in Supabase
-    if (file.size > 3 * 1024 * 1024) {
-      showPill('⚠', 'Large photo (' + (file.size/1024/1024).toFixed(1) + 'MB) — may slow saves', 'rgba(216,90,48,.5)', 4000);
-    }
+    const RAW_LIMIT = 1.2 * 1024 * 1024; // under 1.2MB → store raw
     const reader = new FileReader();
     reader.onload = e => {
-      // Store raw base64 — no canvas, no quality loss
-      DB.bgPhoto = e.target.result;
-      DB.bgZoom = 100; DB.bgPosX = 50; DB.bgPosY = 50;
-      applyBackground(); saveState(); updatePickerPhotoUI();
-      document.getElementById('tp-file').value = '';
+      const finish = dataUrl => {
+        DB.bgPhoto = dataUrl;
+        DB.bgZoom = 100; DB.bgPosX = 50; DB.bgPosY = 50;
+        applyBackground(); saveState(); updatePickerPhotoUI();
+        document.getElementById('tp-file').value = '';
+      };
+      if (file.size <= RAW_LIMIT) { finish(e.target.result); return; }
+      // Light compression: max 2200px, quality 0.92 — visually indistinguishable,
+      // but keeps the saved payload small enough for Supabase + localStorage
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 2200;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        canvas.width  = Math.round(img.width  * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        finish(canvas.toDataURL('image/jpeg', 0.92));
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   });
@@ -8265,6 +8964,7 @@ function makeTilesDraggable(containerId) {
         if (targetNext) parent.insertBefore(card, targetNext);
         else parent.appendChild(card);
       }
+      persistTileOrder();
     });
   });
 }
@@ -8318,6 +9018,7 @@ function wireDragAndDrop() {
             if (targetNext) parent.insertBefore(card, targetNext);
             else parent.appendChild(card);
           }
+          persistTileOrder();
         });
       }
     });
@@ -8506,15 +9207,30 @@ function buildPPROTable(key, headers, types, newRowFn) {
         }
         tr.appendChild(td);
       });
-      // Delete row button
+      // Row actions: move up/down + delete
       const delTd = document.createElement('td');
+      delTd.style.whiteSpace = 'nowrap';
+      const mkMove = (dir, sym) => {
+        const b = document.createElement('button');
+        b.style.cssText='background:none;border:none;cursor:pointer;color:transparent;font-size:10px;padding:0 2px';
+        b.textContent = sym; b.title = dir > 0 ? 'Move down' : 'Move up';
+        b.addEventListener('click', () => {
+          const ni = ri + dir;
+          if (ni < 0 || ni >= DB.ppro[key].length) return;
+          const [row2] = DB.ppro[key].splice(ri, 1);
+          DB.ppro[key].splice(ni, 0, row2);
+          renderTable(); saveState();
+        });
+        return b;
+      };
+      const upB = mkMove(-1,'▲'), dnB = mkMove(1,'▼');
       const delBtn = document.createElement('button');
-      delBtn.style.cssText='background:none;border:none;cursor:pointer;color:transparent;font-size:12px;padding:0';
+      delBtn.style.cssText='background:none;border:none;cursor:pointer;color:transparent;font-size:12px;padding:0 2px';
       delBtn.textContent='✕';
       delBtn.addEventListener('click', () => { DB.ppro[key].splice(ri,1); renderTable(); saveState(); });
-      tr.addEventListener('mouseenter', () => delBtn.style.color='var(--muted)');
-      tr.addEventListener('mouseleave', () => delBtn.style.color='transparent');
-      delTd.appendChild(delBtn); tr.appendChild(delTd);
+      tr.addEventListener('mouseenter', () => { delBtn.style.color='var(--muted)'; upB.style.color='var(--muted)'; dnB.style.color='var(--muted)'; });
+      tr.addEventListener('mouseleave', () => { delBtn.style.color='transparent'; upB.style.color='transparent'; dnB.style.color='transparent'; });
+      delTd.appendChild(upB); delTd.appendChild(dnB); delTd.appendChild(delBtn); tr.appendChild(delTd);
       tbody.appendChild(tr);
     });
     tbl.appendChild(tbody);
@@ -8614,6 +9330,655 @@ function exportPPROData() {
   URL.revokeObjectURL(url);
 }
 
+
+// ══════════════════════════════════════════════════════════
+// KOL INTERACTIONS + ENGAGEMENT ANALYTICS
+// ══════════════════════════════════════════════════════════
+if (!DB.interactions) DB.interactions = [];
+
+function switchKOLSubtab(tab) {
+  document.querySelectorAll('.kol-subtab').forEach(b => {
+    const active = b.dataset.tab === tab;
+    b.style.background = active ? 'rgba(255,255,255,.85)' : 'transparent';
+    b.style.color = active ? 'var(--navy)' : 'var(--muted)';
+    b.style.fontWeight = active ? '600' : '400';
+  });
+  document.getElementById('kol-tab-dir').style.display = tab === 'dir' ? '' : 'none';
+  document.getElementById('kol-tab-int').style.display = tab === 'int' ? '' : 'none';
+  if (tab === 'int') renderInteractions();
+}
+
+function switchAnalyticsSubtab(tab) {
+  document.querySelectorAll('.an-subtab').forEach(b => {
+    const active = b.dataset.tab === tab;
+    b.style.background = active ? 'rgba(255,255,255,.85)' : 'transparent';
+    b.style.color = active ? 'var(--navy)' : 'var(--muted)';
+    b.style.fontWeight = active ? '600' : '400';
+  });
+  document.getElementById('an-tab-content').style.display = tab === 'content' ? '' : 'none';
+  document.getElementById('an-tab-kol').style.display = tab === 'kol' ? '' : 'none';
+  if (tab === 'kol') renderEngagement();
+}
+
+// ── Gather ALL interactions: manual log + conference interviews + calendar
+function getAllInteractions() {
+  const all = [];
+  // Manual log
+  (DB.interactions || []).forEach(x => {
+    if (x.date && x.kol) all.push({date: x.date, kol: x.kol, type: x.type || 'Other', source: 'log'});
+  });
+  // Conference interviews (auto)
+  (DB.conferences || []).forEach(conf => {
+    (conf.interviews || []).forEach(iv => {
+      if (iv.kol && (iv.date || conf.start)) {
+        all.push({date: iv.date || conf.start, kol: iv.kol, type: 'Interview', source: 'conference'});
+      }
+    });
+  });
+  // Calendar events with author tagged (auto)
+  (DB.calEvents || []).forEach(ev => {
+    const authors = (ev.authors || (ev.author ? [ev.author] : []));
+    authors.forEach(a => {
+      if (a && a.trim()) {
+        const d = ev.y + '-' + String(ev.m).padStart(2,'0') + '-' + String(ev.d).padStart(2,'0');
+        all.push({date: d, kol: a.trim(), type: 'Content collaboration', source: 'calendar'});
+      }
+    });
+  });
+  return all;
+}
+
+function getFilteredInteractions() {
+  const kolF  = document.getElementById('int-filter-kol')?.value || '';
+  const fromF = document.getElementById('int-filter-from')?.value || '';
+  const toF   = document.getElementById('int-filter-to')?.value || '';
+  return [...(DB.interactions||[])].filter(x =>
+    (!kolF || x.kol === kolF) &&
+    (!fromF || (x.date||'') >= fromF) &&
+    (!toF || (x.date||'') <= toF)
+  ).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+}
+
+function renderInteractions() {
+  const tbody = document.getElementById('interactions-tbody'); if (!tbody) return;
+  // Populate KOL filter with names present in the log
+  const kolSel = document.getElementById('int-filter-kol');
+  if (kolSel) {
+    const cur = kolSel.value;
+    const names = [...new Set((DB.interactions||[]).map(x => x.kol).filter(Boolean))].sort();
+    kolSel.innerHTML = '<option value="">All KOLs</option>' + names.map(n => '<option' + (n===cur?' selected':'') + '>' + n + '</option>').join('');
+  }
+  const items = getFilteredInteractions();
+  tbody.innerHTML = '';
+  if (!items.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);font-style:italic;text-align:center;padding:14px">No interactions logged yet</td></tr>';
+    return;
+  }
+  items.forEach(item => {
+    const tr = document.createElement('tr');
+    const dateTd = document.createElement('td'); dateTd.textContent = item.date || '—';
+    const kolTd = document.createElement('td'); kolTd.style.fontWeight='500'; kolTd.textContent = item.kol || '—';
+    const typeTd = document.createElement('td');
+    const typeBadge = document.createElement('span');
+    typeBadge.style.cssText = 'font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(25,46,87,.08);color:var(--navy);font-weight:600';
+    typeBadge.textContent = item.type || 'Other';
+    typeTd.appendChild(typeBadge);
+    const notesTd = document.createElement('td'); notesTd.style.cssText='font-size:11px;color:var(--muted);max-width:300px';
+    notesTd.textContent = item.notes || '';
+    const editTd = document.createElement('td');
+    const editBtn = document.createElement('button');
+    editBtn.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px';
+    editBtn.textContent = '✎';
+    editBtn.addEventListener('click', () => openInteractionModal(item.id));
+    editTd.appendChild(editBtn);
+    tr.appendChild(dateTd); tr.appendChild(kolTd); tr.appendChild(typeTd);
+    tr.appendChild(notesTd); tr.appendChild(editTd);
+    tbody.appendChild(tr);
+  });
+}
+
+function openInteractionModal(id) {
+  const item = id ? (DB.interactions||[]).find(x=>x.id===id) : null;
+  document.getElementById('int-id').value = item?.id || '';
+  document.getElementById('int-date').value = item?.date || new Date().toISOString().slice(0,10);
+  document.getElementById('int-type').value = item?.type || 'Meeting';
+  document.getElementById('int-notes').value = item?.notes || '';
+  // Populate KOL dropdown
+  const sel = document.getElementById('int-kol');
+  sel.innerHTML = '';
+  const blank = document.createElement('option'); blank.value=''; blank.textContent='— Select KOL —';
+  sel.appendChild(blank);
+  [...(DB.kols||[])].filter(k=>k.name).sort((a,b)=>a.name.localeCompare(b.name)).forEach(k => {
+    const o = document.createElement('option'); o.value=k.name; o.textContent=k.name;
+    if (item && item.kol === k.name) o.selected = true;
+    sel.appendChild(o);
+  });
+  document.getElementById('int-del').style.display = item ? '' : 'none';
+  openModal('interaction-modal');
+}
+
+function saveInteraction() {
+  const id = document.getElementById('int-id').value || ('int-' + Date.now());
+  const kol = document.getElementById('int-kol').value;
+  if (!kol) { showPill('!', 'Select a KOL first', 'rgba(216,90,48,.5)', 2000); return; }
+  const obj = {
+    id, kol,
+    date: document.getElementById('int-date').value,
+    type: document.getElementById('int-type').value,
+    notes: document.getElementById('int-notes').value.trim(),
+  };
+  const idx = (DB.interactions||[]).findIndex(x=>x.id===id);
+  if (!DB.interactions) DB.interactions = [];
+  idx >= 0 ? DB.interactions[idx] = obj : DB.interactions.push(obj);
+  closeModal('interaction-modal');
+  renderInteractions(); saveState();
+}
+
+function deleteInteraction() {
+  const id = document.getElementById('int-id').value;
+  DB.interactions = (DB.interactions||[]).filter(x=>x.id!==id);
+  closeModal('interaction-modal');
+  renderInteractions(); saveState();
+}
+
+// ── Engagement analytics ──────────────────────────────────
+function renderEngagement() {
+  const all = getAllInteractions();
+  const now = new Date();
+  const d30 = new Date(now); d30.setDate(d30.getDate()-30);
+  const d90 = new Date(now); d90.setDate(d90.getDate()-90);
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+
+  const in30 = all.filter(x => new Date(x.date) >= d30);
+  const in90 = all.filter(x => new Date(x.date) >= d90);
+  const confYTD = all.filter(x => x.source==='conference' && new Date(x.date) >= yearStart);
+
+  // Last contact per KOL
+  const lastContact = {};
+  all.forEach(x => {
+    const k = x.kol.toLowerCase();
+    if (!lastContact[k] || x.date > lastContact[k]) lastContact[k] = x.date;
+  });
+
+  // Active = any contact in 90d
+  const activeKols = new Set(in90.map(x => x.kol.toLowerCase()));
+
+  // Stale = T1 or EAB KOLs with no contact in 90d
+  const staleList = (DB.kols||[]).filter(k => {
+    if (!k.name) return false;
+    const isT1 = (k.tier === 'T1');
+    const isEAB = (k.source||'').toLowerCase().includes('eab') || (k.category||'').toLowerCase().includes('eab');
+    if (!isT1 && !isEAB) return false;
+    const last = lastContact[k.name.toLowerCase()];
+    return !last || new Date(last) < d90;
+  });
+
+  // Stat strip
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('eng-stat-30d', in30.length);
+  set('eng-stat-active', activeKols.size);
+  set('eng-stat-stale', staleList.length);
+  set('eng-stat-conf', confYTD.length);
+
+  // Most engaged (90d) — count per KOL
+  const counts = {};
+  in90.forEach(x => {
+    const k = x.kol;
+    counts[k] = (counts[k]||0) + 1;
+  });
+  const topEngaged = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 12);
+  const mostCont = document.getElementById('eng-most-engaged');
+  if (mostCont) {
+    mostCont.innerHTML = '';
+    if (!topEngaged.length) {
+      mostCont.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:10px 0">No interactions in the last 90 days — log some on the KOLs page.</div>';
+    }
+    topEngaged.forEach(([name, count]) => {
+      const last = lastContact[name.toLowerCase()] || '';
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 4px;border-bottom:0.5px solid var(--border)';
+      const left = document.createElement('div');
+      left.innerHTML = '<div style="font-size:12px;font-weight:500;color:var(--text)">' + name + '</div>' +
+        '<div style="font-size:10px;color:var(--muted)">Last contact: ' + (last||'—') + '</div>';
+      const badge = document.createElement('div');
+      badge.style.cssText = 'font-size:13px;font-weight:700;color:var(--navy);background:rgba(25,46,87,.08);border-radius:10px;padding:2px 10px';
+      badge.textContent = count;
+      row.appendChild(left); row.appendChild(badge);
+      mostCont.appendChild(row);
+    });
+  }
+
+  // Stale list
+  const staleCont = document.getElementById('eng-stale-list');
+  if (staleCont) {
+    staleCont.innerHTML = '';
+    if (!staleList.length) {
+      staleCont.innerHTML = '<div style="color:#1D9E75;font-size:11px;padding:10px 0">✓ All T1/EAB relationships have recent contact</div>';
+    }
+    staleList.forEach(k => {
+      const last = lastContact[k.name.toLowerCase()];
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 4px;border-bottom:0.5px solid var(--border)';
+      const left = document.createElement('div');
+      left.innerHTML = '<div style="font-size:12px;font-weight:500;color:var(--text)">' + k.name + '</div>' +
+        '<div style="font-size:10px;color:var(--muted)">' + (k.inst||'') + '</div>';
+      const badge = document.createElement('div');
+      badge.style.cssText = 'font-size:10px;font-weight:600;color:#993c1d;background:rgba(216,90,48,.1);border-radius:10px;padding:3px 9px';
+      badge.textContent = last ? ('Last: ' + last) : 'Never contacted';
+      row.appendChild(left); row.appendChild(badge);
+      staleCont.appendChild(row);
+    });
+  }
+
+  // Type breakdown
+  const typeCounts = {};
+  in90.forEach(x => { typeCounts[x.type] = (typeCounts[x.type]||0) + 1; });
+  const typeCont = document.getElementById('eng-type-breakdown');
+  if (typeCont) {
+    typeCont.innerHTML = '';
+    if (!Object.keys(typeCounts).length) {
+      typeCont.innerHTML = '<div style="color:var(--muted);font-size:11px">No data yet</div>';
+    }
+    Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]).forEach(([type, count]) => {
+      const chip = document.createElement('div');
+      chip.style.cssText = 'display:flex;flex-direction:column;align-items:center;background:rgba(25,46,87,.05);border-radius:9px;padding:10px 18px';
+      chip.innerHTML = '<div style="font-size:20px;font-weight:700;color:var(--navy)">' + count + '</div>' +
+        '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + type + '</div>';
+      typeCont.appendChild(chip);
+    });
+  }
+}
+
+function wireEngagementTabs() {
+  const editBtn = document.getElementById('kol-edit-btn');
+  if (editBtn) editBtn.addEventListener('click', switchKOLModalToEdit);
+  // Interaction filters
+  ['int-filter-kol','int-filter-from','int-filter-to'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', renderInteractions);
+  });
+  const clearF = document.getElementById('int-filter-clear');
+  if (clearF) clearF.addEventListener('click', () => {
+    ['int-filter-kol','int-filter-from','int-filter-to'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    renderInteractions();
+  });
+  const bulkDel = document.getElementById('int-bulk-delete');
+  if (bulkDel) bulkDel.addEventListener('click', () => {
+    const shown = getFilteredInteractions();
+    if (!shown.length) return;
+    if (!confirm('Delete ' + shown.length + ' shown interaction(s)?')) return;
+    const removed = shown.slice();
+    const ids = new Set(shown.map(x => x.id));
+    DB.interactions = (DB.interactions||[]).filter(x => !ids.has(x.id));
+    renderInteractions(); saveState();
+    showUndoPill('Deleted ' + removed.length + ' interaction(s)', () => {
+      DB.interactions = DB.interactions.concat(removed);
+      renderInteractions();
+    });
+  });
+  document.querySelectorAll('.kol-subtab').forEach(b => {
+    b.addEventListener('click', () => switchKOLSubtab(b.dataset.tab));
+  });
+  document.querySelectorAll('.an-subtab').forEach(b => {
+    b.addEventListener('click', () => switchAnalyticsSubtab(b.dataset.tab));
+  });
+  const logBtn = document.getElementById('log-interaction-btn');
+  if (logBtn) logBtn.addEventListener('click', () => openInteractionModal(null));
+  const intClose = document.getElementById('int-modal-close');
+  if (intClose) intClose.addEventListener('click', () => closeModal('interaction-modal'));
+  const intCancel = document.getElementById('int-cancel');
+  if (intCancel) intCancel.addEventListener('click', () => closeModal('interaction-modal'));
+  const intSave = document.getElementById('int-save');
+  if (intSave) intSave.addEventListener('click', saveInteraction);
+  const intDel = document.getElementById('int-del');
+  if (intDel) intDel.addEventListener('click', deleteInteraction);
+  const intOverlay = document.getElementById('interaction-modal');
+  if (intOverlay) intOverlay.addEventListener('click', e => { if (e.target === intOverlay) closeModal('interaction-modal'); });
+}
+
+
+// ══════════════════════════════════════════════════════════
+// DYNAMIC TEAM MEMBERS — add/remove, generated tabs & panels
+// ══════════════════════════════════════════════════════════
+function ensureTeamOrder() {
+  if (!DB.teamMembers) DB.teamMembers = {};
+  if (!DB.teamOrder || !Array.isArray(DB.teamOrder)) {
+    DB.teamOrder = Object.keys(DB.teamMembers);
+    if (!DB.teamOrder.length) DB.teamOrder = [];
+  }
+  // Drop keys whose member data vanished
+  DB.teamOrder = DB.teamOrder.filter(k => DB.teamMembers[k]);
+}
+
+function renderTeamTabs() {
+  ensureTeamOrder();
+  const bar = document.getElementById('team-tab-bar');
+  const panelsCont = document.getElementById('team-member-panels');
+  if (!bar || !panelsCont) return;
+  bar.innerHTML = ''; panelsCont.innerHTML = '';
+
+  // Team home button
+  const homeBtn = document.createElement('button');
+  homeBtn.className = 'team-tab-btn active';
+  homeBtn.textContent = 'Team home';
+  homeBtn.addEventListener('click', () => switchTeamTab('home', homeBtn));
+  bar.appendChild(homeBtn);
+
+  // Member buttons + panels
+  DB.teamOrder.forEach(key => {
+    const m = DB.teamMembers[key] || {};
+    const btn = document.createElement('button');
+    btn.className = 'team-tab-btn';
+    btn.style.position = 'relative';
+    const lbl = document.createElement('span'); lbl.textContent = m.name || key;
+    btn.appendChild(lbl);
+    const x = document.createElement('span');
+    x.textContent = '×';
+    x.style.cssText = 'margin-left:6px;opacity:0;transition:opacity .15s;font-size:13px';
+    x.title = 'Remove from team';
+    btn.appendChild(x);
+    btn.addEventListener('mouseenter', () => x.style.opacity = '.5');
+    btn.addEventListener('mouseleave', () => x.style.opacity = '0');
+    x.addEventListener('click', e => { e.stopPropagation(); removeTeamMember(key); });
+    btn.addEventListener('click', () => switchTeamTab(key, btn));
+    bar.appendChild(btn);
+
+    panelsCont.appendChild(buildTeamMemberPanel(key));
+  });
+
+  // ＋ Add member
+  const addBtn = document.createElement('button');
+  addBtn.className = 'team-tab-btn';
+  addBtn.style.cssText = 'color:var(--muted);border:1.5px dashed var(--border-s);border-radius:7px;margin-left:4px';
+  addBtn.textContent = '＋ Add member';
+  addBtn.addEventListener('click', addTeamMember);
+  bar.appendChild(addBtn);
+
+  renderTeamHomeMembers();
+}
+
+function buildTeamMemberPanel(key) {
+  const m = DB.teamMembers[key] || {};
+  const panel = document.createElement('div');
+  panel.className = 'team-panel';
+  panel.id = 'team-panel-' + key;
+
+  // Hero
+  const hero = document.createElement('div');
+  hero.className = 'member-hero'; hero.id = key + '-hero';
+  const av = document.createElement('div'); av.className='member-av';
+  av.textContent = (m.name || key).charAt(0).toUpperCase();
+  const info = document.createElement('div'); info.style.flex='1';
+  info.innerHTML = '<div class="member-name" id="' + key + '-name"></div>' +
+    '<div class="member-role" id="' + key + '-role"></div>' +
+    '<div class="member-spec" id="' + key + '-spec"></div>' +
+    '<div class="member-meta" id="' + key + '-meta"></div>';
+  const editBtn = document.createElement('button');
+  editBtn.className='btn btn-sm';
+  editBtn.style.cssText='background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.7);flex-shrink:0';
+  editBtn.textContent='✎ Edit';
+  editBtn.addEventListener('click', () => openMemberModal(key));
+  hero.appendChild(av); hero.appendChild(info); hero.appendChild(editBtn);
+  panel.appendChild(hero);
+
+  // Goals + notes row
+  const row = document.createElement('div'); row.className='g2'; row.style.marginBottom='12px';
+  const goalCard = document.createElement('div'); goalCard.className='card card-accent';
+  const goalHdr = document.createElement('div'); goalHdr.className='card-hdr';
+  goalHdr.innerHTML = '<div class="card-title">Annual goals</div>';
+  const goalAdd = document.createElement('button');
+  goalAdd.className='btn btn-sm btn-primary'; goalAdd.textContent='+ Add goal';
+  goalAdd.addEventListener('click', () => openGoalModal(null, key));
+  goalHdr.appendChild(goalAdd);
+  const goalList = document.createElement('div'); goalList.id = key + '-goals-list';
+  goalCard.appendChild(goalHdr); goalCard.appendChild(goalList);
+
+  const notesCard = document.createElement('div'); notesCard.className='card card-accent';
+  notesCard.innerHTML = '<div class="card-hdr"><div class="card-title">Performance notes</div></div>';
+  const ta = document.createElement('textarea');
+  ta.className='perf-notes-area'; ta.id = key + '-notes';
+  ta.placeholder='Add performance notes, observations, feedback…';
+  ta.addEventListener('blur', () => savePerfNotes(key, ta.value));
+  notesCard.appendChild(ta);
+  row.appendChild(goalCard); row.appendChild(notesCard);
+  panel.appendChild(row);
+
+  // Metrics tile
+  const metCard = document.createElement('div'); metCard.className='card card-accent';
+  metCard.innerHTML = '<div class="card-hdr"><div class="card-title">Metrics scoring</div>' +
+    '<div style="font-size:11px;color:var(--muted)">Score 1–5 per metric · weighted total auto-calculated</div></div>';
+  const metTile = document.createElement('div'); metTile.id = key + '-metrics-tile';
+  metCard.appendChild(metTile);
+  panel.appendChild(metCard);
+
+  return panel;
+}
+
+function renderTeamHomeMembers() {
+  const cont = document.getElementById('team-home-members');
+  if (!cont) return;
+  cont.innerHTML = '';
+  if (!DB.teamOrder.length) {
+    cont.innerHTML = '<div style="color:var(--muted);font-size:11px;font-style:italic;grid-column:1/-1">No team members yet — use ＋ Add member above</div>';
+    return;
+  }
+  DB.teamOrder.forEach(key => {
+    const m = DB.teamMembers[key] || {};
+    const card = document.createElement('div');
+    card.style.cssText = 'background:rgba(255,255,255,.6);border:0.5px solid var(--border);border-radius:9px;padding:12px;display:flex;gap:12px;align-items:center;cursor:pointer';
+    const av = document.createElement('div');
+    av.style.cssText = 'width:42px;height:42px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--gold);flex-shrink:0';
+    av.textContent = (m.name || key).charAt(0).toUpperCase();
+    const info = document.createElement('div');
+    info.innerHTML = '<div style="font-size:13px;font-weight:600;color:var(--text)">' + (m.name||key) + '</div>' +
+      '<div style="font-size:11px;color:var(--muted)">' + (m.role||'') + '</div>' +
+      '<div style="font-size:11px;color:var(--gold-d);font-style:italic">' + (m.spec||'') + '</div>';
+    card.appendChild(av); card.appendChild(info);
+    card.addEventListener('click', () => {
+      const btns = document.querySelectorAll('#team-tab-bar .team-tab-btn');
+      const idx = DB.teamOrder.indexOf(key) + 1; // +1 for Team home btn
+      switchTeamTab(key, btns[idx]);
+    });
+    cont.appendChild(card);
+  });
+}
+
+function addTeamMember() {
+  const name = prompt('New team member name:');
+  if (!name || !name.trim()) return;
+  const key = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || ('member-' + Date.now());
+  if (DB.teamMembers[key] && DB.teamOrder.includes(key)) { alert('A member with that name already exists.'); return; }
+  if (!DB.teamMembers[key]) DB.teamMembers[key] = { name: name.trim(), role: '', spec: '', notes: '' };
+  if (!DB.teamOrder.includes(key)) DB.teamOrder.push(key);
+  if (!DB.goals[key]) DB.goals[key] = [];
+  renderTeamTabs(); renderTeamPage(); saveState();
+  showPill('✓', name.trim() + ' added to team', 'rgba(29,158,117,.5)', 2500);
+}
+
+function removeTeamMember(key) {
+  const m = DB.teamMembers[key] || {};
+  if (!confirm('Remove ' + (m.name || key) + ' from the team? Their goals and notes are kept and restored if you re-add the same name.')) return;
+  DB.teamOrder = DB.teamOrder.filter(k => k !== key);
+  renderTeamTabs(); renderTeamPage(); saveState();
+  switchTeamTab('home', document.querySelector('#team-tab-bar .team-tab-btn'));
+}
+
+
+
+
+// ══ GLOBAL SEARCH ══════════════════════════════════════════
+function buildSearchIndex() {
+  const ix = [];
+  (DB.kols||[]).forEach((k,i) => { if (k.name) ix.push({
+    label: k.name, sub: [k.inst, k.primarySpec||k.spec].filter(Boolean).join(' · '),
+    kind: 'KOL', text: [k.name,k.inst,k.title,k.primarySpec,k.subSpec,k.email].join(' ').toLowerCase(),
+    go: () => { showPage('kols', navBtnFor('kols')); setTimeout(() => openKOLModal(i), 200); } }); });
+  (DB.projectTrackers||[]).forEach(p => {
+    let cellText = '';
+    (p.tabs||[]).forEach(t => { (t.rows||[]).forEach(r => cellText += ' ' + (r.cells||[]).join(' ')); cellText += ' ' + (t.title||''); });
+    ix.push({ label: p.title, sub: 'Project', kind: 'Project',
+      text: [p.title,p.details,cellText].join(' ').toLowerCase(),
+      go: () => showPage('projects', navBtnFor('projects')) });
+  });
+  (DB.calEvents||[]).forEach(e => { if (e.label) ix.push({
+    label: e.label, sub: (e.y? e.y+'-'+String(e.m).padStart(2,'0')+'-'+String(e.d).padStart(2,'0') : '') + (e.author? ' · '+e.author : ''),
+    kind: 'Content', text: [e.label,e.author,e.type].join(' ').toLowerCase(),
+    go: () => showPage('calendar', navBtnFor('calendar')) }); });
+  (DB.pitches||[]).forEach(p => { if (p.title) ix.push({
+    label: p.title, sub: 'Pitch · ' + (p.stage||''), kind: 'Pitch',
+    text: [p.title,p.notes,p.outlet].join(' ').toLowerCase(),
+    go: () => showPage('pitch', navBtnFor('pitch')) }); });
+  (DB.conferences||[]).forEach(c => { if (c.name) ix.push({
+    label: c.name, sub: 'Conference', kind: 'Conference',
+    text: [c.name,(c.interviews||[]).map(iv=>iv.kol+' '+(iv.topic||'')).join(' ')].join(' ').toLowerCase(),
+    go: () => showPage('conferences', navBtnFor('conferences')) }); });
+  (DB.ppfoTrackers||[]).forEach(t => { (t.rows||[]).forEach(r => {
+    const title = r.cells?.[1]; if (title) ix.push({
+      label: title, sub: 'PPFO · ' + (t.title||''), kind: 'PPFO',
+      text: (r.cells||[]).join(' ').toLowerCase(),
+      go: () => showPage('ppfo', navBtnFor('ppfo')) }); }); });
+  (DB.todos||[]).forEach(t => { if (t.text) ix.push({
+    label: t.text, sub: 'To-do', kind: 'To-do', text: t.text.toLowerCase(),
+    go: () => showPage('home', navBtnFor('home')) }); });
+  (DB.reminders||[]).forEach(r => { if (r.text) ix.push({
+    label: r.text, sub: 'Reminder · ' + (r.date||''), kind: 'Reminder', text: r.text.toLowerCase(),
+    go: () => showPage('home', navBtnFor('home')) }); });
+  (DB.hotTopics||[]).forEach(t => { const lbl = t.title || t.text || t; if (typeof lbl === 'string' && lbl) ix.push({
+    label: lbl, sub: 'Hot topic', kind: 'Trend', text: String(lbl).toLowerCase(),
+    go: () => showPage('trending', navBtnFor('trending')) }); });
+  return ix;
+}
+
+function navBtnFor(name) {
+  return document.querySelector('.nav-i[onclick*="\'" + name + "\'"]') || null;
+}
+
+function openSearch() {
+  const ov = document.getElementById('search-overlay');
+  ov.style.display = '';
+  const inp = document.getElementById('search-inp');
+  inp.value = ''; document.getElementById('search-results').innerHTML =
+    '<div style="padding:14px 18px;font-size:11px;color:var(--muted)">Type to search everything…</div>';
+  setTimeout(() => inp.focus(), 50);
+}
+function closeSearch() { document.getElementById('search-overlay').style.display = 'none'; }
+
+function runSearch(q) {
+  const res = document.getElementById('search-results');
+  q = q.trim().toLowerCase();
+  if (q.length < 2) { res.innerHTML = '<div style="padding:14px 18px;font-size:11px;color:var(--muted)">Type at least 2 characters…</div>'; return; }
+  const KIND_COLORS = {KOL:'#534AB7',Project:'#1D9E75',Content:'#192e57',Pitch:'#BA7517',Conference:'#D85A30',PPFO:'#dfad0e','To-do':'#5b8fa8',Reminder:'#e07b8a',Trend:'#7c3aed'};
+  const hits = buildSearchIndex().filter(x => x.text.includes(q)).slice(0, 30);
+  res.innerHTML = '';
+  if (!hits.length) { res.innerHTML = '<div style="padding:14px 18px;font-size:11px;color:var(--muted)">No matches</div>'; return; }
+  hits.forEach(h => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;border-bottom:0.5px solid var(--border)';
+    row.addEventListener('mouseenter', () => row.style.background = 'rgba(25,46,87,.05)');
+    row.addEventListener('mouseleave', () => row.style.background = '');
+    const c = KIND_COLORS[h.kind] || '#888';
+    const badge = document.createElement('span');
+    badge.style.cssText = 'font-size:9px;font-weight:700;padding:2px 7px;border-radius:9px;background:' + c + '18;color:' + c + ';flex-shrink:0;min-width:52px;text-align:center';
+    badge.textContent = h.kind;
+    const info = document.createElement('div'); info.style.cssText = 'flex:1;min-width:0';
+    info.innerHTML = '<div style="font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + h.label + '</div>' +
+      (h.sub ? '<div style="font-size:10px;color:var(--muted)">' + h.sub + '</div>' : '');
+    row.appendChild(badge); row.appendChild(info);
+    row.addEventListener('click', () => { closeSearch(); h.go(); });
+    res.appendChild(row);
+  });
+}
+
+function wireGlobalSearch() {
+  const btn = document.getElementById('global-search-btn');
+  if (btn) btn.addEventListener('click', openSearch);
+  const ov = document.getElementById('search-overlay');
+  if (ov) ov.addEventListener('click', e => { if (e.target === ov) closeSearch(); });
+  const inp = document.getElementById('search-inp');
+  let deb;
+  if (inp) inp.addEventListener('input', () => { clearTimeout(deb); deb = setTimeout(() => runSearch(inp.value), 180); });
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+    if (e.key === 'Escape') closeSearch();
+  });
+}
+
+// ══ TILE ORDER PERSISTENCE ═════════════════════════════════
+function getTileId(card) {
+  if (card.dataset.tileId) return card.dataset.tileId;
+  const idEl = card.querySelector('[id]');
+  let tid;
+  if (idEl) tid = 'tid-' + idEl.id;
+  else {
+    const t = card.querySelector('.card-title');
+    tid = 'tid-' + (t ? t.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,40) : 'card');
+  }
+  card.dataset.tileId = tid;
+  return tid;
+}
+
+function currentPageName() {
+  const pg = document.querySelector('.pg.active');
+  return pg ? pg.id.replace('page-','') : null;
+}
+
+function persistTileOrder() {
+  const page = currentPageName(); if (!page) return;
+  const pg = document.querySelector('.pg.active');
+  if (!DB.tileOrder) DB.tileOrder = {};
+  // Group cards by parent container, in DOM order
+  const parents = [];
+  pg.querySelectorAll('.card').forEach(card => {
+    const p = card.parentNode;
+    if (!parents.includes(p)) parents.push(p);
+  });
+  DB.tileOrder[page] = parents.map(p =>
+    Array.from(p.children).filter(c => c.classList && c.classList.contains('card')).map(getTileId)
+  );
+  saveState();
+}
+
+function applyTileOrder(page) {
+  const saved = DB.tileOrder && DB.tileOrder[page];
+  if (!saved) return;
+  const pg = document.getElementById('page-' + page); if (!pg) return;
+  const parents = [];
+  pg.querySelectorAll('.card').forEach(card => {
+    getTileId(card);
+    const p = card.parentNode;
+    if (!parents.includes(p)) parents.push(p);
+  });
+  parents.forEach((p, pi) => {
+    const order = saved[pi]; if (!order) return;
+    order.forEach(tid => {
+      const card = Array.from(p.children).find(c => c.dataset && c.dataset.tileId === tid);
+      if (card) p.appendChild(card); // append in saved sequence
+    });
+  });
+}
+
+// ══ UNDO TOAST ═════════════════════════════════════════════
+let _undoTimer = null;
+function showUndoPill(label, undoFn) {
+  let toast = document.getElementById('undo-toast');
+  if (toast) toast.remove();
+  if (_undoTimer) clearTimeout(_undoTimer);
+  toast = document.createElement('div');
+  toast.id = 'undo-toast';
+  toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:900;background:rgba(20,22,34,.92);backdrop-filter:blur(10px);color:#fff;border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:12px;box-shadow:0 6px 24px rgba(0,0,0,.3)';
+  const txt = document.createElement('span'); txt.textContent = label;
+  const btn = document.createElement('button');
+  btn.textContent = 'Undo';
+  btn.style.cssText = 'background:var(--gold);border:none;border-radius:6px;color:#1a1a1a;font-weight:700;font-size:11px;padding:5px 12px;cursor:pointer';
+  btn.addEventListener('click', () => {
+    clearTimeout(_undoTimer); toast.remove();
+    undoFn(); saveState();
+  });
+  toast.appendChild(txt); toast.appendChild(btn);
+  document.body.appendChild(toast);
+  _undoTimer = setTimeout(() => toast.remove(), 6000);
+}
+
 // ══════════════════════════════════════════
 // STARTUP
 // ══════════════════════════════════════════
@@ -8683,7 +10048,9 @@ async function startup() {
   setupThemePicker();
   renderReminders();
   startReminderChecker();
-  setTimeout(wireDragAndDrop, 300);
+  wireEngagementTabs();
+  wireGlobalSearch();
+  setTimeout(() => { applyTileOrder('home'); wireDragAndDrop(); }, 300);
   // Live clock in topbar
   function updateTopClock() {
     const now = new Date();
@@ -8721,11 +10088,19 @@ startup();
 <script>
 // ── DEBUG HELPERS ─────────────────────────────────────────
 function dbgLog(msg, success) {
+  // flush any queued messages from before this block loaded
+  if (window._dbgQueue && window._dbgQueue.length && !window._dbgFlushing) {
+    window._dbgFlushing = true;
+    const q = window._dbgQueue.splice(0);
+    window._dbgFlushing = false;
+    q.forEach(([m, s]) => dbgLog(m, s));
+  }
   const log = document.getElementById('debug-log'); if (!log) return;
   const ts = new Date().toLocaleTimeString();
   const color = success ? '#5dd3a8' : msg.startsWith('✓') ? '#5dd3a8' : '#f0856d';
   log.innerHTML = `<div style="color:${color}">[${ts}] ${msg}</div>` + log.innerHTML;
 }
+window.dbgLog = dbgLog;
 
 async function testSupabase() {
   const log = document.getElementById('debug-log'); 
@@ -8844,6 +10219,15 @@ async function checkCurrentSave() {
         <input type="range" id="tp-pos-y" min="0" max="100" value="50" style="flex:1;accent-color:var(--gold)">
       </div>
     </div>
+  </div>
+</div>
+
+
+<!-- ══ GLOBAL SEARCH ══ -->
+<div id="search-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.35);backdrop-filter:blur(3px)">
+  <div style="max-width:560px;margin:80px auto 0;background:rgba(255,255,255,.97);border-radius:14px;box-shadow:0 12px 48px rgba(0,0,0,.3);overflow:hidden" id="search-box">
+    <input id="search-inp" type="text" placeholder="Search KOLs, projects, content, pitches, conferences…" style="width:100%;border:none;outline:none;padding:16px 18px;font-size:14px;background:transparent;color:var(--text);font-family:inherit">
+    <div id="search-results" style="max-height:420px;overflow-y:auto;border-top:0.5px solid var(--border)"></div>
   </div>
 </div>
 
