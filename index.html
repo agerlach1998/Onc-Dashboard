@@ -912,7 +912,7 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
     <div id="save-pill" class="save-pill"><span id="save-icon">⟳</span><span id="save-txt">Saving…</span></div>
     <div id="top-datetime" style="font-size:11px;color:rgba(255,255,255,.7);text-align:right;line-height:1.4;padding-left:6px;border-left:0.5px solid rgba(255,255,255,.15)">
       <div id="top-date" style="font-weight:600"></div>
-      <div style="display:flex;gap:6px;justify-content:flex-end;align-items:baseline"><div id="top-time" style="font-size:10px;opacity:.8"></div><div title="Dashboard build version" style="font-size:9px;opacity:.45;font-weight:600">v81</div></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end;align-items:baseline"><div id="top-time" style="font-size:10px;opacity:.8"></div><div title="Dashboard build version" style="font-size:9px;opacity:.45;font-weight:600">v83</div></div>
     </div>
   </div>
 </div>
@@ -1025,7 +1025,10 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
   <div class="card card-accent" style="height:180px;display:flex;flex-direction:column">
     <div class="card-hdr" style="flex-shrink:0;margin-bottom:6px">
       <div class="card-title"><i class="ti ti-bell"></i> Reminders</div>
-      <button class="btn btn-sm btn-primary" onclick="openReminderModal(null)"><i class="ti ti-plus"></i> Add</button>
+      <div style="display:flex;gap:5px">
+        <button class="btn btn-sm" onclick="clearPastReminders()" style="font-size:10px">Clear past</button>
+        <button class="btn btn-sm btn-primary" onclick="openReminderModal(null)"><i class="ti ti-plus"></i> Add</button>
+      </div>
     </div>
     <div id="reminders-list" style="flex:1;overflow-y:auto;min-height:0"></div>
   </div>
@@ -1243,7 +1246,6 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
     <div class="card-hdr">
       <div class="card-title"><i class="ti ti-flask"></i> Upcoming PDUFA decisions</div>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-sm" id="pdufa-refresh-btn" onclick="refreshPDUFA(event)"><i class="ti ti-refresh"></i> Refresh</button>
         <button class="btn btn-sm btn-primary" onclick="openPDUFAModal(null)"><i class="ti ti-plus"></i> Add</button>
       </div>
     </div>
@@ -2221,11 +2223,11 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
 
 <!-- Calendar event modal -->
-<div id="cal-evt-modal" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('cal-evt-modal')">
+<div id="cal-evt-modal" class="overlay" style="display:none" onclick="if(event.target===this)closeCalEvtModal()">
 <div class="modal modal-md">
   <div class="modal-hdr">
     <h3><i class="ti ti-calendar-event"></i><span id="cal-evt-modal-title">Add event</span></h3>
-    <button class="modal-close" onclick="closeModal('cal-evt-modal')">✕</button>
+    <button class="modal-close" onclick="closeCalEvtModal()">✕</button>
   </div>
   <div class="field"><label>Title</label><input id="cevt-label" type="text" placeholder="e.g. ASCO late-breaker recap"></div>
   <div class="g2f">
@@ -2276,7 +2278,7 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
   <input type="hidden" id="cevt-id">
   <div class="modal-foot">
     <button class="btn btn-danger" id="cevt-del" style="display:none;margin-right:auto" onclick="deleteCalEvt()"><i class="ti ti-trash"></i> Delete</button>
-    <button class="btn" onclick="closeModal('cal-evt-modal')">Cancel</button>
+    <button class="btn" onclick="closeCalEvtModal()">Cancel</button>
     <button class="btn btn-primary" onclick="saveCalEvt()">Save</button>
   </div>
 </div></div>
@@ -2361,6 +2363,9 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 </div></div>
 
 <script>
+
+// Run a renderer without letting its failure break siblings
+function safeRun(fn) { try { fn(); } catch(e) { window.dbgLog && dbgLog('safeRun ' + (fn.name||'fn') + ': ' + e.message, false); } }
 // Safe dbgLog stub — real implementation loads later in the debug panel block.
 // Queues messages so nothing is lost and, critically, nothing throws.
 window._dbgQueue = [];
@@ -2482,7 +2487,14 @@ document.getElementById('top-date').textContent = new Date().toLocaleDateString(
 // ══════════════════════════════════════════
 function openModal(id) { document.getElementById(id).style.display='flex'; }
 function closeModal(id){ document.getElementById(id).style.display='none'; }
-document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.overlay').forEach(m=>m.style.display='none'); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const open = Array.from(document.querySelectorAll('.overlay')).filter(m => m.style.display !== 'none' && m.style.display !== '');
+  if (!open.length) return;
+  const top = open[open.length - 1];
+  if (top.id === 'cal-evt-modal') { closeCalEvtModal(); }
+  else top.style.display = 'none';
+});
 
 // ══════════════════════════════════════════
 // COUNTDOWNS
@@ -2502,6 +2514,7 @@ function getRCCounts() {
 }
 
 function renderPacing() {
+  if (!document.getElementById('pacing-cont') && !document.getElementById('rc-pacing-list')) { /* fall through, guarded below */ }
   const cont = document.getElementById('pacing-cont'); if(!cont) return;
   const counts = getRCCounts();
   const mo = new Date().getMonth()+1;
@@ -2519,7 +2532,7 @@ function renderPacing() {
       <div class="pac-num ${cls}">${cnt} / ${r.target>0?'~'+r.target+' proj':'TBD'} · ${note}</div>
     </div>`;
   });
-  document.getElementById('stat-rc').textContent = DB.rcData.length;
+  (document.getElementById('stat-rc')||{}).textContent = DB.rcData.length;
 }
 
 // ══════════════════════════════════════════
@@ -2595,6 +2608,7 @@ function getCalCounts() {
 }
 
 function renderCharts() {
+  if (typeof Chart === 'undefined') return; // CDN not loaded — skip charts, keep rest of page alive
   const {types,disease}=getCalCounts();
   Chart.defaults.font.size=11; Chart.defaults.color='#5a6e94';
 
@@ -2648,7 +2662,7 @@ function renderPDUFA() {
     <td style="color:var(--muted);font-size:11px">${p.notes}</td>
     <td><button class="btn btn-sm" onclick="openPDUFAModal(${p.id})" style="padding:2px 8px"><i class="ti ti-edit"></i></button></td>
   </tr>`).join('');
-  document.getElementById('stat-pdufa').textContent=DB.pdufa.length;
+  const sp=document.getElementById('stat-pdufa'); if(sp) sp.textContent=DB.pdufa.length;
 }
 
 function openPDUFAModal(id) {
@@ -2688,43 +2702,7 @@ function deletePDUFA() {
   closeModal('pdufa-modal'); renderPDUFA(); saveState();
 }
 
-async function refreshPDUFA(event) {
-  const btn=document.getElementById('pdufa-refresh-btn');
-  btn.disabled=true; btn.innerHTML='<i class="ti ti-loader"></i> Fetching…';
-  try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',max_tokens:1000,
-        tools:[{type:'web_search_20250305',name:'web_search'}],
-        messages:[{role:'user',content:'List the 5 most important upcoming oncology PDUFA dates in 2026 based on the latest news. For each: date (month year), drug name, company, indication, and action type (BLA/sNDA/sBLA). Return ONLY a JSON array: [{"date":"...","drug":"...","co":"...","ind":"...","type":"..."}]'}]
-      })
-    });
-    const data=await res.json();
-    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-    const match=text.match(/\[[\s\S]*?\]/);
-    if(match){
-      const items=JSON.parse(match[0]);
-      let added=0;
-      items.forEach(item=>{
-        if(!DB.pdufa.find(p=>p.drug===item.drug)){
-          DB.pdufa.push({id:Date.now()+Math.random(),date:item.date||'',drug:item.drug||'',co:item.co||'',ind:item.ind||'',type:item.type||'',notes:'Auto-fetched'});
-          added++;
-        }
-      });
-      renderPDUFA(); saveState();
-      btn.innerHTML=`<i class="ti ti-check"></i> +${added} added`;
-    } else {
-      btn.innerHTML='<i class="ti ti-refresh"></i> Refresh';
-    }
-  } catch(e) {
-    console.warn('PDUFA refresh failed:',e);
-    btn.innerHTML='<i class="ti ti-refresh"></i> Refresh';
-  }
-  btn.disabled=false;
-  setTimeout(()=>btn.innerHTML='<i class="ti ti-refresh"></i> Refresh',4000);
-}
+
 
 // ══════════════════════════════════════════
 // Old home goals system removed
@@ -2802,6 +2780,22 @@ function showPill(icon,text,color,hideMs) {
 }
 
 let saveTimer;
+
+// Background photo persists under its own key — only uploaded when it changes
+let _bgDirty = false;
+async function saveBgPhoto() {
+  if (!_bgDirty) return;
+  _bgDirty = false;
+  try {
+    await fetch(SUPA_URL + '/rest/v1/dashboard_state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ statekey: LS_KEY + '_bg', data: JSON.stringify({ bgPhoto: DB.bgPhoto || '' }) })
+    });
+  } catch(e) { _bgDirty = true; window.dbgLog && dbgLog('BG photo save failed: ' + e.message, false); }
+  try { localStorage.setItem(LS_KEY + '_bg', DB.bgPhoto || ''); } catch(e) { /* photo may exceed quota */ }
+}
 function saveState() {
   clearTimeout(saveTimer);
   saveTimer=setTimeout(_doSave,800);
@@ -2819,7 +2813,9 @@ async function _doSave() {
   _isSaving = true;
   showPill('⟳','Saving…','rgba(223,173,14,.5)');
 
-  const dataStr  = JSON.stringify(DB);
+  // Serialize without the photo (saved under its own key) and without _internal fields
+  const { bgPhoto, ...rest } = DB;
+  const dataStr = JSON.stringify(rest, (k, v) => k.startsWith('_') ? undefined : v);
   const byteSize = new Blob([dataStr]).size;
   const kb       = Math.round(byteSize / 1024);
   console.log('[PT Dashboard] Saving', kb + 'KB…');
@@ -2865,6 +2861,18 @@ async function _doSave() {
 }
 
 async function loadState() {
+  // Load background photo from its dedicated key (merged after main state below)
+  window._loadBgPhoto = async function() {
+    try {
+      const r = await fetch(SUPA_URL + '/rest/v1/dashboard_state?statekey=eq.' + encodeURIComponent(LS_KEY + '_bg') + '&select=data', {
+        headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY } });
+      if (r.ok) {
+        const rows = await r.json();
+        if (rows.length) { const d = JSON.parse(rows[0].data); if (d.bgPhoto) { DB.bgPhoto = d.bgPhoto; return; } }
+      }
+    } catch(e) {}
+    try { const ls = localStorage.getItem(LS_KEY + '_bg'); if (ls) DB.bgPhoto = ls; } catch(e) {}
+  };
   try {
     const res = await fetch(
       `${SUPA_URL}/rest/v1/${SUPA_TABLE}?statekey=eq.main&select=data`,
@@ -2946,13 +2954,16 @@ function showPage(name, el) {
   if (pg) { pg.classList.add('active'); pg.style.display = 'block'; }
   if (el) el.classList.add('active');
   // Lazy-render pages on first visit
-  if (name === 'calendar' && !calRendered) { renderCal(); calRendered = true; }
-  if (name === 'trending' && !trendRendered) { renderTrending(); renderTopicChart(); renderPDUFA(); renderAdcom(); renderRegulatory(); renderJournals(); trendRendered = true; }
-  if (name === 'analytics' && !analyticsRendered) {
-    renderCharts(); updateMonthStat(); renderPPFOProgress(); updateStatStrip();
-    renderWeeklyDigest(); renderGapAlerts(); renderPacing(); renderTopContent(); renderGap();
-    analyticsRendered = true;
-  }
+  try {
+    if (name === 'calendar') { renderCal(); }
+    if (name === 'trending') { renderTrending(); renderTopicChart(); renderPDUFA(); renderAdcom(); renderRegulatory(); renderJournals(); }
+    if (name === 'analytics') {
+      [renderCharts, updateMonthStat, renderPPFOProgress, updateStatStrip,
+       renderWeeklyDigest, renderGapAlerts, renderPacing, renderTopContent, renderGap].forEach(safeRun);
+      const engTab = document.getElementById('an-tab-kol');
+      if (engTab && engTab.style.display !== 'none') renderEngagement();
+    }
+  } catch(e) { dbgLog('Page render error (' + name + '): ' + e.message, false); }
   if (name === 'pitches') { renderSWOT(); }
   setTimeout(() => { applyTileOrder(name); wireDragAndDrop(); }, 150);
   if (name === 'kols') {
@@ -3241,6 +3252,16 @@ function calNav(dir) {
 // ══════════════════════════════════════════════════════════
 // CALENDAR EVENT MODAL
 // ══════════════════════════════════════════════════════════
+
+// Editor↔day-popup flow: remember origin so every exit path returns correctly
+let _evtFromDay = false;
+function closeCalEvtModal() {
+  closeModal('cal-evt-modal');
+  if (_evtFromDay && _dayPopupY) {
+    setTimeout(() => openDayPopup(_dayPopupY, _dayPopupM, _dayPopupD), 60);
+  }
+  _evtFromDay = false;
+}
 function openCalEvtModal(dateHint, evtId) {
   const evt = evtId ? (DB.calEvents || []).find(e => e.id === evtId) : null;
   document.getElementById('cal-evt-modal-title').textContent = evt ? 'Edit event' : 'Add event';
@@ -3294,31 +3315,33 @@ function saveCalEvt() {
   }
   closeModal('cal-evt-modal');
   renderCal();
-  renderCharts(); renderGap(); renderPacing();
-  updateMonthStat(); renderUpcomingArticles(); updateStatStrip(); renderWeeklyDigest(); renderGapAlerts();
+  [renderCharts, renderGap, renderPacing, updateMonthStat, renderUpcomingArticles,
+   updateStatStrip, renderWeeklyDigest, renderGapAlerts].forEach(safeRun);
   saveState();
   // Auto-update lastTouchpoint for KOLs tagged as author
   if (obj.author) {
     const _td = new Date(); const _ds = _td.toLocaleString('default',{month:'short'})+' '+_td.getFullYear();
     obj.author.split(',').map(s=>s.trim()).filter(Boolean).forEach(n => {
       const kol=(DB.kols||[]).find(k=>k.name.toLowerCase()===n.toLowerCase());
-      if(kol) kol.lastTouchpoint=_ds;
+      if(kol) { kol.last = _ds; kol.lastTouchpoint = _ds; }
     });
   }
-  if (_dayPopupY && obj.y === _dayPopupY && obj.m === _dayPopupM && obj.d === _dayPopupD) {
+  if (_evtFromDay && _dayPopupY) {
     setTimeout(() => openDayPopup(_dayPopupY, _dayPopupM, _dayPopupD), 80);
   }
+  _evtFromDay = false;
   if (document.getElementById('page-kols')?.style.display !== 'none') renderKOLs();
 }
 
 function deleteCalEvt() {
   const evtId = Number(document.getElementById('cevt-id').value);
   DB.calEvents = (DB.calEvents || []).filter(e => String(e.id) !== String(evtId));
-  closeModal('cal-evt-modal');
   renderCal();
-  renderCharts(); renderGap(); renderPacing();
-  updateMonthStat();
+  safeRun(renderCharts); safeRun(renderGap); safeRun(renderPacing);
+  safeRun(updateMonthStat); safeRun(renderUpcomingArticles); safeRun(updateStatStrip);
+  safeRun(renderWeeklyDigest); safeRun(renderGapAlerts);
   saveState();
+  closeCalEvtModal();
 }
 
 function exportCalCSV() {
@@ -3397,6 +3420,7 @@ function renderTrending() {
 
 let topicChartRef;
 function renderTopicChart() {
+  if (typeof Chart === 'undefined') return; // CDN not loaded — skip charts, keep rest of page alive
   if (topicChartRef) topicChartRef.destroy();
   const tc = document.getElementById('topicChart'); if (!tc) return;
   // Use calendar data for "your content" bars
@@ -3480,7 +3504,36 @@ const TIER_T1 = 7, TIER_T2 = 3; // project count thresholds
 
 
 // ── Live KOL project count from calendar + PPFO tracker data ─────────────
+
+function getManualCount(kolName) {
+  const k = (DB.kols||[]).find(x => (x.name||'').toLowerCase() === (kolName||'').toLowerCase());
+  return (k && k.count) ? Number(k.count) || 0 : 0;
+}
+
+// One-pass counts for all KOLs (renderKOLs perf: O(n) instead of O(n²))
+function getKOLCountsMap() {
+  const map = {};
+  const bump = n => { if (n) { const k = String(n).trim().toLowerCase(); if (k) map[k] = (map[k]||0) + 1; } };
+  (DB.calEvents||[]).forEach(e => (e.author||'').split(',').forEach(bump));
+  (DB.ppfoTrackers||[]).forEach(t => (t.rows||[]).forEach(r => bump(r.cells?.[2])));
+  (DB.projectTrackers||[]).forEach(p => {
+    (p.rows||[]).forEach(r => bump(r.cells?.[2]));
+    (p.parties||[]).forEach(pt => bump(pt.name));
+    (p.tabs||[]).forEach(tab => {
+      if (!tab.colDefs) return;
+      tab.colDefs.forEach((col, ci) => {
+        if (col.type !== 'kol') return;
+        (tab.rows||[]).forEach(r => bump(r.cells?.[ci]));
+      });
+    });
+  });
+  return map;
+}
 function getKOLCount(kolName) {
+  if (window._kolCountsCache && kolName) {
+    const cached = window._kolCountsCache[kolName.trim().toLowerCase()];
+    if (cached !== undefined) return cached + getManualCount(kolName);
+  }
   if (!kolName) return 0;
   const name = kolName.trim().toLowerCase();
 
@@ -3600,13 +3653,15 @@ function getKOLAssociations(kolName) {
     });
   });
 
-  // Content: conference interviews
+  // Content: conference interviews — match KOL name inside the interview label
   (DB.conferences || []).forEach(conf => {
     (conf.interviews || []).forEach(iv => {
-      if ((iv.kol||'').trim().toLowerCase() === name) {
-        const key = 'iv-' + (iv.topic || conf.name);
+      const who = ((typeof iv === 'string' ? iv : iv.name) || '').trim();
+      if (!who) return;
+      if (who.toLowerCase().includes(name)) {
+        const key = 'iv-' + conf.name + '-' + who;
         if (!seenContent.has(key)) {
-          content.push({ title: iv.topic || 'Interview', kind: conf.name + ' interview', date: iv.date || '' });
+          content.push({ title: who, kind: (conf.name || 'Conference') + ' interview', date: conf.start || '' });
           seenContent.add(key);
         }
       }
@@ -3754,6 +3809,8 @@ function buildKOLCard(k, idx, tierMeta) {
 }
 
 function renderKOLs(filter) {
+  window._kolCountsCache = getKOLCountsMap();
+  setTimeout(() => { window._kolCountsCache = null; }, 0);
   if (filter !== undefined) currentKOLFilter = filter;
   const cont = document.getElementById('kol-grid');
   if (!cont) return;
@@ -5414,12 +5471,16 @@ function buildProjectPanel(p) {
       btn.addEventListener('mouseleave', () => x.style.opacity = '0');
       x.addEventListener('click', e => {
         e.stopPropagation();
-        if (!confirm('Delete tab "' + tab.title + '" and all its data?')) return;
         const idx = p.tabs.findIndex(t => t.id === tab.id);
-        if (idx > -1) p.tabs.splice(idx, 1);
-        if (p.activeTab === tab.id) p._activeTab = 'details';
-        rebuildPanel();
-        saveState();
+        if (idx < 0) return;
+        const removedTab = p.tabs.splice(idx, 1)[0];
+        if (p._activeTab === tab.id) p._activeTab = 'details';
+        rebuildPanel(); saveState();
+        showUndoPill('Deleted tab "' + removedTab.title + '"', () => {
+          p.tabs.splice(Math.min(idx, p.tabs.length), 0, removedTab);
+          p._activeTab = removedTab.id;
+          renderProjects();
+        });
       });
     }
 
@@ -6513,11 +6574,16 @@ function saveGoal() {
 function deleteGoalConfirm() {
   const scope = document.getElementById('gm-scope').value;
   const id    = Number(document.getElementById('gm-id').value);
-  if (!confirm('Delete this goal?')) return;
-  DB.goals[scope] = (DB.goals[scope] || []).filter(g => g.id !== id);
+  const idx = (DB.goals[scope] || []).findIndex(g => g.id === id);
+  if (idx < 0) return;
+  const removed = DB.goals[scope].splice(idx, 1)[0];
   closeModal('goal-modal');
   refreshGoalViews(scope);
   saveState();
+  showUndoPill('Deleted goal "' + (removed.title || removed.text || 'goal') + '"', () => {
+    DB.goals[scope].splice(Math.min(idx, DB.goals[scope].length), 0, removed);
+    refreshGoalViews(scope);
+  });
 }
 
 function refreshGoalViews(scope) {
@@ -6957,7 +7023,8 @@ function addTodoSubitem(i) {
   DB.todos[i].subitems.push({ text: '', done: false });
   renderTodos(); saveState();
   setTimeout(() => {
-    const subTxts = document.querySelectorAll('.todo-subitems .todo-sub-txt');
+    const wraps = document.querySelectorAll('#todo-body > div');
+    const subTxts = wraps[i] ? wraps[i].querySelectorAll('.todo-sub-txt') : [];
     if (subTxts.length) subTxts[subTxts.length - 1].focus();
   }, 30);
 }
@@ -6966,7 +7033,8 @@ function addTodoSubitemAfter(i, si) {
   DB.todos[i].subitems.splice(si + 1, 0, { text: '', done: false });
   renderTodos(); saveState();
   setTimeout(() => {
-    const subTxts = document.querySelectorAll('.todo-subitems .todo-sub-txt');
+    const wraps = document.querySelectorAll('#todo-body > div');
+    const subTxts = wraps[i] ? wraps[i].querySelectorAll('.todo-sub-txt') : [];
     if (subTxts[si + 1]) subTxts[si + 1].focus();
   }, 30);
 }
@@ -7402,7 +7470,7 @@ function renderDayPopupItems() {
     del_el.innerHTML = '<i class="ti ti-trash" style="font-size:13px"></i>';
     const capturedId = evt.id;
     const capturedEvt = Object.assign({}, evt);
-    const editFn = () => { closeModal('cal-day-modal'); openCalEvtFromObj(capturedEvt); };
+    const editFn = () => { closeModal('cal-day-modal'); _evtFromDay = true; openCalEvtFromObj(capturedEvt); };
     dot_el.addEventListener('click', editFn);
     body_el.addEventListener('click', editFn);
     del_el.addEventListener('click', (e) => {
@@ -7417,6 +7485,7 @@ function renderDayPopupItems() {
 function openAddFromDay() {
   // Close day popup and open the event editor pre-filled with this day's date
   closeModal('cal-day-modal');
+  _evtFromDay = true;
   openCalEvtModal({ y: _dayPopupY, m: _dayPopupM, d: _dayPopupD });
 }
 
@@ -8214,7 +8283,7 @@ function renderGoalsPreview() {
 // ══════════════════════════════════════════════════════════
 // DAILY QUOTE + WORD OF THE DAY
 // ══════════════════════════════════════════════════════════
-const FALLBACK_QUOTES = [
+const QUOTE_BANK = [
   {text:"The cure for boredom is curiosity. There is no cure for curiosity.", author:"Dorothy Parker"},
   {text:"Science is not only a disciple of reason but also one of romance and passion.", author:"Stephen Hawking"},
   {text:"In the middle of difficulty lies opportunity.", author:"Albert Einstein"},
@@ -8222,9 +8291,50 @@ const FALLBACK_QUOTES = [
   {text:"Progress is impossible without change.", author:"George Bernard Shaw"},
   {text:"Out of difficulties grow miracles.", author:"Jean de La Bruyère"},
   {text:"What we know is a drop, what we don't know is an ocean.", author:"Isaac Newton"},
+  {text:"Nothing in life is to be feared, it is only to be understood.", author:"Marie Curie"},
+  {text:"The good physician treats the disease; the great physician treats the patient who has the disease.", author:"William Osler"},
+  {text:"Wherever the art of medicine is loved, there is also a love of humanity.", author:"Hippocrates"},
+  {text:"It always seems impossible until it's done.", author:"Nelson Mandela"},
+  {text:"Quality is not an act, it is a habit.", author:"Aristotle"},
+  {text:"The best way to predict the future is to create it.", author:"Peter Drucker"},
+  {text:"An investment in knowledge pays the best interest.", author:"Benjamin Franklin"},
+  {text:"I have not failed. I've just found 10,000 ways that won't work.", author:"Thomas Edison"},
+  {text:"Somewhere, something incredible is waiting to be known.", author:"Carl Sagan"},
+  {text:"Research is what I'm doing when I don't know what I'm doing.", author:"Wernher von Braun"},
+  {text:"The important thing is not to stop questioning.", author:"Albert Einstein"},
+  {text:"Chance favors the prepared mind.", author:"Louis Pasteur"},
+  {text:"Medicine is a science of uncertainty and an art of probability.", author:"William Osler"},
+  {text:"You miss 100% of the shots you don't take.", author:"Wayne Gretzky"},
+  {text:"Whether you think you can or you think you can't, you're right.", author:"Henry Ford"},
+  {text:"Success is not final, failure is not fatal: it is the courage to continue that counts.", author:"Winston Churchill"},
+  {text:"Do what you can, with what you have, where you are.", author:"Theodore Roosevelt"},
+  {text:"It is not the strongest of the species that survives, but the most adaptable.", author:"Charles Darwin"},
+  {text:"Everything should be made as simple as possible, but not simpler.", author:"Albert Einstein"},
+  {text:"The art of writing is the art of discovering what you believe.", author:"Gustave Flaubert"},
+  {text:"Either write something worth reading or do something worth writing.", author:"Benjamin Franklin"},
+  {text:"There is no greater agony than bearing an untold story inside you.", author:"Maya Angelou"},
+  {text:"Start where you are. Use what you have. Do what you can.", author:"Arthur Ashe"},
+  {text:"Perfection is not attainable, but if we chase perfection we can catch excellence.", author:"Vince Lombardi"},
+  {text:"Small deeds done are better than great deeds planned.", author:"Peter Marshall"},
+  {text:"The secret of getting ahead is getting started.", author:"Mark Twain"},
+  {text:"Well done is better than well said.", author:"Benjamin Franklin"},
+  {text:"He who has a why to live can bear almost any how.", author:"Friedrich Nietzsche"},
+  {text:"We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author:"Will Durant"},
+  {text:"Knowing is not enough; we must apply. Willing is not enough; we must do.", author:"Johann Wolfgang von Goethe"},
+  {text:"A ship in harbor is safe, but that is not what ships are built for.", author:"John A. Shedd"},
+  {text:"Courage is not the absence of fear, but the triumph over it.", author:"Nelson Mandela"},
+  {text:"The mind is not a vessel to be filled but a fire to be kindled.", author:"Plutarch"},
+  {text:"Learn from yesterday, live for today, hope for tomorrow.", author:"Albert Einstein"},
+  {text:"Tough times never last, but tough people do.", author:"Robert H. Schuller"},
+  {text:"If you want to lift yourself up, lift up someone else.", author:"Booker T. Washington"},
+  {text:"What you do makes a difference, and you have to decide what kind of difference you want to make.", author:"Jane Goodall"},
+  {text:"Nothing will work unless you do.", author:"Maya Angelou"},
+  {text:"The purpose of life is to contribute in some way to making things better.", author:"Robert F. Kennedy"},
+  {text:"Act as if what you do makes a difference. It does.", author:"William James"},
+  {text:"Believe you can and you're halfway there.", author:"Theodore Roosevelt"},
 ];
 
-const FALLBACK_WORDS = [
+const WORD_BANK = [
   {word:"Sanguine", def:"Optimistic or positive, especially in a difficult situation."},
   {word:"Ineffable", def:"Too great or extreme to be expressed in words."},
   {word:"Resilience", def:"The capacity to recover quickly from difficulties."},
@@ -8232,9 +8342,61 @@ const FALLBACK_WORDS = [
   {word:"Tenacious", def:"Holding firmly to a course of action or belief."},
   {word:"Salient", def:"Most noticeable or important."},
   {word:"Synthesis", def:"The combination of ideas to form a theory or system."},
+  {word:"Perspicacious", def:"Having keen insight and understanding."},
+  {word:"Equanimity", def:"Mental calmness and composure, especially under stress."},
+  {word:"Sagacious", def:"Having good judgment; wise."},
+  {word:"Alacrity", def:"Brisk and cheerful readiness."},
+  {word:"Erudite", def:"Having or showing great knowledge or learning."},
+  {word:"Assiduous", def:"Showing great care and perseverance."},
+  {word:"Cogent", def:"Clear, logical, and convincing."},
+  {word:"Ebullient", def:"Cheerful and full of energy."},
+  {word:"Fastidious", def:"Very attentive to accuracy and detail."},
+  {word:"Gregarious", def:"Fond of company; sociable."},
+  {word:"Halcyon", def:"Denoting a period of time that was idyllically happy and peaceful."},
+  {word:"Intrepid", def:"Fearless; adventurous."},
+  {word:"Judicious", def:"Having or showing good judgment."},
+  {word:"Kinetic", def:"Relating to or resulting from motion; energetic and dynamic."},
+  {word:"Laconic", def:"Using very few words; concise."},
+  {word:"Magnanimous", def:"Generous or forgiving, especially toward a rival."},
+  {word:"Nascent", def:"Just coming into existence and beginning to develop."},
+  {word:"Obviate", def:"To remove a need or difficulty; to prevent."},
+  {word:"Panacea", def:"A solution or remedy for all difficulties."},
+  {word:"Quintessential", def:"Representing the most perfect example of a quality."},
+  {word:"Recalcitrant", def:"Stubbornly resistant to authority or guidance."},
+  {word:"Serendipity", def:"The occurrence of events by chance in a happy way."},
+  {word:"Taciturn", def:"Reserved or uncommunicative in speech."},
+  {word:"Ubiquitous", def:"Present or found everywhere."},
+  {word:"Veracity", def:"Conformity to facts; accuracy or truthfulness."},
+  {word:"Wistful", def:"Having a feeling of vague or regretful longing."},
+  {word:"Zenith", def:"The time at which something is most powerful or successful."},
+  {word:"Ameliorate", def:"To make something bad or unsatisfactory better."},
+  {word:"Bellwether", def:"An indicator or predictor of trends."},
+  {word:"Catalyst", def:"A person or thing that precipitates change."},
+  {word:"Deleterious", def:"Causing harm or damage."},
+  {word:"Empirical", def:"Based on observation or experience rather than theory."},
+  {word:"Fortuitous", def:"Happening by a lucky chance."},
+  {word:"Galvanize", def:"To shock or excite someone into taking action."},
+  {word:"Heuristic", def:"Enabling discovery or problem-solving through practical methods."},
+  {word:"Iterative", def:"Involving repetition of a process to approach a goal."},
+  {word:"Juxtapose", def:"To place close together for contrasting effect."},
+  {word:"Kismet", def:"Destiny; fate."},
+  {word:"Liminal", def:"Occupying a position at, or on both sides of, a boundary or threshold."},
+  {word:"Meticulous", def:"Showing great attention to detail; very careful."},
+  {word:"Nuance", def:"A subtle difference in meaning, expression, or sound."},
+  {word:"Paradigm", def:"A typical example, pattern, or model of something."},
+  {word:"Sine qua non", def:"An essential condition; a thing that is absolutely necessary."},
 ];
 
+// Deterministic daily index — same word/quote all day, new one tomorrow
+function dayOfYear() {
+  const now = new Date();
+  return Math.floor((now - new Date(now.getFullYear(),0,0)) / 86400000);
+}
+let _quoteOffset = 0, _wordOffset = 0;
+
 async function refreshDailyInspiration() {
+  _quoteOffset = (_quoteOffset + 1 + Math.floor(Math.random() * (QUOTE_BANK.length - 2))) % QUOTE_BANK.length;
+  _wordOffset  = (_wordOffset  + 1 + Math.floor(Math.random() * (WORD_BANK.length  - 2))) % WORD_BANK.length;
   loadQuote();
   loadWordOfDay();
 }
@@ -8243,44 +8405,27 @@ async function loadQuote() {
   const textEl = document.getElementById('quote-text');
   const authEl = document.getElementById('quote-author');
   if (!textEl) return;
-  textEl.textContent = 'Loading…';
-  try {
-    const res = await fetch('https://api.quotable.io/random?tags=wisdom|inspirational|science');
-    if (!res.ok) throw new Error('fetch failed');
-    const data = await res.json();
-    textEl.textContent = '"' + data.content + '"';
-    authEl.textContent = '— ' + data.author;
-    DB.lastQuote = {text: data.content, author: data.author, date: todayKey()};
-    saveState();
-  } catch (e) {
-    const pick = FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)];
-    textEl.textContent = '"' + pick.text + '"';
-    authEl.textContent = '— ' + pick.author;
-  }
+  const pick = QUOTE_BANK[(dayOfYear() + _quoteOffset) % QUOTE_BANK.length];
+  textEl.textContent = '"' + pick.text + '"';
+  authEl.textContent = '— ' + pick.author;
 }
 
 async function loadWordOfDay() {
   const wordEl = document.getElementById('wotd-word');
   const defEl  = document.getElementById('wotd-def');
   if (!wordEl) return;
-  wordEl.textContent = '—'; defEl.textContent = 'Loading…';
+  const pick = WORD_BANK[(dayOfYear() + _wordOffset) % WORD_BANK.length];
+  wordEl.textContent = pick.word;
+  defEl.textContent = pick.def;
+  // Optionally enrich from dictionary API (works reliably; ignore failures)
   try {
-    // Use a curated word list + free dictionary API for definition
-    const pick = FALLBACK_WORDS[Math.floor(Math.random() * FALLBACK_WORDS.length)];
-    const res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(pick.word));
+    const res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(pick.word.split(' ')[0]));
     if (res.ok) {
       const data = await res.json();
-      const def = data[0]?.meanings?.[0]?.definitions?.[0]?.definition || pick.def;
-      wordEl.textContent = pick.word;
-      defEl.textContent = def;
-    } else {
-      throw new Error('no definition');
+      const def = data[0]?.meanings?.[0]?.definitions?.[0]?.definition;
+      if (def && wordEl.textContent === pick.word) defEl.textContent = def;
     }
-  } catch (e) {
-    const pick = FALLBACK_WORDS[Math.floor(Math.random() * FALLBACK_WORDS.length)];
-    wordEl.textContent = pick.word;
-    defEl.textContent = pick.def;
-  }
+  } catch (e) { /* built-in definition already shown */ }
 }
 
 // ══════════════════════════════════════════════════════════
@@ -8722,7 +8867,7 @@ function setupThemePicker() {
     const reader = new FileReader();
     reader.onload = e => {
       const finish = dataUrl => {
-        DB.bgPhoto = dataUrl;
+        DB.bgPhoto = dataUrl; _bgDirty = true; saveBgPhoto();
         DB.bgZoom = 100; DB.bgPosX = 50; DB.bgPosY = 50;
         applyBackground(); saveState(); updatePickerPhotoUI();
         document.getElementById('tp-file').value = '';
@@ -8750,7 +8895,7 @@ function setupThemePicker() {
 
   // Remove photo
   document.getElementById('tp-remove-btn').addEventListener('click', () => {
-    DB.bgPhoto = ''; applyBackground(); saveState(); updatePickerPhotoUI();
+    DB.bgPhoto = ''; _bgDirty = true; saveBgPhoto(); applyBackground(); saveState(); updatePickerPhotoUI();
   });
 
   // Sliders
@@ -8795,6 +8940,19 @@ function updatePickerPhotoUI() {
 // ══════════════════════════════════════════════════════════
 if (!DB.reminders) DB.reminders = [];
 
+
+function clearPastReminders() {
+  const now = new Date();
+  const past = (DB.reminders||[]).filter(r => r.date && new Date(r.date + 'T' + (r.time||'23:59')) < now);
+  if (!past.length) { showPill('✓', 'No past reminders to clear', 'rgba(29,158,117,.4)', 2000); return; }
+  const removed = past.slice();
+  const ids = new Set(past.map(r => r.id));
+  DB.reminders = DB.reminders.filter(r => !ids.has(r.id));
+  renderReminders(); saveState();
+  showUndoPill('Cleared ' + removed.length + ' past reminder(s)', () => {
+    DB.reminders = DB.reminders.concat(removed); renderReminders();
+  });
+}
 function renderReminders() {
   const cont = document.getElementById('reminders-list'); if (!cont) return;
   cont.innerHTML = '';
@@ -8911,64 +9069,6 @@ if (!DB.tileOrder) DB.tileOrder = {};
 
 let _dndSrc = null; // the card being dragged
 
-function makeTilesDraggable(containerId) {
-  const cont = containerId ? document.getElementById(containerId) : null;
-  const cards = cont
-    ? cont.querySelectorAll(':scope > .card, :scope > div > .card')
-    : document.querySelectorAll('.pg.active .card');
-
-  cards.forEach((card, i) => {
-    if (card.dataset.dndWired) return;
-    card.dataset.dndWired = 'true';
-    card.draggable = true;
-
-    // Add drag handle to card header right side (not overlapping content)
-    if (!card.querySelector('.drag-handle')) {
-      const handle = document.createElement('div');
-      handle.className = 'drag-handle';
-      handle.title = 'Drag to reorder';
-      handle.innerHTML = '<span></span><span></span><span></span>';
-      // Try to append to the card-hdr right side
-      const hdr = card.querySelector('.card-hdr');
-      if (hdr) hdr.appendChild(handle);
-      else card.insertBefore(handle, card.firstChild);
-    }
-
-    card.addEventListener('dragstart', e => {
-      _dndSrc = card;
-      card.classList.add('dnd-dragging');
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    card.addEventListener('dragend', () => {
-      card.classList.remove('dnd-dragging');
-      document.querySelectorAll('.dnd-over').forEach(c => c.classList.remove('dnd-over'));
-      _dndSrc = null;
-    });
-    card.addEventListener('dragover', e => {
-      e.preventDefault();
-      if (_dndSrc && _dndSrc !== card) card.classList.add('dnd-over');
-    });
-    card.addEventListener('dragleave', () => card.classList.remove('dnd-over'));
-    card.addEventListener('drop', e => {
-      e.preventDefault();
-      card.classList.remove('dnd-over');
-      if (!_dndSrc || _dndSrc === card) return;
-      // Swap in DOM
-      const parent = card.parentNode;
-      const srcNext = _dndSrc.nextSibling;
-      const targetNext = card.nextSibling;
-      // Insert src before card, and card where src was
-      if (srcNext === card) {
-        parent.insertBefore(card, _dndSrc);
-      } else {
-        parent.insertBefore(_dndSrc, card);
-        if (targetNext) parent.insertBefore(card, targetNext);
-        else parent.appendChild(card);
-      }
-      persistTileOrder();
-    });
-  });
-}
 
 // Wire drag-and-drop whenever a page becomes active
 function wireDragAndDrop() {
@@ -9012,6 +9112,8 @@ function wireDragAndDrop() {
           const parent = card.parentNode;
           const srcNext = _dndSrc.nextSibling;
           const targetNext = card.nextSibling;
+          const h1b = _dndSrc.style.height, h2b = card.style.height;
+          _dndSrc.style.height = h2b; card.style.height = h1b;
           if (srcNext === card) {
             parent.insertBefore(card, _dndSrc);
           } else {
@@ -9228,7 +9330,11 @@ function buildPPROTable(key, headers, types, newRowFn) {
       const delBtn = document.createElement('button');
       delBtn.style.cssText='background:none;border:none;cursor:pointer;color:transparent;font-size:12px;padding:0 2px';
       delBtn.textContent='✕';
-      delBtn.addEventListener('click', () => { DB.ppro[key].splice(ri,1); renderTable(); saveState(); });
+      delBtn.addEventListener('click', () => {
+        const removedRow = DB.ppro[key].splice(ri,1)[0];
+        renderTable(); saveState();
+        showUndoPill('Deleted row', () => { DB.ppro[key].splice(Math.min(ri, DB.ppro[key].length), 0, removedRow); renderTable(); });
+      });
       tr.addEventListener('mouseenter', () => { delBtn.style.color='var(--muted)'; upB.style.color='var(--muted)'; dnB.style.color='var(--muted)'; });
       tr.addEventListener('mouseleave', () => { delBtn.style.color='transparent'; upB.style.color='transparent'; dnB.style.color='transparent'; });
       delTd.appendChild(upB); delTd.appendChild(dnB); delTd.appendChild(delBtn); tr.appendChild(delTd);
@@ -9303,14 +9409,28 @@ function runPPROImport() {
   const target = document.getElementById('ppro-import-target').value;
   const csv    = document.getElementById('ppro-import-csv').value.trim();
   if (!csv) return;
-  const lines  = csv.split('\n').filter(l => l.trim());
-  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
+  function parseCSVRow(line) {
+    const out = []; let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQ) {
+        if (ch === '"') { if (line[i+1] === '"') { cur += '"'; i++; } else inQ = false; }
+        else cur += ch;
+      } else {
+        if (ch === '"') inQ = true;
+        else if (ch === ',') { out.push(cur); cur = ''; }
+        else cur += ch;
+      }
+    }
+    out.push(cur);
+    return out.map(s => s.trim());
+  }
+  const lines  = csv.split(/\r?\n/).filter(l => l.trim());
+  const headers = parseCSVRow(lines[0]);
   const rows = lines.slice(1).map(line => {
-    const vals = line.match(/(".*?"|[^,]+|(?<=,)(?=,))/g) || line.split(',');
+    const vals = parseCSVRow(line);
     const obj = {};
-    headers.forEach((h, i) => {
-      obj[h] = (vals[i]||'').replace(/^"|"$/g,'').trim();
-    });
+    headers.forEach((h, i) => { obj[h] = vals[i] || ''; });
     return obj;
   }).filter(r => Object.values(r).some(v => v));
   if (!DB.ppro) DB.ppro = {};
@@ -9368,12 +9488,14 @@ function getAllInteractions() {
   (DB.interactions || []).forEach(x => {
     if (x.date && x.kol) all.push({date: x.date, kol: x.kol, type: x.type || 'Other', source: 'log'});
   });
-  // Conference interviews (auto)
+  // Conference interviews (auto) — rows are {name, day, time, location}
   (DB.conferences || []).forEach(conf => {
     (conf.interviews || []).forEach(iv => {
-      if (iv.kol && (iv.date || conf.start)) {
-        all.push({date: iv.date || conf.start, kol: iv.kol, type: 'Interview', source: 'conference'});
-      }
+      const who = (typeof iv === 'string' ? iv : iv.name) || '';
+      if (!who.trim()) return;
+      // Best-available date: explicit day text can't parse reliably → use conf start date
+      const d = conf.start || conf.dates || '';
+      all.push({date: d, kol: who.trim(), type: 'Interview', source: 'conference', conf: conf.name});
     });
   });
   // Calendar events with author tagged (auto)
@@ -9831,7 +9953,7 @@ function buildSearchIndex() {
     go: () => showPage('pitch', navBtnFor('pitch')) }); });
   (DB.conferences||[]).forEach(c => { if (c.name) ix.push({
     label: c.name, sub: 'Conference', kind: 'Conference',
-    text: [c.name,(c.interviews||[]).map(iv=>iv.kol+' '+(iv.topic||'')).join(' ')].join(' ').toLowerCase(),
+    text: [c.name,(c.interviews||[]).map(iv=>(typeof iv==='string'?iv:iv.name)||'').join(' ')].join(' ').toLowerCase(),
     go: () => showPage('conferences', navBtnFor('conferences')) }); });
   (DB.ppfoTrackers||[]).forEach(t => { (t.rows||[]).forEach(r => {
     const title = r.cells?.[1]; if (title) ix.push({
@@ -9862,14 +9984,16 @@ function openSearch() {
     '<div style="padding:14px 18px;font-size:11px;color:var(--muted)">Type to search everything…</div>';
   setTimeout(() => inp.focus(), 50);
 }
-function closeSearch() { document.getElementById('search-overlay').style.display = 'none'; }
+function closeSearch() { document.getElementById('search-overlay').style.display = 'none'; _searchIx = null; }
 
+let _searchIx = null;
 function runSearch(q) {
   const res = document.getElementById('search-results');
   q = q.trim().toLowerCase();
   if (q.length < 2) { res.innerHTML = '<div style="padding:14px 18px;font-size:11px;color:var(--muted)">Type at least 2 characters…</div>'; return; }
   const KIND_COLORS = {KOL:'#534AB7',Project:'#1D9E75',Content:'#192e57',Pitch:'#BA7517',Conference:'#D85A30',PPFO:'#dfad0e','To-do':'#5b8fa8',Reminder:'#e07b8a',Trend:'#7c3aed'};
-  const hits = buildSearchIndex().filter(x => x.text.includes(q)).slice(0, 30);
+  if (!_searchIx) _searchIx = buildSearchIndex();
+  const hits = _searchIx.filter(x => x.text.includes(q)).slice(0, 30);
   res.innerHTML = '';
   if (!hits.length) { res.innerHTML = '<div style="padding:14px 18px;font-size:11px;color:var(--muted)">No matches</div>'; return; }
   hits.forEach(h => {
@@ -9941,19 +10065,28 @@ function persistTileOrder() {
 
 function applyTileOrder(page) {
   const saved = DB.tileOrder && DB.tileOrder[page];
-  if (!saved) return;
   const pg = document.getElementById('page-' + page); if (!pg) return;
+  // Snapshot slot geometry from the ORIGINAL layout (parent-by-parent, position-by-position)
   const parents = [];
   pg.querySelectorAll('.card').forEach(card => {
     getTileId(card);
     const p = card.parentNode;
     if (!parents.includes(p)) parents.push(p);
   });
+  if (!saved) return;
+  const slotGeom = parents.map(p =>
+    Array.from(p.children).filter(c => c.classList && c.classList.contains('card')).map(c => c.style.height));
+  // Global id → card map (allows cross-row restore)
+  const byId = {};
+  pg.querySelectorAll('.card').forEach(c => { byId[c.dataset.tileId] = c; });
   parents.forEach((p, pi) => {
     const order = saved[pi]; if (!order) return;
-    order.forEach(tid => {
-      const card = Array.from(p.children).find(c => c.dataset && c.dataset.tileId === tid);
-      if (card) p.appendChild(card); // append in saved sequence
+    order.forEach(tid => { const card = byId[tid]; if (card) p.appendChild(card); });
+  });
+  // Re-assert slot geometry so every position keeps its intended size
+  parents.forEach((p, pi) => {
+    Array.from(p.children).filter(c => c.classList && c.classList.contains('card')).forEach((c, ci) => {
+      if (slotGeom[pi] && slotGeom[pi][ci] !== undefined) c.style.height = slotGeom[pi][ci];
     });
   });
 }
@@ -9987,6 +10120,7 @@ async function startup() {
   try { if(localStorage.getItem('pt_dark_mode')==='1'){document.body.classList.add('dark');DB.darkMode=true;} } catch(_){}
   applyBackground(); // instant color before loadState
   await loadState();
+  await (window._loadBgPhoto ? window._loadBgPhoto() : Promise.resolve());
   applyDark();
   patchKOLEmails();
   // Seed PPRO project AFTER loadState (Supabase may not have it yet)
@@ -10024,14 +10158,8 @@ async function startup() {
     };
     saveState();
   }
-  renderTodos();
-  renderUpcomingArticles();
-  renderSeries();
-  updateHomeDateSub();
-  renderDailySchedule();
-  renderGoalsPreview();
-  refreshDailyInspiration();
-  loadPubMedFeed();
+  [renderTodos, renderUpcomingArticles, renderSeries, updateHomeDateSub,
+   renderDailySchedule, renderGoalsPreview, refreshDailyInspiration, loadPubMedFeed].forEach(safeRun);
   setTimeout(() => { setupOfflineDetection(); }, 100);
   renderKOLs();
   renderKanban();
