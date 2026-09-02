@@ -14,11 +14,14 @@
   --gold:#dfad0e;--gold-l:#f5c93a;--gold-d:#b8900c;
   --cream:#ecd8a5;--cream-l:#f7edcc;--cream-d:#c9b47a;
   --green:#1D9E75;--red:#D85A30;--blue:#185FA5;--purple:#534AB7;
-  --text:#192e57;--muted:#5a6e94;--bg:#f5f3ee;--surface:#fff;
-  --border:rgba(25,46,87,.12);--border-s:rgba(25,46,87,.25);
+  --text:#1f1f1d;--muted:#73726c;--bg:#faf9f7;--surface:#fff;--surface-2:#f4f2ee;
+  --hover:rgba(0,0,0,.035);--sel:rgba(0,0,0,.06);
+  --border:rgba(0,0,0,.10);--border-s:rgba(0,0,0,.18);
+  --v-onc:#185FA5;--v-multi:#0F6E56;--v-retail:#993C1D;
 }
 body.dark{
-  --text:#e8eaf0;--muted:#8a9ab8;--bg:#0a0f1e;--surface:#111827;
+  --text:#e6e4dd;--muted:#9c9a92;--bg:#191917;--surface:#232320;--surface-2:#2b2b28;
+  --hover:rgba(255,255,255,.05);--sel:rgba(255,255,255,.09);
   --border:rgba(255,255,255,.08);--border-s:rgba(255,255,255,.18);
   --cream-l:rgba(236,216,165,.1);
 }
@@ -608,7 +611,6 @@ body.dark .home-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12)
 
 
 /* Sidebar photo applied */
-.sidebar[data-photo="true"]{background-size:cover !important;background-position:var(--sb-x,50%) var(--sb-y,50%) !important;background-repeat:no-repeat !important}
 
 
 
@@ -743,67 +745,77 @@ body.dark .home-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12)
 
 /* ══ FULL-BLEED BACKGROUND ══════════════════════════════
    One fixed layer behind everything. Always on.         */
-body { position: relative; }
-#bg-layer {
-  position: fixed; inset: 0; z-index: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  transition: background .3s;
+/* ══ FLAT DESIGN SYSTEM ══════════════════════════════════ */
+body { position: relative; background: var(--bg); }
+.topbar {
+  background: var(--surface) !important;
+  border-bottom: 0.5px solid var(--border);
+  color: var(--text);
 }
-/* Everything above bg */
-.topbar, .app { position: relative; z-index: 1; }
-/* Topbar: glass */
-.topbar { background: rgba(0,0,0,.32) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-/* Sidebar: fully transparent — just floating pills */
-.sidebar { background: transparent !important; }
-/* Cards: frosted glass — ALL pages, always */
-.card, .notepad, .stat-card, .kol-card, .goal-card, .proj-section {
-  background: rgba(255,255,255,.78) !important;
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  border-color: rgba(255,255,255,.6) !important;
-  box-shadow: 0 2px 16px rgba(0,0,0,.08);
+.topbar-title, .topbar .ibtni { color: var(--text) !important; }
+.sidebar {
+  background: var(--surface) !important;
+  border-right: 0.5px solid var(--border);
+  padding: 8px 0;
 }
-body.dark .card, body.dark .notepad, body.dark .stat-card,
-body.dark .kol-card, body.dark .goal-card { background: rgba(18,20,32,.68) !important; }
-/* Home tile hover lift */
-#page-home .card, #page-home .notepad {
-  transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
-  will-change: transform;
+.nav-i {
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--muted);
+  font-weight: 400;
+  margin: 1px 8px;
+  border-radius: 7px;
+}
+.nav-i:hover { background: var(--hover) !important; color: var(--text); box-shadow: none !important; }
+.nav-i.active {
+  background: var(--sel) !important;
+  color: var(--text);
+  font-weight: 500;
+  box-shadow: none !important;
+}
+.card, .notepad, .proj-section {
+  background: var(--surface) !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  border: 0.5px solid var(--border) !important;
+  border-radius: 12px;
+  box-shadow: none !important;
 }
 #page-home .card:hover, #page-home .notepad:hover {
-  transform: scale(1.025) translateY(-3px);
-  box-shadow: 0 10px 28px rgba(0,0,0,.14);
-  z-index: 3; position: relative;
+  transform: none; box-shadow: none !important;
 }
-/* ══ THEME PICKER ════════════════════════════════════════ */
-#theme-picker {
-  position: fixed; bottom: 64px; left: 16px; z-index: 600;
-  background: rgba(255,255,255,.95); backdrop-filter: blur(16px);
-  border: 0.5px solid rgba(0,0,0,.12); border-radius: 12px;
-  padding: 16px; width: 280px; box-shadow: 0 8px 32px rgba(0,0,0,.2);
-  display: none;
+.stat-card {
+  background: var(--surface-2) !important;
+  border: none !important;
+  border-radius: 8px;
+  box-shadow: none !important;
+  color: var(--text);
 }
-body.dark #theme-picker { background: rgba(25,27,40,.95); }
-#theme-picker-btn {
-  position: fixed; bottom: 20px; left: 16px; z-index: 600;
-  width: 38px; height: 38px; border-radius: 50%;
-  background: rgba(255,255,255,.9); border: 0.5px solid rgba(0,0,0,.12);
-  cursor: pointer; font-size: 18px; display: flex; align-items: center;
-  justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.15);
-  transition: transform .15s;
+.stat-card::after { display: none; }
+.stat-lbl { color: var(--muted) !important; font-size: 12px; }
+.stat-val { color: var(--text) !important; font-size: 24px; font-weight: 500; }
+.stat-sub { color: var(--muted) !important; }
+.kol-card, .goal-card {
+  background: var(--surface) !important;
+  border: 0.5px solid var(--border) !important;
+  box-shadow: none !important;
+  border-radius: 12px;
 }
-#theme-picker-btn:hover { transform: scale(1.1); }
-.tp-label { font-size:9px; font-weight:700; text-transform:uppercase;
-  letter-spacing:.8px; color:var(--muted); margin: 10px 0 6px; }
-.tp-label:first-child { margin-top: 0; }
-.color-swatches { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
-.color-swatch {
-  width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
-  border: 2px solid transparent; transition: all .15s; flex-shrink: 0;
+.pg-header, .tab-pill-bar {
+  background: transparent !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 0 10px 0 !important;
 }
-.color-swatch:hover { transform: scale(1.15); }
-.color-swatch.active { border-color: #333 !important; }
+.tab-pill-bar { border-bottom: 0.5px solid var(--border) !important; margin-bottom: 14px; }
+.dtbl th {
+  background: transparent !important;
+  color: var(--muted) !important;
+  border-bottom: 0.5px solid var(--border);
+  text-transform: none; letter-spacing: 0; font-size: 11px; font-weight: 500;
+}
+.dtbl tr:hover td { background: var(--hover); }
+.card-title { font-size: 14px; font-weight: 500; }
 
 
 /* TODO SUBITEMS */
@@ -903,6 +915,12 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
     <div class="logo-sub">Content Intelligence</div>
   </div>
   <div class="topbar-r" style="display:flex;align-items:center;gap:6px">
+    <div style="display:flex;gap:4px;margin-right:6px">
+      <span class="vert-chip" data-vert="all" style="font-size:11px;padding:3px 10px;border-radius:12px;border:0.5px solid var(--border);cursor:pointer;user-select:none">All</span>
+      <span class="vert-chip" data-vert="onc" style="font-size:11px;padding:3px 10px;border-radius:12px;border:0.5px solid var(--border);cursor:pointer;user-select:none">Onc</span>
+      <span class="vert-chip" data-vert="multi" style="font-size:11px;padding:3px 10px;border-radius:12px;border:0.5px solid var(--border);cursor:pointer;user-select:none">Multi</span>
+      <span class="vert-chip" data-vert="retail" style="font-size:11px;padding:3px 10px;border-radius:12px;border:0.5px solid var(--border);cursor:pointer;user-select:none">Retail</span>
+    </div>
     <button class="ibtni" id="global-search-btn" title="Search dashboard (Ctrl+K)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg></button>
     <button class="ibtni" id="quick-add-btn" title="Quick-add content (N)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
     <button class="ibtni" onclick="toggleDark()" title="Toggle dark mode"><span id="dark-ic">🌙</span></button>
@@ -912,7 +930,7 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
     <div id="save-pill" class="save-pill"><span id="save-icon">⟳</span><span id="save-txt">Saving…</span></div>
     <div id="top-datetime" style="font-size:11px;color:rgba(255,255,255,.7);text-align:right;line-height:1.4;padding-left:6px;border-left:0.5px solid rgba(255,255,255,.15)">
       <div id="top-date" style="font-weight:600"></div>
-      <div style="display:flex;gap:6px;justify-content:flex-end;align-items:baseline"><div id="top-time" style="font-size:10px;opacity:.8"></div><div title="Dashboard build version" style="font-size:9px;opacity:.45;font-weight:600">v83</div></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end;align-items:baseline"><div id="top-time" style="font-size:10px;opacity:.8"></div><div title="Dashboard build version" style="font-size:9px;opacity:.45;font-weight:600">v93</div></div>
     </div>
   </div>
 </div>
@@ -924,10 +942,8 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
     <div class="nav-i active" onclick="showPage('home',this)">Home</div>
     <div class="nav-i" onclick="showPage('projects',this)">Projects</div>
     <div class="nav-i" onclick="showPage('calendar',this)">Content Calendar</div>
-    <div class="nav-i" onclick="showPage('trending',this)">Trends</div>
     <div class="nav-i" onclick="showPage('analytics',this)">Analytics</div>
     <div class="nav-i" onclick="showPage('kols',this)">KOLs</div>
-    <div class="nav-i" onclick="showPage('pitches',this)">Pitch Queue</div>
     <div class="nav-i" onclick="showPage('conferences',this)">Conferences</div>
   </div>
   <div class="nav-g"><div class="nav-lbl">Publications</div>
@@ -944,109 +960,77 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
 <div id="page-home" class="pg active">
 
-<div style="background:rgba(255,255,255,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:0.5px solid rgba(255,255,255,.6);border-radius:12px;padding:12px 20px;box-shadow:0 2px 10px rgba(0,0,0,.08);display:flex;align-items:center;gap:0;margin-bottom:14px">
-  <!-- Date -->
-  <div style="flex-shrink:0;padding-right:20px;border-right:0.5px solid var(--border)">
-    <div style="font-size:18px;font-weight:700;color:var(--text)">Today</div>
-    <div style="font-size:11px;color:var(--muted)" id="home-date-sub">—</div>
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:14px">
+  <div>
+    <div style="font-size:20px;font-weight:500;color:var(--text)" id="mc-greeting">Today</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:2px" id="mc-datesub"></div>
   </div>
-  <!-- Word of the day -->
-  <div style="flex-shrink:0;padding:0 20px;border-right:0.5px solid var(--border)">
-    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:1px">Word of the day</div>
-    <div id="wotd-word" style="font-size:14px;font-weight:700;color:var(--gold-d)">—</div>
-    <div id="wotd-def" style="font-size:10px;color:var(--muted);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+  <button class="btn btn-sm" id="briefing-btn" style="margin-left:auto">Copy briefing</button>
+</div>
+
+<div style="display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:12px;margin-bottom:12px">
+
+  <div class="card" style="margin-bottom:0">
+    <div class="card-hdr"><div class="card-title">Needs attention</div>
+      <button class="btn btn-sm" id="mc-refresh" style="font-size:10px">Refresh</button></div>
+    <div id="attention-list" style="max-height:330px;overflow-y:auto"></div>
   </div>
-  <!-- Quote -->
-  <div style="flex:1;padding-left:20px;display:flex;align-items:center;gap:10px">
-    <div style="flex:1">
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:1px">Daily quote</div>
-      <div id="quote-text" style="font-size:12px;font-style:italic;color:var(--text);line-height:1.4">Loading…</div>
-      <div id="quote-author" style="font-size:10px;color:var(--muted);text-align:right">—</div>
+
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title" style="margin-bottom:4px">This week</div>
+      <div id="week-strip"></div>
     </div>
-    <button class="btn btn-sm" onclick="refreshDailyInspiration()" style="flex-shrink:0"><i class="ti ti-refresh"></i></button>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title" style="margin-bottom:2px">Vertical balance</div>
+      <div id="vert-balance"></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title" style="margin-bottom:5px">Conference mode</div>
+      <div id="conf-mode"></div>
+    </div>
   </div>
 </div>
 
-<!-- ROW 1: DAILY SCHEDULE + TO-DO -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-  <div class="card card-accent" style="height:380px;display:flex;flex-direction:column;margin-bottom:0">
+<div class="card">
+  <div class="card-hdr">
+    <div class="card-title">Vertical performance</div>
+    <button class="btn btn-sm" onclick="showPage('analytics', null)" style="font-size:10px">Full analytics</button>
+  </div>
+  <div id="mc-vertical-analytics"></div>
+</div>
+
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-bottom:12px">
+  <div class="card" style="height:210px;display:flex;flex-direction:column;margin-bottom:0">
     <div class="card-hdr" style="flex-shrink:0">
-      <div class="card-title"><i class="ti ti-clock"></i> Today's schedule</div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <span style="font-size:10px;color:var(--muted)">9 AM – 5 PM</span>
-        <button class="btn btn-sm" onclick="newDay()" title="Clear today and start fresh" style="font-size:10px;padding:2px 8px"><i class="ti ti-sun"></i> New Day</button>
+      <div style="display:flex;gap:3px;align-items:center">
+        <button class="feed-tab active" data-feed="research" style="padding:3px 9px;border-radius:6px;border:none;cursor:pointer;font-size:11px;font-weight:500;background:var(--sel);color:var(--text)">Research</button>
+        <button class="feed-tab" data-feed="guidelines" style="padding:3px 9px;border-radius:6px;border:none;cursor:pointer;font-size:11px;font-weight:400;background:transparent;color:var(--muted)">Guidelines</button>
+        <button class="feed-tab" data-feed="fda" style="padding:3px 9px;border-radius:6px;border:none;cursor:pointer;font-size:11px;font-weight:400;background:transparent;color:var(--muted)">FDA</button>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center">
+        <input id="pubmed-search-term" type="text" value="oncology pharmacist" style="font-size:10px;padding:3px 6px;width:95px;border:0.5px solid var(--border-s);border-radius:5px;background:var(--surface);color:var(--text)">
+        <button class="btn btn-sm" id="feed-refresh-btn" style="padding:2px 7px">↻</button>
       </div>
     </div>
-    <div id="daily-schedule" style="flex:1;overflow-y:auto;min-height:0"></div>
+    <div id="pubmed-feed" style="flex:1;overflow-y:auto;min-height:0"></div>
   </div>
-  <div class="card card-accent" style="height:380px;display:flex;flex-direction:column;margin-bottom:0">
+
+  <div class="card" style="height:210px;display:flex;flex-direction:column;margin-bottom:0">
     <div class="card-hdr" style="flex-shrink:0">
-      <div class="card-title"><i class="ti ti-notebook"></i> To-do</div>
-      <button class="btn btn-sm" style="font-size:10px;padding:2px 7px" onclick="clearDoneTodos()"><i class="ti ti-check"></i> Clear done</button>
-    </div>
-    <div id="todo-body" style="flex:1;overflow-y:auto;min-height:0;padding:2px 0"></div>
-    <div style="flex-shrink:0;padding-top:8px;border-top:0.5px solid var(--border);display:flex;gap:6px">
-      <input id="todo-inp" type="text" placeholder="Add a task…" style="flex:1" onkeydown="if(event.key==='Enter')addTodoItem()">
-      <button class="btn btn-sm btn-primary" onclick="addTodoItem()"><i class="ti ti-plus"></i></button>
-    </div>
-  </div>
-</div>
-
-<!-- ROW 2: UPCOMING + DEADLINES + GOALS -->
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
-  <div class="card card-accent" style="height:220px;display:flex;flex-direction:column;margin-bottom:0">
-    <div class="card-hdr" style="flex-shrink:0;margin-bottom:4px">
-      <div class="card-title"><i class="ti ti-calendar-event"></i> Upcoming articles</div>
-      <div style="display:flex;gap:3px">
-        <button class="fbtn active" id="upc-day-btn" onclick="switchUpcoming('day',this)" style="padding:2px 7px;font-size:10px">Today</button>
-        <button class="fbtn" id="upc-week-btn" onclick="switchUpcoming('week',this)" style="padding:2px 7px;font-size:10px">Week</button>
-      </div>
-    </div>
-    <div id="upcoming-articles-list" style="flex:1;overflow-y:auto;min-height:0"></div>
-  </div>
-  <div class="card card-accent" style="height:220px;display:flex;flex-direction:column;margin-bottom:0">
-    <div class="card-hdr" style="flex-shrink:0;margin-bottom:4px">
-      <div class="card-title"><i class="ti ti-calendar-due"></i> Deadlines</div>
-      <button class="btn btn-sm" onclick="openTextEditor('deadlines','Edit deadlines')"><i class="ti ti-edit"></i></button>
-    </div>
-    <div id="deadlines-content" style="flex:1;overflow-y:auto;min-height:0;font-size:12px;line-height:1.9;white-space:pre-wrap"></div>
-  </div>
-  <div class="card card-accent" style="height:220px;display:flex;flex-direction:column;margin-bottom:0">
-    <div class="card-hdr" style="flex-shrink:0;margin-bottom:4px">
-      <div class="card-title"><i class="ti ti-target"></i> Goals</div>
-      <button class="btn btn-sm" onclick="showPage('goals',document.querySelector('[onclick*=goals]'))"><i class="ti ti-arrow-right"></i></button>
-    </div>
-    <div id="goals-preview-list" style="flex:1;overflow-y:auto;min-height:0"></div>
-  </div>
-</div>
-
-<!-- ROW 2b: REMINDERS -->
-<div style="margin-bottom:12px">
-  <div class="card card-accent" style="height:180px;display:flex;flex-direction:column">
-    <div class="card-hdr" style="flex-shrink:0;margin-bottom:6px">
-      <div class="card-title"><i class="ti ti-bell"></i> Reminders</div>
+      <div class="card-title">Reminders</div>
       <div style="display:flex;gap:5px">
         <button class="btn btn-sm" onclick="clearPastReminders()" style="font-size:10px">Clear past</button>
-        <button class="btn btn-sm btn-primary" onclick="openReminderModal(null)"><i class="ti ti-plus"></i> Add</button>
+        <button class="btn btn-sm btn-primary" onclick="openReminderModal(null)" style="font-size:10px">+ Add</button>
       </div>
     </div>
     <div id="reminders-list" style="flex:1;overflow-y:auto;min-height:0"></div>
   </div>
 </div>
 
-<!-- ROW 3: INSPIRATION + PUBMED -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-
-  <div class="card card-accent" style="height:200px;display:flex;flex-direction:column;margin-bottom:0">
-    <div class="card-hdr" style="flex-shrink:0;margin-bottom:4px">
-      <div class="card-title"><i class="ti ti-microscope"></i> Recent research</div>
-      <div style="display:flex;gap:4px;align-items:center">
-        <input id="pubmed-search-term" type="text" value="oncology pharmacist" style="font-size:10px;padding:3px 6px;width:110px;border:0.5px solid var(--border-s);border-radius:5px;background:rgba(255,255,255,.5);color:var(--text)">
-        <button class="btn btn-sm" onclick="loadPubMedFeed()"><i class="ti ti-refresh"></i></button>
-      </div>
-    </div>
-    <div id="pubmed-feed" style="flex:1;overflow-y:auto;min-height:0"></div>
-  </div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 2px;border-top:0.5px solid var(--border);font-size:11.5px;color:var(--muted);gap:16px;flex-wrap:wrap">
+  <span style="font-style:italic;flex:1;min-width:0"><span id="quote-text"></span> <span id="quote-author"></span></span>
+  <span style="flex-shrink:0">Word of the day: <strong id="wotd-word" style="font-weight:500;color:var(--text)"></strong> — <span id="wotd-def"></span></span>
 </div>
 
 </div>
@@ -1058,6 +1042,7 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Click a day to add an event · click an event to edit or delete</div>
     </div>
     <div style="display:flex;gap:6px">
+      <button class="btn btn-sm" id="sheet-open-btn">Sync sheet</button>
       <button class="btn btn-sm" onclick="openCalEvtModal(null)"><i class="ti ti-plus"></i> Add event</button>
       <button class="btn btn-sm" onclick="exportCalCSV()"><i class="ti ti-download"></i> Export CSV</button>
     </div>
@@ -1098,6 +1083,10 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
   </div>
 
   <div id="an-tab-content">
+  <div class="card">
+    <div class="card-title" style="margin-bottom:2px">Vertical balance — this month</div>
+    <div id="vert-balance-analytics"></div>
+  </div>
   <!-- STAT STRIP -->
   <div class="g4" style="margin-bottom:12px">
     <div class="stat-card" style="cursor:pointer" onclick="showPage('calendar',document.querySelector('[onclick*=calendar]'))">
@@ -1199,104 +1188,7 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
     </div>
   </div>
 
-<div id="page-trending" class="pg" style="display:none">
-  <div class="pg-header" style="">
-    <div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> Trends</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">Field trends · awareness windows · emerging content angles</div>
-    </div>
-  </div>
-  <div class="g2">
-    <div>
-      <div class="card card-accent">
-        <div class="card-hdr">
-          <div class="card-title"><i class="ti ti-flame"></i> Hot topics right now</div>
-          <button class="btn btn-sm" id="sync-hot-btn" onclick="syncTrending('hot',this)"><i class="ti ti-refresh"></i> Sync</button>
-        </div>
-        <div id="hot-topics-list"></div>
-      </div>
-      <div class="card card-accent">
-        <div class="card-hdr">
-          <div class="card-title"><i class="ti ti-calendar-event"></i> Awareness windows</div>
-          <button class="btn btn-sm" id="sync-aw-btn" onclick="syncTrending('awareness',this)"><i class="ti ti-refresh"></i> Sync</button>
-        </div>
-        <div id="awareness-list"></div>
-      </div>
-    </div>
-    <div>
-      <div class="card card-accent">
-        <div class="card-hdr">
-          <div class="card-title"><i class="ti ti-chart-bar"></i> Oncology topic volume</div>
-          <span style="font-size:10px;color:var(--muted)">Your content vs field activity</span>
-        </div>
-        <div style="height:220px"><canvas id="topicChart"></canvas></div>
-      </div>
-      <div class="card card-accent">
-        <div class="card-hdr">
-          <div class="card-title"><i class="ti ti-sparkles"></i> Emerging content angles</div>
-          <button class="btn btn-sm" id="sync-em-btn" onclick="syncTrending('emerging',this)"><i class="ti ti-refresh"></i> Sync</button>
-        </div>
-        <div id="emerging-list"></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- PDUFA -->
-  <div class="card card-accent">
-    <div class="card-hdr">
-      <div class="card-title"><i class="ti ti-flask"></i> Upcoming PDUFA decisions</div>
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-sm btn-primary" onclick="openPDUFAModal(null)"><i class="ti ti-plus"></i> Add</button>
-      </div>
-    </div>
-    <div style="overflow-x:auto;max-height:280px;overflow-y:auto"><table class="dtbl"><thead><tr><th>Date</th><th>Drug</th><th>Company</th><th>Indication</th><th>Type</th><th>Notes</th><th></th></tr></thead><tbody id="pdufa-tbody"></tbody></table></div>
-  </div>
-
-  <!-- FDA ADVISORY COMMITTEE MEETINGS -->
-  <div class="card card-accent">
-    <div class="card-hdr">
-      <div class="card-title"><i class="ti ti-building-bank"></i> FDA Advisory Committee meetings</div>
-      <button class="btn btn-sm btn-primary" onclick="openAdcomModal(null)"><i class="ti ti-plus"></i> Add</button>
-    </div>
-    <div style="overflow-x:auto;max-height:240px;overflow-y:auto">
-      <table class="dtbl"><thead><tr><th>Date</th><th>Drug / Topic</th><th>Indication</th><th>Committee</th><th>Sponsor</th><th>Notes</th><th></th></tr></thead>
-      <tbody id="adcom-tbody"></tbody></table>
-    </div>
-  </div>
-
-  <!-- REGULATORY MILESTONES (label expansions, BT designations, late-stage readouts) -->
-  <div class="card card-accent">
-    <div class="card-hdr">
-      <div class="card-title"><i class="ti ti-certificate"></i> Regulatory milestones</div>
-      <button class="btn btn-sm btn-primary" onclick="openRegulatoryModal(null)"><i class="ti ti-plus"></i> Add</button>
-    </div>
-    <div style="overflow-x:auto;max-height:240px;overflow-y:auto">
-      <table class="dtbl"><thead><tr><th>Expected date</th><th>Drug</th><th>Company</th><th>Type</th><th>Indication</th><th>Notes</th><th></th></tr></thead>
-      <tbody id="regulatory-tbody"></tbody></table>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border)">
-      <span style="font-size:10px;font-weight:600;color:var(--muted)">Type key:</span>
-      <span class="tag" style="background:rgba(29,158,117,.12);color:#0d7a5a">Label expansion</span>
-      <span class="tag" style="background:rgba(83,74,183,.12);color:#3c3489">Breakthrough designation</span>
-      <span class="tag" style="background:rgba(223,173,14,.12);color:#8a6a00">Late-stage readout</span>
-      <span class="tag" style="background:rgba(216,90,48,.12);color:#993c1d">Post-market safety</span>
-      <span class="tag" style="background:rgba(25,46,87,.12);color:var(--navy)">Approval</span>
-    </div>
-  </div>
-
-  <!-- JOURNAL RELEASE SCHEDULE -->
-  <div class="card card-accent">
-    <div class="card-hdr">
-      <div class="card-title"><i class="ti ti-book-2"></i> Journal release schedule</div>
-      <button class="btn btn-sm btn-primary" onclick="openJournalModal(null)"><i class="ti ti-plus"></i> Add</button>
-    </div>
-    <div style="overflow-x:auto;max-height:240px;overflow-y:auto">
-      <table class="dtbl"><thead><tr><th>Publication date</th><th>Journal</th><th>Issue / Volume</th><th>Key topics / Studies</th><th>Embargo</th><th>Notes</th><th></th></tr></thead>
-      <tbody id="journal-tbody"></tbody></table>
-    </div>
-  </div>
-
-</div>
 
 
 <!-- ═══ KOLs ═══ -->
@@ -1394,48 +1286,7 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 
 
 <!-- ═══ PITCH QUEUE ═══ -->
-<div id="page-pitches" class="pg" style="display:none">
-  <div class="pg-header" style="">
-    <div>
-      <div style="font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px"> Pitch queue</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">Drag cards between columns · click to edit · click + to add</div>
-    </div>
-    <button class="btn btn-sm btn-primary" onclick="openPitchModal(null,null)"><i class="ti ti-plus"></i> Add pitch</button>
-  </div>
-  <div class="kanban" id="kanban-board">
-    <div class="kb-col" id="kb-idea" ondragover="kbDragOver(event,'idea')" ondrop="kbDrop(event,'idea')" ondragleave="kbDragLeave(event)">
-      <div class="kb-col-hdr"><span><span class="kb-dot" style="background:#8a9ab8"></span>Ideas</span><span id="cnt-idea" class="fbtn" style="padding:1px 7px;cursor:default;pointer-events:none">0</span></div>
-      <div id="kb-cards-idea"></div>
-      <button class="kb-add" onclick="openPitchModal(null,'idea')">+ Add idea</button>
-    </div>
-    <div class="kb-col" id="kb-pitched" ondragover="kbDragOver(event,'pitched')" ondrop="kbDrop(event,'pitched')" ondragleave="kbDragLeave(event)">
-      <div class="kb-col-hdr"><span><span class="kb-dot" style="background:var(--gold)"></span>Pitched</span><span id="cnt-pitched" class="fbtn" style="padding:1px 7px;cursor:default;pointer-events:none">0</span></div>
-      <div id="kb-cards-pitched"></div>
-      <button class="kb-add" onclick="openPitchModal(null,'pitched')">+ Add</button>
-    </div>
-    <div class="kb-col" id="kb-assigned" ondragover="kbDragOver(event,'assigned')" ondrop="kbDrop(event,'assigned')" ondragleave="kbDragLeave(event)">
-      <div class="kb-col-hdr"><span><span class="kb-dot" style="background:var(--blue)"></span>Assigned</span><span id="cnt-assigned" class="fbtn" style="padding:1px 7px;cursor:default;pointer-events:none">0</span></div>
-      <div id="kb-cards-assigned"></div>
-      <button class="kb-add" onclick="openPitchModal(null,'assigned')">+ Add</button>
-    </div>
-    <div class="kb-col" id="kb-inprogress" ondragover="kbDragOver(event,'inprogress')" ondrop="kbDrop(event,'inprogress')" ondragleave="kbDragLeave(event)">
-      <div class="kb-col-hdr"><span><span class="kb-dot" style="background:var(--green)"></span>In progress</span><span id="cnt-inprogress" class="fbtn" style="padding:1px 7px;cursor:default;pointer-events:none">0</span></div>
-      <div id="kb-cards-inprogress"></div>
-      <button class="kb-add" onclick="openPitchModal(null,'inprogress')">+ Add</button>
-    </div>
-  </div>
 
-  <!-- SWOT -->
-  <div class="card card-accent" style="margin-top:14px">
-    <div class="card-hdr"><div class="card-title"><i class="ti ti-chart-dots"></i> SWOT — oncology at Pharmacy Times</div></div>
-    <div class="swot-grid">
-      <div class="swot-q swot-s"><h4><i class="ti ti-shield-check" style="font-size:12px"></i>Strengths</h4><ul id="swot-s"></ul></div>
-      <div class="swot-q swot-w"><h4><i class="ti ti-alert-triangle" style="font-size:12px"></i>Weaknesses</h4><ul id="swot-w"></ul></div>
-      <div class="swot-q swot-o"><h4><i class="ti ti-rocket" style="font-size:12px"></i>Opportunities</h4><ul id="swot-o"></ul></div>
-      <div class="swot-q swot-t"><h4><i class="ti ti-flame" style="font-size:12px"></i>Threats</h4><ul id="swot-t"></ul></div>
-    </div>
-  </div>
-</div>
 
 <!-- ═══ CONFERENCES ═══ -->
 <div id="page-conferences" class="pg" style="display:none">
@@ -1578,7 +1429,7 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
       <div style="font-size:12px;color:var(--muted);margin-top:3px">Oncology content team · 2026</div>
     </div>
   </div>
-  <div class="team-tab-bar" id="team-tab-bar"></div>
+  <div class="team-tab-bar tab-pill-bar" id="team-tab-bar"></div>
 
   <!-- TEAM HOME TAB -->
   <div class="team-panel active" id="team-panel-home">
@@ -1607,6 +1458,27 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
 </div><!-- /app -->
 
 <!-- ═══ MODALS ═══ -->
+
+<div id="sheet-modal" class="overlay" style="display:none">
+<div class="modal modal-md">
+  <div class="modal-hdr"><h3>Sync daily tracker</h3><button class="modal-close" id="sheet-close">✕</button></div>
+  <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px" id="sheet-status"></div>
+  <div class="field"><label>Google Sheet link</label><input type="text" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/d/…"></div>
+  <div class="field"><label>Tab name</label><input type="text" id="sheet-tab" placeholder="2026 Daily Tracker"></div>
+  <label style="display:flex;align-items:center;gap:7px;font-size:12px;margin-bottom:10px;cursor:pointer">
+    <input type="checkbox" id="sheet-window" style="width:auto"> Only import the last 60 / next 180 days (recommended)
+  </label>
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <button class="btn btn-primary" id="sheet-sync-btn">Sync now</button>
+  </div>
+  <div style="border-top:0.5px solid var(--border);padding-top:12px">
+    <div style="font-size:12px;font-weight:500;margin-bottom:4px">Paste CSV instead</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">If the live sync is blocked, open the sheet, File → Download → CSV, then paste the contents here.</div>
+    <textarea id="sheet-paste" rows="4" placeholder="Paste CSV contents…" style="width:100%"></textarea>
+    <button class="btn" id="sheet-paste-btn" style="margin-top:8px">Import pasted CSV</button>
+  </div>
+</div></div>
+
 
 <!-- Interaction Modal -->
 <div id="interaction-modal" class="overlay" style="display:none">
@@ -2189,6 +2061,13 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
       </div>
     </div>
     <div class="field"><label>Email</label><input id="km-email" type="email" placeholder="e.g. name@institution.edu"></div>
+    <div class="field"><label>Vertical</label>
+      <select id="km-vertical">
+        <option value="onc">Oncology</option>
+        <option value="multi">Multispecialty</option>
+        <option value="retail">Retail</option>
+      </select>
+    </div>
     <div class="g2f">
       <div class="field"><label>Tier</label>
         <select id="km-tier">
@@ -2243,10 +2122,17 @@ body.dark #theme-picker { background: rgba(25,27,40,.95); }
         <option value="ppfo">PPFO</option>
       </select>
     </div>
+  <div class="field"><label>Vertical</label>
+    <select id="cevt-vertical">
+      <option value="onc">Oncology</option>
+      <option value="multi">Multispecialty</option>
+      <option value="retail">Retail</option>
+    </select>
+  </div>
     <div class="field"><label>Date</label><input id="cevt-date" type="date"></div>
   </div>
   <div class="g2f">
-    <div class="field"><label>Cancer type</label><select id="cevt-cancer"></select></div>
+    <div class="field"><label id="cevt-topic-label">Cancer type</label><select id="cevt-cancer"></select></div>
     <div class="field"><label>Associated RC <span style="font-weight:400;color:var(--muted)">(optional)</span></label><select id="cevt-rc"></select></div>
   </div>
   <div class="g2f">
@@ -2783,19 +2669,7 @@ let saveTimer;
 
 // Background photo persists under its own key — only uploaded when it changes
 let _bgDirty = false;
-async function saveBgPhoto() {
-  if (!_bgDirty) return;
-  _bgDirty = false;
-  try {
-    await fetch(SUPA_URL + '/rest/v1/dashboard_state', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY,
-        'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'resolution=merge-duplicates' },
-      body: JSON.stringify({ statekey: LS_KEY + '_bg', data: JSON.stringify({ bgPhoto: DB.bgPhoto || '' }) })
-    });
-  } catch(e) { _bgDirty = true; window.dbgLog && dbgLog('BG photo save failed: ' + e.message, false); }
-  try { localStorage.setItem(LS_KEY + '_bg', DB.bgPhoto || ''); } catch(e) { /* photo may exceed quota */ }
-}
+
 function saveState() {
   clearTimeout(saveTimer);
   saveTimer=setTimeout(_doSave,800);
@@ -2814,8 +2688,7 @@ async function _doSave() {
   showPill('⟳','Saving…','rgba(223,173,14,.5)');
 
   // Serialize without the photo (saved under its own key) and without _internal fields
-  const { bgPhoto, ...rest } = DB;
-  const dataStr = JSON.stringify(rest, (k, v) => k.startsWith('_') ? undefined : v);
+  const dataStr = JSON.stringify(DB, (k, v) => k.startsWith('_') ? undefined : v);
   const byteSize = new Blob([dataStr]).size;
   const kb       = Math.round(byteSize / 1024);
   console.log('[PT Dashboard] Saving', kb + 'KB…');
@@ -2861,18 +2734,6 @@ async function _doSave() {
 }
 
 async function loadState() {
-  // Load background photo from its dedicated key (merged after main state below)
-  window._loadBgPhoto = async function() {
-    try {
-      const r = await fetch(SUPA_URL + '/rest/v1/dashboard_state?statekey=eq.' + encodeURIComponent(LS_KEY + '_bg') + '&select=data', {
-        headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY } });
-      if (r.ok) {
-        const rows = await r.json();
-        if (rows.length) { const d = JSON.parse(rows[0].data); if (d.bgPhoto) { DB.bgPhoto = d.bgPhoto; return; } }
-      }
-    } catch(e) {}
-    try { const ls = localStorage.getItem(LS_KEY + '_bg'); if (ls) DB.bgPhoto = ls; } catch(e) {}
-  };
   try {
     const res = await fetch(
       `${SUPA_URL}/rest/v1/${SUPA_TABLE}?statekey=eq.main&select=data`,
@@ -2955,16 +2816,15 @@ function showPage(name, el) {
   if (el) el.classList.add('active');
   // Lazy-render pages on first visit
   try {
+    if (name === 'home') { renderMissionControl(); }
     if (name === 'calendar') { renderCal(); }
-    if (name === 'trending') { renderTrending(); renderTopicChart(); renderPDUFA(); renderAdcom(); renderRegulatory(); renderJournals(); }
     if (name === 'analytics') {
       [renderCharts, updateMonthStat, renderPPFOProgress, updateStatStrip,
-       renderWeeklyDigest, renderGapAlerts, renderPacing, renderTopContent, renderGap].forEach(safeRun);
+       renderWeeklyDigest, renderGapAlerts, renderPacing, renderTopContent, renderGap, renderVerticalBalance].forEach(safeRun);
       const engTab = document.getElementById('an-tab-kol');
       if (engTab && engTab.style.display !== 'none') renderEngagement();
     }
   } catch(e) { dbgLog('Page render error (' + name + '): ' + e.message, false); }
-  if (name === 'pitches') { renderSWOT(); }
   setTimeout(() => { applyTileOrder(name); wireDragAndDrop(); }, 150);
   if (name === 'kols') {
     renderKOLs();
@@ -2973,7 +2833,6 @@ function showPage(name, el) {
     const so = document.getElementById('kol-sort-sel');     if(so) so.value = currentKOLSort;
     const sp = document.getElementById('kol-specialty-sel');if(sp) sp.value = currentKOLSpecialty;
   }
-  if (name === 'pitches')     { renderKanban(); }
   if (name === 'conferences') { renderConferences(); }
   if (name === 'ppfo')     { renderPPFO(); }
   if (name === 'projects') { renderProjects(); }
@@ -3050,6 +2909,161 @@ const CANCER_GROUPS = {
 
 // All valid values from the grouped list
 const ALL_CANCER_TYPES = Object.values(CANCER_GROUPS).flat();
+
+// ══ TOPIC TAXONOMY PER VERTICAL ════════════════════════════
+const MULTI_GROUPS = {
+  'Cardiometabolic': ['Heart failure','Hypertension','Lipids & cholesterol','Atrial fibrillation','Coronary artery disease','Anticoagulation','Type 2 diabetes','Type 1 diabetes','Obesity & weight management','GLP-1 therapies','Metabolic syndrome','Cardiorenal-metabolic (CKM)'],
+  'Nephrology': ['Chronic kidney disease','Dialysis','Acute kidney injury','Kidney transplant','Electrolyte disorders','Diabetic nephropathy'],
+  'Mental health': ['Depression','Anxiety disorders','Bipolar disorder','Schizophrenia','ADHD','PTSD','Substance use disorder','Opioid use disorder','Insomnia & sleep','Psychedelics & novel therapies'],
+  'Neurology': ['Alzheimer disease & dementia','Parkinson disease','Multiple sclerosis','Epilepsy','Migraine','Neuropathic pain','ALS','Stroke'],
+  'Infectious disease': ['COVID-19','Influenza','RSV','HIV','Hepatitis B','Hepatitis C','Antimicrobial stewardship','C. difficile','Sepsis','Tuberculosis','Measles & MMR','Sexually transmitted infections'],
+  'Respiratory': ['Asthma','COPD','Cystic fibrosis','Pulmonary hypertension','Idiopathic pulmonary fibrosis'],
+  'Immunology & rheumatology': ['Rheumatoid arthritis','Psoriasis & psoriatic arthritis','Lupus','Inflammatory bowel disease','Atopic dermatitis','Allergy & anaphylaxis','Biosimilars'],
+  'Gastroenterology & hepatology': ['GERD','IBS','Celiac disease','MASH / fatty liver','Cirrhosis','Pancreatitis'],
+  'Endocrine & bone': ['Thyroid disorders','Osteoporosis','Adrenal disorders','Growth & pituitary'],
+  'Women’s & men’s health': ['Contraception','Menopause','Fertility','Pregnancy & lactation safety','Cervical & breast screening','Urology & BPH','Erectile dysfunction'],
+  'Pediatrics': ['Pediatric vaccines','Pediatric asthma','Pediatric mental health','Neonatal care','Childhood obesity'],
+  'Vaccines & prevention': ['Adult immunization schedule','Vaccine hesitancy','Travel vaccines','Shingles','Pneumococcal','Preventive screening'],
+  'Pain & supportive': ['Chronic pain','Acute pain','Palliative care','Opioid stewardship','Non-opioid analgesia'],
+  'Other specialties': ['Dermatology','Ophthalmology','Rare disease','Transplant','Hematology (non-malignant)','Sickle cell disease','Wound care','Oral health'],
+};
+const RETAIL_GROUPS = {
+  'Community practice': ['Immunization services','Point-of-care testing','Medication therapy management','Adherence programs','Medication synchronization','Clinical services expansion','Test & treat'],
+  'OTC & front-end': ['OTC counseling','Vitamins & supplements','Cough & cold','Allergy OTC','Smoking cessation','Skin & sun care','Sleep aids','Digestive health'],
+  'Operations': ['Workflow & staffing','Burnout & wellbeing','Automation & robotics','Inventory & shortages','Central fill','Technician roles & training','Scheduling'],
+  'Business & policy': ['Reimbursement & DIR','PBM reform','Pharmacy deserts & closures','Provider status','Scope of practice','340B','Independent ownership'],
+  'Patient experience': ['Counseling & communication','Health literacy','Digital & telehealth','Home delivery','Price transparency','Language access'],
+  'Specialty & niche': ['Specialty pharmacy','Compounding','Long-term care','Home infusion','Veterinary compounding'],
+};
+const TOPIC_GROUPS = { onc: CANCER_GROUPS, multi: MULTI_GROUPS, retail: RETAIL_GROUPS };
+const TOPIC_LABEL  = { onc: 'Cancer type', multi: 'Therapeutic area', retail: 'Retail topic' };
+function topicGroupsFor(v) { return TOPIC_GROUPS[v] || CANCER_GROUPS; }
+function allTopicsFor(v) { return Object.values(topicGroupsFor(v)).flat(); }
+
+// Guess a topic from free text (used when syncing the sheet)
+const TOPIC_ALIASES = {
+  'Chronic kidney disease': ['ckd','kidney disease','renal disease','nephrolog'],
+  'Type 2 diabetes': ['type 2 diabetes','t2d','diabetes'],
+  'Type 1 diabetes': ['type 1 diabetes','t1d'],
+  'Obesity & weight management': ['obesity','weight management','weight loss','wegovy','zepbound','tirzepatide','semaglutide'],
+  'GLP-1 therapies': ['glp-1','glp1','orforlipron','incretin'],
+  'Lipids & cholesterol': ['cholesterol','statin','lipid','pcsk9','ldl','enlicitide'],
+  'Heart failure': ['heart failure','hfpef','hfref'],
+  'Hypertension': ['hypertension','blood pressure'],
+  'Atrial fibrillation': ['atrial fibrillation','afib','a-fib'],
+  'Coronary artery disease': ['coronary','cardio','cardiovascular','cvd','attr-cm'],
+  'Anticoagulation': ['anticoag','doac','warfarin','apixaban'],
+  'Cardiorenal-metabolic (CKM)': ['ckm','cardiorenal'],
+  'Depression': ['depression','antidepress','ssri'],
+  'Anxiety disorders': ['anxiety'],
+  'Schizophrenia': ['schizophren','antipsychotic'],
+  'Bipolar disorder': ['bipolar'],
+  'ADHD': ['adhd','stimulant'],
+  'Substance use disorder': ['substance use','sud care','sud '],
+  'Opioid use disorder': ['opioid use','oud','naloxone','buprenorphine'],
+  'Insomnia & sleep': ['insomnia','sleep'],
+  'Psychedelics & novel therapies': ['psychedelic','psilocybin','ketamine'],
+  'Alzheimer disease & dementia': ['alzheimer','dementia','lecanemab','donanemab'],
+  'Parkinson disease': ['parkinson','pimavanserin'],
+  'Multiple sclerosis': ['multiple sclerosis',' ms ','tolebrutinib'],
+  'Migraine': ['migraine'],
+  'Epilepsy': ['epilepsy','seizure'],
+  'Stroke': ['stroke'],
+  'COVID-19': ['covid'],
+  'Influenza': ['influenza','flu '],
+  'RSV': ['rsv'],
+  'HIV': ['hiv'],
+  'Hepatitis B': ['hepatitis b','hep b'],
+  'Hepatitis C': ['hepatitis c','hep c'],
+  'Antimicrobial stewardship': ['antimicrobial','antibiotic','stewardship'],
+  'Measles & MMR': ['measles','mmr'],
+  'Sexually transmitted infections': ['sti','syphilis','gonorrhea','chlamydia'],
+  'Tuberculosis': ['tuberculosis',' tb '],
+  'Asthma': ['asthma'],
+  'COPD': ['copd'],
+  'Cystic fibrosis': ['cystic fibrosis'],
+  'Rheumatoid arthritis': ['rheumatoid','arthritis'],
+  'Psoriasis & psoriatic arthritis': ['psoriasis','psoriatic'],
+  'Lupus': ['lupus'],
+  'Inflammatory bowel disease': ['inflammatory bowel','crohn','ulcerative colitis','ibd'],
+  'Atopic dermatitis': ['atopic dermatitis','eczema'],
+  'Allergy & anaphylaxis': ['allergy','allergic','anaphylaxis'],
+  'Biosimilars': ['biosimilar'],
+  'MASH / fatty liver': ['mash','fatty liver','nash','nafld'],
+  'GERD': ['gerd','reflux','heartburn'],
+  'IBS': ['ibs','irritable bowel'],
+  'Cirrhosis': ['cirrhosis'],
+  'Thyroid disorders': ['thyroid'],
+  'Osteoporosis': ['osteoporosis','bone density'],
+  'Contraception': ['contracept','birth control'],
+  'Menopause': ['menopause'],
+  'Pregnancy & lactation safety': ['pregnan','lactation','breastfeed'],
+  'Cervical & breast screening': ['pap smear','cervical screen','mammogram'],
+  'Urology & BPH': ['bph','prostate hyperplasia','urolog'],
+  'Pediatric vaccines': ['pediatric vaccine','childhood vaccine'],
+  'Childhood obesity': ['childhood obesity','pediatric obesity'],
+  'Adult immunization schedule': ['immunization schedule','vaccine schedule','vaccine guideline','vaccine update'],
+  'Vaccine hesitancy': ['vaccine hesitan','anti-vax'],
+  'Shingles': ['shingles','zoster'],
+  'Pneumococcal': ['pneumococcal'],
+  'Preventive screening': ['screening','prevent'],
+  'Chronic pain': ['chronic pain'],
+  'Palliative care': ['palliative','hospice'],
+  'Sickle cell disease': ['sickle cell'],
+  'Rare disease': ['rare disease','orphan drug'],
+  'Transplant': ['transplant'],
+  'Oral health': ['oral care','dental','oral health'],
+  'Dermatology': ['dermatolog','skin '],
+  'Ophthalmology': ['ophthalm','eye ','retina'],
+  'Vitamins & supplements': ['vitamin','supplement','vits'],
+  'OTC counseling': ['otc'],
+  'Cough & cold': ['cough','cold ','congestion'],
+  'Smoking cessation': ['smoking','nicotine','vaping'],
+  'Immunization services': ['immunization service','vaccine clinic','flu shot'],
+  'Point-of-care testing': ['point-of-care','poc test','test & treat','test and treat'],
+  'Medication therapy management': ['mtm','medication therapy'],
+  'Adherence programs': ['adherence'],
+  'Workflow & staffing': ['staffing','workflow','workload'],
+  'Burnout & wellbeing': ['burnout','wellbeing','wellness'],
+  'Automation & robotics': ['automation','robot'],
+  'Inventory & shortages': ['shortage','inventory','supply chain'],
+  'Reimbursement & DIR': ['reimbursement','dir fee'],
+  'PBM reform': ['pbm'],
+  'Pharmacy deserts & closures': ['pharmacy desert','closure'],
+  'Provider status': ['provider status'],
+  'Scope of practice': ['scope of practice'],
+  '340B': ['340b'],
+  'Specialty pharmacy': ['specialty pharmacy'],
+  'Compounding': ['compound'],
+  'Long-term care': ['long-term care','ltc '],
+  'Home infusion': ['home infusion'],
+  'Digital & telehealth': ['telehealth','digital health','app '],
+  'Health literacy': ['health literacy'],
+  'Price transparency': ['price transparen','drug pricing'],
+};
+
+const _TOPIC_INDEX = (() => {
+  const ix = [];
+  Object.keys(TOPIC_GROUPS).forEach(v => {
+    Object.values(TOPIC_GROUPS[v]).flat().forEach(t => {
+      const keys = new Set();
+      const core = t.replace(/\s*\([^)]*\)/g, '').split(/[&/]/)[0].trim().toLowerCase();
+      if (core.length >= 4) keys.add(core);
+      (TOPIC_ALIASES[t] || []).forEach(a => keys.add(a.toLowerCase()));
+      keys.forEach(k => ix.push({ v, topic: t, key: k }));
+    });
+  });
+  return ix.sort((a, b) => b.key.length - a.key.length);
+})();
+
+function classifyTopic(title, vertical) {
+  const s = ' ' + (title || '').toLowerCase() + ' ';
+  let hit = _TOPIC_INDEX.find(x => x.v === vertical && s.includes(x.key));
+  if (!hit) hit = _TOPIC_INDEX.find(x => s.includes(x.key));
+  return hit ? hit.topic : '';
+}
+
+
 
 
 // Author dropdown — core team + KOL list
@@ -3148,10 +3162,10 @@ function buildConfSelect(selId, currentVal) {
   });
 }
 
-function buildCancerSelect(selId, currentVal) {
+function buildCancerSelect(selId, currentVal, vertical) {
   const sel = document.getElementById(selId); if (!sel) return;
   sel.innerHTML = '<option value="">— None —</option>';
-  Object.entries(CANCER_GROUPS).forEach(([group, types]) => {
+  Object.entries(topicGroupsFor(vertical || 'onc')).forEach(([group, types]) => {
     const og = document.createElement('optgroup'); og.label = group;
     types.forEach(t => {
       const o = document.createElement('option'); o.value = t; o.textContent = t;
@@ -3188,6 +3202,7 @@ let calEvtCounter = Math.max(100, ...((DB.calEvents||[]).map(e => e.id||0)));
 const MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 function renderCal() {
+  // vertical filter honoured via vertMatch in event loops
   const g = document.getElementById('cal-grid'); if (!g) return;
   document.getElementById('cal-month-lbl').textContent = MN[DB.calMonth] + ' ' + DB.calYear;
   g.innerHTML = '';
@@ -3215,7 +3230,7 @@ function renderCal() {
     // Scrollable events container
     const evtScroll = document.createElement('div'); evtScroll.className = 'cal-evts-scroll';
     // Events for this day — chips are visual only (popup handles editing)
-    const dayEvts = (DB.calEvents || []).filter(e => e.y === DB.calYear && e.m === DB.calMonth + 1 && e.d === d);
+    const dayEvts = (DB.calEvents||[]).filter(e => vertMatch(e) && e.y === DB.calYear && e.m === DB.calMonth + 1 && e.d === d);
     dayEvts.forEach(evt => {
       const ev = document.createElement('div');
       ev.className = `cal-evt t-${evt.type || 'articles'}`;
@@ -3266,6 +3281,7 @@ function openCalEvtModal(dateHint, evtId) {
   const evt = evtId ? (DB.calEvents || []).find(e => e.id === evtId) : null;
   document.getElementById('cal-evt-modal-title').textContent = evt ? 'Edit event' : 'Add event';
   document.getElementById('cevt-label').value = evt?.label || '';
+  { const vs=document.getElementById('cevt-vertical'); if(vs) vs.value = evt?.vertical || (DB.activeVertical!=='all'?DB.activeVertical:'onc'); }
   document.getElementById('cevt-type').value  = evt?.type  || 'articles';
   document.getElementById('cevt-id').value    = evt?.id    || '';
   // Date
@@ -3276,7 +3292,9 @@ function openCalEvtModal(dateHint, evtId) {
   } else {
     document.getElementById('cevt-date').value = '';
   }
-  buildCancerSelect('cevt-cancer', evt?.cancer || '');
+  { const _v = (document.getElementById('cevt-vertical')||{}).value || 'onc';
+    buildCancerSelect('cevt-cancer', evt?.cancer || '', _v);
+    const _lbl = document.getElementById('cevt-topic-label'); if (_lbl) _lbl.textContent = TOPIC_LABEL[_v] || 'Topic'; }
   buildRCSelect('cevt-rc', evt?.rc || '');
   buildAuthorSelect('cevt-author', evt?.author || '');
   buildProjectSelect('cevt-project', evt?.project || '');
@@ -3298,6 +3316,7 @@ function saveCalEvt() {
     id:      evtId ? Number(evtId) : ++calEvtCounter,
     y, m, d,
     type:    document.getElementById('cevt-type').value,
+    vertical: (document.getElementById('cevt-vertical')||{}).value || 'onc',
     label,
     cancer:  document.getElementById('cevt-cancer').value,
     rc:      document.getElementById('cevt-rc').value,
@@ -3481,8 +3500,6 @@ async function syncTrending(type, btn) {
       if (type === 'hot')       { DB.hotTopics       = items; }
       if (type === 'awareness') { DB.awarenessWindows = items; }
       if (type === 'emerging')  { DB.emergingAngles   = items; }
-      renderTrending();
-      renderTopicChart();
       saveState();
       btn.innerHTML = '<i class="ti ti-check"></i> Updated';
     } else {
@@ -3798,6 +3815,7 @@ function buildKOLCard(k, idx, tierMeta) {
         ${k.primarySpec || k.spec ? `<span class="tag tag-gold">${k.primarySpec || (k.spec||'').split(',')[0]}</span>` : ''}
         ${k.subSpec ? `<span class="tag" style="background:rgba(83,74,183,.1);color:#3c3489">${k.subSpec}</span>` : ''}
         <span class="tag ${tierMeta[tier]?.tagCls || 'tag-t3'}">${tier}</span>
+        ${vertBadge(k.vertical||'onc')}
       </div>
     </div>
     <div class="kol-right">
@@ -3810,6 +3828,7 @@ function buildKOLCard(k, idx, tierMeta) {
 
 function renderKOLs(filter) {
   window._kolCountsCache = getKOLCountsMap();
+  // vertical filter applied inside list build below
   setTimeout(() => { window._kolCountsCache = null; }, 0);
   if (filter !== undefined) currentKOLFilter = filter;
   const cont = document.getElementById('kol-grid');
@@ -3828,6 +3847,7 @@ function renderKOLs(filter) {
 
   // Group by tier
   const kols = (DB.kols || []).filter(k => {
+    if (!vertMatch(k)) return false;
     // Tier filter
     if (currentKOLFilter !== 'all' && getKOLTier(k) !== currentKOLFilter) return false;
     // Source filter
@@ -3952,9 +3972,11 @@ function openKOLModal(idx) {
 
   // Populate primary specialty dropdown from CANCER_GROUPS
   const primSel = document.getElementById('km-primary');
-  if (primSel && primSel.options.length <= 1) {
-    if (typeof CANCER_GROUPS !== 'undefined') {
-      Object.entries(CANCER_GROUPS).forEach(([group, types]) => {
+  if (primSel) {
+    const _kv = k?.vertical || (DB.activeVertical !== 'all' ? DB.activeVertical : 'onc');
+    primSel.innerHTML = '<option value="">— Select —</option>';
+    {
+      Object.entries(topicGroupsFor(_kv)).forEach(([group, types]) => {
         const og = document.createElement('optgroup'); og.label = group;
         types.forEach(t => {
           const o = document.createElement('option'); o.value = t; o.textContent = t;
@@ -4041,6 +4063,7 @@ function openKOLModal(idx) {
   const pv = document.getElementById('km-primary'); if (pv) pv.value = k?.primarySpec || '';
   const sv = document.getElementById('km-sub');     if (sv) sv.value = k?.subSpec || '';
   document.getElementById('km-email').value = k?.email || '';
+  { const kv=document.getElementById('km-vertical'); if(kv) kv.value = k?.vertical || 'onc'; }
   document.getElementById('km-tier').value  = k?.tierOverride || 'auto';
   document.getElementById('km-count').value = k?.count || 0;
   document.getElementById('km-last').value  = k?.last || '';
@@ -4068,6 +4091,7 @@ function saveKOL() {
     primarySpec: document.getElementById('km-primary')?.value || '',
     subSpec:     document.getElementById('km-sub')?.value || '',
     email: document.getElementById('km-email').value.trim(),
+    vertical: (document.getElementById('km-vertical')||{}).value || 'onc',
     tierOverride: document.getElementById('km-tier').value,
     count: parseInt(document.getElementById('km-count').value) || 0,
     last:  document.getElementById('km-last').value.trim(),
@@ -5494,10 +5518,10 @@ function buildProjectPanel(p) {
     // Build tab buttons
     p.tabs.forEach(tab => tabBar.appendChild(buildTabButton(tab)));
 
-    // ＋ Add tab button
+    // + Add tab button
     const addTabBtn = document.createElement('button');
     addTabBtn.style.cssText = 'padding:4px 10px;border-radius:7px;border:1.5px dashed var(--border-s);background:none;color:var(--muted);font-size:13px;cursor:pointer;transition:all .15s;margin-left:2px';
-    addTabBtn.textContent = '＋';
+    addTabBtn.textContent = '+';
     addTabBtn.title = 'Add new table tab';
     addTabBtn.addEventListener('mouseenter', () => { addTabBtn.style.color='var(--navy)'; addTabBtn.style.borderColor='var(--navy)'; });
     addTabBtn.addEventListener('mouseleave', () => { addTabBtn.style.color='var(--muted)'; addTabBtn.style.borderColor='var(--border-s)'; });
@@ -5644,7 +5668,7 @@ function buildTablePanel(p, tab, panel) {
     const addColTh = document.createElement('th');
     addColTh.style.cssText = 'background:var(--navy);width:30px';
     const addColBtn = document.createElement('button');
-    addColBtn.textContent = '＋';
+    addColBtn.textContent = '+';
     addColBtn.title = 'Add column';
     addColBtn.style.cssText = 'background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:14px;padding:0;line-height:1';
     addColBtn.addEventListener('click', () => {
@@ -7390,8 +7414,7 @@ function openDayPopup(y, m, d) {
 
 function renderDayPopupItems() {
   const cont = document.getElementById('cdp-items-list'); if (!cont) return;
-  const evts = (DB.calEvents || []).filter(e =>
-    e.y === _dayPopupY && e.m === _dayPopupM && e.d === _dayPopupD
+  const evts = (DB.calEvents||[]).filter(e => vertMatch(e) && e.y === _dayPopupY && e.m === _dayPopupM && e.d === _dayPopupD
   );
 
   if (!evts.length) {
@@ -7497,8 +7520,7 @@ function deleteDayEvt(evtId) {
   renderCharts(); renderGap(); renderPacing(); updateMonthStat(); renderUpcomingArticles();
   saveState();
   // If popup is now empty, close it after short delay
-  const remaining = (DB.calEvents || []).filter(e =>
-    e.y === _dayPopupY && e.m === _dayPopupM && e.d === _dayPopupD
+  const remaining = (DB.calEvents||[]).filter(e => vertMatch(e) && e.y === _dayPopupY && e.m === _dayPopupM && e.d === _dayPopupD
   );
   if (!remaining.length) setTimeout(() => closeModal('cal-day-modal'), 600);
 }
@@ -7512,7 +7534,10 @@ function openCalEvtFromObj(evt) {
   document.getElementById('cevt-id').value    = evt.id;
   document.getElementById('cevt-date').value  =
     `${evt.y}-${String(evt.m).padStart(2,'0')}-${String(evt.d).padStart(2,'0')}`;
-  buildCancerSelect('cevt-cancer', evt.cancer || '');
+  { const _v = evt.vertical || 'onc';
+    const _vs = document.getElementById('cevt-vertical'); if (_vs) _vs.value = _v;
+    buildCancerSelect('cevt-cancer', evt.cancer || '', _v);
+    const _lbl = document.getElementById('cevt-topic-label'); if (_lbl) _lbl.textContent = TOPIC_LABEL[_v] || 'Topic'; }
   buildRCSelect('cevt-rc',         evt.rc     || '');
   buildAuthorSelect('cevt-author', evt.author || '');
   buildProjectSelect('cevt-project', evt.project || '');
@@ -7958,6 +7983,18 @@ function fallbackExport(dataStr) {
   conf.style.display = '';
 }
 
+
+
+
+// ══════════════════════════════════════════════════════════
+// SIDEBAR CUSTOMIZATION — accent color + photo background
+// ══════════════════════════════════════════════════════════
+
+// Accent themes (topbar + highlight colors)
+// Solid sidebar background colors
+
+if (!DB.theme)       DB.theme       = '';
+if (!DB.sidebarColor)DB.sidebarColor= '';
 function importDashboardData() {
   const errEl = document.getElementById('import-error');
   errEl.style.display = 'none';
@@ -7997,29 +8034,8 @@ function importDashboardData() {
 }
 
 
-// ══════════════════════════════════════════════════════════
-// SIDEBAR CUSTOMIZATION — accent color + photo background
-// ══════════════════════════════════════════════════════════
-
-// Accent themes (topbar + highlight colors)
-// Solid sidebar background colors
-
-if (!DB.theme)       DB.theme       = '';
-if (!DB.sidebarColor)DB.sidebarColor= '';
-if (!DB.sidebarPhoto)DB.sidebarPhoto= '';
-if (!DB.sidebarZoom) DB.sidebarZoom = 100;
-if (!DB.sidebarPosX) DB.sidebarPosX = 50;
-if (!DB.sidebarPosY) DB.sidebarPosY = 50;
 
 
-// Close picker on outside click
-document.addEventListener('click', e => {
-  const picker = document.getElementById('theme-picker');
-  const btn    = document.getElementById('theme-picker-btn');
-  if (picker && !picker.contains(e.target) && !btn?.contains(e.target)) {
-    picker.style.display = 'none';
-  }
-});
 
 
 // Sidebar + accent opacity controls
@@ -8332,6 +8348,66 @@ const QUOTE_BANK = [
   {text:"The purpose of life is to contribute in some way to making things better.", author:"Robert F. Kennedy"},
   {text:"Act as if what you do makes a difference. It does.", author:"William James"},
   {text:"Believe you can and you're halfway there.", author:"Theodore Roosevelt"},
+{text:"Not everything that is faced can be changed, but nothing can be changed until it is faced.", author:"James Baldwin"},
+  {text:"How wonderful it is that nobody need wait a single moment before starting to improve the world.", author:"Anne Frank"},
+  {text:"The future belongs to those who believe in the beauty of their dreams.", author:"Eleanor Roosevelt"},
+  {text:"Success is stumbling from failure to failure with no loss of enthusiasm.", author:"Winston Churchill"},
+  {text:"Do the best you can until you know better. Then when you know better, do better.", author:"Maya Angelou"},
+  {text:"Everything you can imagine is real.", author:"Pablo Picasso"},
+  {text:"Genius is one percent inspiration and ninety-nine percent perspiration.", author:"Thomas Edison"},
+  {text:"The journey of a thousand miles begins with a single step.", author:"Lao Tzu"},
+  {text:"What lies behind us and what lies before us are tiny matters compared to what lies within us.", author:"Ralph Waldo Emerson"},
+  {text:"You must be the change you wish to see in the world.", author:"Mahatma Gandhi"},
+  {text:"Life is what happens when you're busy making other plans.", author:"John Lennon"},
+  {text:"The only limit to our realization of tomorrow will be our doubts of today.", author:"Franklin D. Roosevelt"},
+  {text:"It does not matter how slowly you go as long as you do not stop.", author:"Confucius"},
+  {text:"Our greatest weakness lies in giving up. The most certain way to succeed is always to try just one more time.", author:"Thomas Edison"},
+  {text:"You are never too old to set another goal or to dream a new dream.", author:"C.S. Lewis"},
+  {text:"Keep your face always toward the sunshine, and shadows will fall behind you.", author:"Walt Whitman"},
+  {text:"The mind is everything. What you think you become.", author:"Buddha"},
+  {text:"Strive not to be a success, but rather to be of value.", author:"Albert Einstein"},
+  {text:"I attribute my success to this: I never gave or took any excuse.", author:"Florence Nightingale"},
+  {text:"The most difficult thing is the decision to act, the rest is merely tenacity.", author:"Amelia Earhart"},
+  {text:"Every strike brings me closer to the next home run.", author:"Babe Ruth"},
+  {text:"Definiteness of purpose is the starting point of all achievement.", author:"W. Clement Stone"},
+  {text:"The two most important days in your life are the day you are born and the day you find out why.", author:"Mark Twain"},
+  {text:"Whatever you can do, or dream you can, begin it. Boldness has genius, power and magic in it.", author:"Johann Wolfgang von Goethe"},
+  {text:"The best revenge is massive success.", author:"Frank Sinatra"},
+  {text:"I have learned over the years that when one's mind is made up, this diminishes fear.", author:"Rosa Parks"},
+  {text:"Certain things catch your eye, but pursue only those that capture the heart.", author:"Ancient proverb"},
+  {text:"Believe and act as if it were impossible to fail.", author:"Charles Kettering"},
+  {text:"When everything seems to be going against you, remember that the airplane takes off against the wind.", author:"Henry Ford"},
+  {text:"The question isn't who is going to let me; it's who is going to stop me.", author:"Ayn Rand"},
+  {text:"If you hear a voice within you say you cannot paint, then by all means paint and that voice will be silenced.", author:"Vincent van Gogh"},
+  {text:"Build your own dreams, or someone else will hire you to build theirs.", author:"Farrah Gray"},
+  {text:"Remember that not getting what you want is sometimes a wonderful stroke of luck.", author:"Dalai Lama"},
+  {text:"You can't use up creativity. The more you use, the more you have.", author:"Maya Angelou"},
+  {text:"I would rather die of passion than of boredom.", author:"Vincent van Gogh"},
+  {text:"Fall seven times and stand up eight.", author:"Japanese proverb"},
+  {text:"Everything has beauty, but not everyone can see.", author:"Confucius"},
+  {text:"We can't help everyone, but everyone can help someone.", author:"Ronald Reagan"},
+  {text:"Nothing is impossible; the word itself says 'I'm possible!'", author:"Audrey Hepburn"},
+  {text:"If you can dream it, you can achieve it.", author:"Zig Ziglar"},
+  {text:"To live is the rarest thing in the world. Most people exist, that is all.", author:"Oscar Wilde"},
+  {text:"That which does not kill us makes us stronger.", author:"Friedrich Nietzsche"},
+  {text:"A person who never made a mistake never tried anything new.", author:"Albert Einstein"},
+  {text:"The only person you are destined to become is the person you decide to be.", author:"Ralph Waldo Emerson"},
+  {text:"Go confidently in the direction of your dreams. Live the life you have imagined.", author:"Henry David Thoreau"},
+  {text:"Few things can help an individual more than to place responsibility on him, and to let him know that you trust him.", author:"Booker T. Washington"},
+  {text:"Change your thoughts and you change your world.", author:"Norman Vincent Peale"},
+  {text:"Nurses dispense comfort, compassion, and caring without even a prescription.", author:"Val Saintsbury"},
+  {text:"The art of medicine consists of amusing the patient while nature cures the disease.", author:"Voltaire"},
+  {text:"Time is generally the best doctor.", author:"Ovid"},
+  {text:"Healing is a matter of time, but it is sometimes also a matter of opportunity.", author:"Hippocrates"},
+  {text:"The greatest medicine of all is to teach people how not to need it.", author:"Hippocrates"},
+  {text:"To array a man's will against his sickness is the supreme art of medicine.", author:"Henry Ward Beecher"},
+  {text:"Hope is the physician of each misery.", author:"Irish proverb"},
+  {text:"Where there is love of medicine, there is love of humankind.", author:"Hippocrates"},
+  {text:"Prevention is better than cure.", author:"Desiderius Erasmus"},
+  {text:"He who studies medicine without books sails an uncharted sea.", author:"William Osler"},
+  {text:"Observation, reason, human understanding, courage; these make the physician.", author:"Martin H. Fischer"},
+  {text:"The doctor of the future will give no medicine but will instruct his patient in the care of the human frame.", author:"Thomas Edison"},
+  {text:"Wear gratitude like a cloak and it will feed every corner of your life.", author:"Rumi"},
 ];
 
 const WORD_BANK = [
@@ -8385,6 +8461,66 @@ const WORD_BANK = [
   {word:"Nuance", def:"A subtle difference in meaning, expression, or sound."},
   {word:"Paradigm", def:"A typical example, pattern, or model of something."},
   {word:"Sine qua non", def:"An essential condition; a thing that is absolutely necessary."},
+{word:"Apotheosis", def:"The highest point in the development of something; culmination."},
+  {word:"Bucolic", def:"Relating to the pleasant aspects of the countryside."},
+  {word:"Cacophony", def:"A harsh, discordant mixture of sounds."},
+  {word:"Demure", def:"Reserved, modest, and shy."},
+  {word:"Effervescent", def:"Vivacious and enthusiastic; bubbling."},
+  {word:"Felicity", def:"Intense happiness; the ability to find appropriate expression."},
+  {word:"Garrulous", def:"Excessively talkative, especially on trivial matters."},
+  {word:"Hubris", def:"Excessive pride or self-confidence."},
+  {word:"Iconoclast", def:"A person who attacks cherished beliefs or institutions."},
+  {word:"Jubilant", def:"Feeling or expressing great happiness and triumph."},
+  {word:"Keen", def:"Having or showing eagerness or enthusiasm; sharp."},
+  {word:"Luminous", def:"Full of or shedding light; bright, especially in the dark."},
+  {word:"Mellifluous", def:"Sweet or musical; pleasant to hear."},
+  {word:"Nefarious", def:"Wicked or criminal."},
+  {word:"Ossify", def:"To become rigid or fixed in attitude or position."},
+  {word:"Pellucid", def:"Translucently clear; easily understood."},
+  {word:"Quixotic", def:"Exceedingly idealistic; unrealistic and impractical."},
+  {word:"Redolent", def:"Strongly reminiscent or suggestive of something; fragrant."},
+  {word:"Sonorous", def:"Imposingly deep and full in sound."},
+  {word:"Trenchant", def:"Vigorous or incisive in expression or style."},
+  {word:"Umbrage", def:"Offense or annoyance."},
+  {word:"Vexillology", def:"The study of flags."},
+  {word:"Winsome", def:"Attractive or appealing in appearance or character."},
+  {word:"Xenial", def:"Relating to hospitality between host and guest."},
+  {word:"Yearn", def:"To have an intense feeling of longing for something."},
+  {word:"Zephyr", def:"A soft, gentle breeze."},
+  {word:"Anodyne", def:"Not likely to provoke offense; inoffensive, often deliberately so."},
+  {word:"Bulwark", def:"A defensive wall; a person or thing that acts as a defense."},
+  {word:"Copacetic", def:"In excellent order; completely satisfactory."},
+  {word:"Denouement", def:"The final part where the strands of the plot are drawn together."},
+  {word:"Ephemeral", def:"Lasting for a very short time."},
+  {word:"Fecund", def:"Producing or capable of producing abundant growth; highly fertile."},
+  {word:"Gossamer", def:"Something very light, thin, and insubstantial or delicate."},
+  {word:"Hinterland", def:"The remote areas of a region away from the coast or river banks."},
+  {word:"Insouciant", def:"Showing a casual lack of concern; indifferent."},
+  {word:"Juggernaut", def:"A huge, powerful, and overwhelming force."},
+  {word:"Kaleidoscopic", def:"Continually shifting or rapidly changing."},
+  {word:"Labyrinthine", def:"Like a labyrinth; irregular and twisting."},
+  {word:"Maelstrom", def:"A powerful whirlpool; a situation of confused movement or upheaval."},
+  {word:"Numinous", def:"Having a strong religious or spiritual quality."},
+  {word:"Obfuscate", def:"To render obscure, unclear, or unintelligible."},
+  {word:"Panoply", def:"A complete or impressive collection of things."},
+  {word:"Quandary", def:"A state of perplexity or uncertainty over what to do."},
+  {word:"Rhapsodize", def:"To speak or write about someone or something with great enthusiasm."},
+  {word:"Susurrus", def:"A whispering or rustling sound."},
+  {word:"Tantamount", def:"Equivalent in seriousness to; virtually the same as."},
+  {word:"Undulate", def:"To move with a smooth wavelike motion."},
+  {word:"Verdant", def:"Green with grass or other rich vegetation."},
+  {word:"Wanderlust", def:"A strong desire to travel."},
+  {word:"Zeitgeist", def:"The defining spirit or mood of a particular period of history."},
+  {word:"Ataraxia", def:"A state of serene calmness."},
+  {word:"Brio", def:"Vigor or vivacity of style or performance."},
+  {word:"Chiaroscuro", def:"The treatment of light and shade in drawing and painting."},
+  {word:"Duende", def:"A quality of passion and inspiration."},
+  {word:"Eloquence", def:"Fluent or persuasive speaking or writing."},
+  {word:"Frisson", def:"A sudden strong feeling of excitement or thrill."},
+  {word:"Grandiloquent", def:"Pompous or extravagant in language, style, or manner."},
+  {word:"Halcyon days", def:"A period of time in the past that was idyllically happy and peaceful."},
+  {word:"Incandescent", def:"Full of strong emotion; passionate; emitting light when heated."},
+  {word:"Lagniappe", def:"Something given as a bonus or extra gift."},
 ];
 
 // Deterministic daily index — same word/quote all day, new one tomorrow
@@ -8431,6 +8567,115 @@ async function loadWordOfDay() {
 // ══════════════════════════════════════════════════════════
 // PUBMED RECENT RESEARCH FEED
 // ══════════════════════════════════════════════════════════
+
+// ══ INTEL FEED TABS: Research | Guidelines | FDA ═══════════
+let _activeFeed = 'research';
+function switchFeedTab(tab) {
+  _activeFeed = tab;
+  document.querySelectorAll('.feed-tab').forEach(b => {
+    const on = b.dataset.feed === tab;
+    b.style.background = on ? 'rgba(25,46,87,.1)' : 'transparent';
+    b.style.color = on ? 'var(--navy)' : 'var(--muted)';
+    b.style.fontWeight = on ? '600' : '400';
+  });
+  const searchInp = document.getElementById('pubmed-search-term');
+  if (searchInp) searchInp.style.display = tab === 'research' ? '' : 'none';
+  if (tab === 'research') loadPubMedFeed();
+  else if (tab === 'guidelines') loadGuidelinesFeed();
+  else loadFDAFeed();
+}
+
+// Oncology guideline publications via PubMed (CORS-open, no key)
+async function loadGuidelinesFeed() {
+  const cont = document.getElementById('pubmed-feed'); if (!cont) return;
+  cont.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:8px 0">Loading guideline updates…</div>';
+  const terms = [
+    '(guideline[pt] OR practice guideline[pt]) AND (neoplasms[mh] OR oncology[tiab])',
+    '(guideline[pt] OR consensus[ti]) AND pharmacy[tiab]',
+    'guideline[pt]',
+  ];
+  for (const term of terms) {
+    try {
+      const sUrl = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=' +
+        encodeURIComponent(term) + '&sort=date&retmax=8&retmode=json';
+      const sRes = await fetch(sUrl);
+      if (!sRes.ok) continue;
+      const sData = await sRes.json();
+      const ids = (sData.esearchresult && sData.esearchresult.idlist) || [];
+      if (!ids.length) continue;
+      const mRes = await fetch('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=' + ids.join(',') + '&retmode=json');
+      if (!mRes.ok) continue;
+      const mData = await mRes.json();
+      cont.innerHTML = '';
+      ids.forEach(id => {
+        const it = mData.result && mData.result[id]; if (!it) return;
+        const row = document.createElement('a');
+        row.href = 'https://pubmed.ncbi.nlm.nih.gov/' + id + '/';
+        row.target = '_blank'; row.rel = 'noopener';
+        row.style.cssText = 'display:block;padding:5px 0;border-bottom:0.5px solid var(--border);text-decoration:none';
+        row.innerHTML = '<div style="font-size:11.5px;font-weight:500;color:var(--text);line-height:1.4">' + (it.title || '') + '</div>' +
+          '<div style="font-size:10px;color:var(--muted);margin-top:1px">' + (it.source || '') + ' · ' + (it.pubdate || '') + '</div>';
+        cont.appendChild(row);
+      });
+      return;
+    } catch (e) { /* try next term */ }
+  }
+  cont.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">Couldn\u2019t reach PubMed right now.' +
+    '<br><a href="https://pubmed.ncbi.nlm.nih.gov/?term=guideline%5Bpt%5D+AND+oncology&sort=date" target="_blank" rel="noopener" style="color:var(--v-onc)">Open in PubMed</a></div>';
+}
+
+// Recent FDA oncology label actions via openFDA (CORS-open, no key)
+async function loadFDAFeed() {
+  const cont = document.getElementById('pubmed-feed'); if (!cont) return;
+  cont.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:8px 0">Loading FDA activity…</div>';
+  // openFDA 404s when a query matches nothing, so try progressively broader queries.
+  const attempts = [
+    'https://api.fda.gov/drug/label.json?search=openfda.pharm_class_epc:"antineoplastic"&sort=effective_time:desc&limit=10',
+    'https://api.fda.gov/drug/label.json?search=indications_and_usage:(cancer+OR+oncology+OR+lymphoma+OR+leukemia+OR+myeloma)&limit=10',
+    'https://api.fda.gov/drug/label.json?search=indications_and_usage:cancer&limit=10',
+  ];
+  let results = null, lastErr = '';
+  for (const url of attempts) {
+    try {
+      const res = await fetch(url);
+      if (res.status === 404) { lastErr = 'no matches'; continue; }
+      if (!res.ok) { lastErr = 'HTTP ' + res.status; continue; }
+      const data = await res.json();
+      if (data.results && data.results.length) { results = data.results; break; }
+      lastErr = 'empty response';
+    } catch (e) { lastErr = e.message; }
+  }
+  if (!results) {
+    cont.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">Couldn\u2019t reach openFDA (' + lastErr + ').' +
+      '<br><a href="https://www.accessdata.fda.gov/scripts/cder/daf/" target="_blank" rel="noopener" style="color:var(--v-onc)">Open Drugs@FDA</a></div>';
+    return;
+  }
+  cont.innerHTML = '<div style="font-size:10px;color:var(--muted);padding:2px 0 4px">Recent oncology drug label actions</div>';
+  results.forEach(r => {
+    const brand = (r.openfda && r.openfda.brand_name && r.openfda.brand_name[0]) || '';
+    const generic = (r.openfda && r.openfda.generic_name && r.openfda.generic_name[0]) || '';
+    const mfr = (r.openfda && r.openfda.manufacturer_name && r.openfda.manufacturer_name[0]) || '';
+    const et = r.effective_time || '';
+    const date = et.length === 8 ? et.slice(0,4)+'-'+et.slice(4,6)+'-'+et.slice(6,8) : et;
+    const name = brand && generic && brand.toLowerCase() !== generic.toLowerCase()
+      ? brand + ' (' + generic + ')' : (brand || generic || 'Drug label update');
+    const row = document.createElement('a');
+    row.href = 'https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=BasicSearch.process&DrugName=' + encodeURIComponent(brand || generic);
+    row.target = '_blank'; row.rel = 'noopener';
+    row.style.cssText = 'display:block;padding:5px 0;border-bottom:0.5px solid var(--border);text-decoration:none';
+    row.innerHTML = '<div style="font-size:11.5px;font-weight:500;color:var(--text);line-height:1.4">' + name + '</div>' +
+      '<div style="font-size:10px;color:var(--muted);margin-top:1px">' + (mfr ? mfr + ' · ' : '') + (date ? 'Label effective ' + date : '') + '</div>';
+    cont.appendChild(row);
+  });
+}
+
+function wireFeedTabs() {
+  document.querySelectorAll('.feed-tab').forEach(b => b.addEventListener('click', () => switchFeedTab(b.dataset.feed)));
+  const rb = document.getElementById('feed-refresh-btn');
+  if (rb) rb.addEventListener('click', () => switchFeedTab(_activeFeed));
+  const inp = document.getElementById('pubmed-search-term');
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') loadPubMedFeed(); });
+}
 async function loadPubMedFeed() {
   const cont = document.getElementById('pubmed-feed'); if (!cont) return;
   const term = document.getElementById('pubmed-search-term')?.value.trim() || 'oncology pharmacist';
@@ -8787,151 +9032,19 @@ const BG_COLORS = [
 ];
 
 // Ensure DB has bg fields
-if (!DB.bgPhoto) DB.bgPhoto = '';
 if (!DB.bgColor) DB.bgColor = '#192e57';
 if (!DB.bgZoom)  DB.bgZoom  = 100;
 if (!DB.bgPosX)  DB.bgPosX  = 50;
 if (!DB.bgPosY)  DB.bgPosY  = 50;
 
-function applyBackground() {
-  const layer = document.getElementById('bg-layer');
-  if (!layer) return;
-  if (DB.bgPhoto) {
-    const size = DB.bgZoom <= 100 ? 'cover' : (DB.bgZoom * 1.5) + '%';
-    layer.style.backgroundImage = 'url("' + DB.bgPhoto + '")';
-    layer.style.backgroundSize  = size;
-    layer.style.backgroundPosition = DB.bgPosX + '% ' + DB.bgPosY + '%';
-    layer.style.backgroundColor = '';
-  } else {
-    layer.style.backgroundImage = 'none';
-    layer.style.backgroundColor = DB.bgColor || '#192e57';
-  }
-}
+
 
 // also keep applyTheme as a no-op alias (called in other places)
-function applyTheme() { applyBackground(); }
+function applyTheme() {}
 
-function setupThemePicker() {
-  // Build color swatches
-  const swatchCont = document.getElementById('tp-colors');
-  if (swatchCont) {
-    swatchCont.innerHTML = '';
-    BG_COLORS.forEach(c => {
-      const btn = document.createElement('button');
-      btn.className = 'color-swatch' + (DB.bgColor === c.color && !DB.bgPhoto ? ' active' : '');
-      btn.style.background = c.color;
-      btn.title = c.label;
-      btn.addEventListener('click', () => {
-        DB.bgColor = c.color; DB.bgPhoto = '';
-        applyBackground(); saveState();
-        // Update active state
-        swatchCont.querySelectorAll('.color-swatch').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        updatePickerPhotoUI();
-      });
-      swatchCont.appendChild(btn);
-    });
-  }
 
-  // Toggle open/close
-  document.getElementById('theme-picker-btn').addEventListener('click', () => {
-    const p = document.getElementById('theme-picker');
-    p.style.display = p.style.display === 'none' || !p.style.display ? 'block' : 'none';
-    if (p.style.display === 'block') updatePickerPhotoUI();
-  });
 
-  // Close button
-  document.getElementById('tp-close').addEventListener('click', () => {
-    document.getElementById('theme-picker').style.display = 'none';
-  });
 
-  // Close on outside click
-  document.addEventListener('click', e => {
-    const picker = document.getElementById('theme-picker');
-    const btn    = document.getElementById('theme-picker-btn');
-    if (picker && btn && !picker.contains(e.target) && !btn.contains(e.target)) {
-      picker.style.display = 'none';
-    }
-  });
-
-  // Upload button → open file picker
-  document.getElementById('tp-upload-btn').addEventListener('click', () => {
-    document.getElementById('tp-file').click();
-  });
-
-  // File chosen — small files stay raw (no quality loss);
-  // large files get light high-res compression so Supabase saves succeed.
-  document.getElementById('tp-file').addEventListener('change', function() {
-    const file = this.files[0]; if (!file) return;
-    const RAW_LIMIT = 1.2 * 1024 * 1024; // under 1.2MB → store raw
-    const reader = new FileReader();
-    reader.onload = e => {
-      const finish = dataUrl => {
-        DB.bgPhoto = dataUrl; _bgDirty = true; saveBgPhoto();
-        DB.bgZoom = 100; DB.bgPosX = 50; DB.bgPosY = 50;
-        applyBackground(); saveState(); updatePickerPhotoUI();
-        document.getElementById('tp-file').value = '';
-      };
-      if (file.size <= RAW_LIMIT) { finish(e.target.result); return; }
-      // Light compression: max 2200px, quality 0.92 — visually indistinguishable,
-      // but keeps the saved payload small enough for Supabase + localStorage
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX = 2200;
-        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
-        canvas.width  = Math.round(img.width  * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext('2d');
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        finish(canvas.toDataURL('image/jpeg', 0.92));
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  // Remove photo
-  document.getElementById('tp-remove-btn').addEventListener('click', () => {
-    DB.bgPhoto = ''; _bgDirty = true; saveBgPhoto(); applyBackground(); saveState(); updatePickerPhotoUI();
-  });
-
-  // Sliders
-  document.getElementById('tp-zoom').addEventListener('input', function() {
-    DB.bgZoom = parseInt(this.value);
-    document.getElementById('tp-zoom-val').textContent = this.value + '%';
-    applyBackground();
-  });
-  document.getElementById('tp-pos-x').addEventListener('input', function() {
-    DB.bgPosX = parseInt(this.value); applyBackground();
-  });
-  document.getElementById('tp-pos-y').addEventListener('input', function() {
-    DB.bgPosY = parseInt(this.value); applyBackground();
-  });
-}
-
-function updatePickerPhotoUI() {
-  const preview  = document.getElementById('tp-preview');
-  const img      = document.getElementById('tp-preview-img');
-  const sliders  = document.getElementById('tp-sliders');
-  const uploadBtn = document.getElementById('tp-upload-btn');
-  if (DB.bgPhoto) {
-    img.src = DB.bgPhoto;
-    preview.style.display = 'block';
-    sliders.style.display = 'block';
-    uploadBtn.textContent = 'Change photo';
-    document.getElementById('tp-zoom').value = DB.bgZoom || 100;
-    document.getElementById('tp-zoom-val').textContent = (DB.bgZoom || 100) + '%';
-    document.getElementById('tp-pos-x').value = DB.bgPosX || 50;
-    document.getElementById('tp-pos-y').value = DB.bgPosY || 50;
-  } else {
-    preview.style.display = 'none';
-    sliders.style.display = 'none';
-    uploadBtn.innerHTML = '<i class="ti ti-upload"></i> Choose photo from device';
-  }
-}
 
 
 
@@ -9809,11 +9922,11 @@ function renderTeamTabs() {
     panelsCont.appendChild(buildTeamMemberPanel(key));
   });
 
-  // ＋ Add member
+  // + Add member
   const addBtn = document.createElement('button');
   addBtn.className = 'team-tab-btn';
   addBtn.style.cssText = 'color:var(--muted);border:1.5px dashed var(--border-s);border-radius:7px;margin-left:4px';
-  addBtn.textContent = '＋ Add member';
+  addBtn.textContent = '+ Add member';
   addBtn.addEventListener('click', addTeamMember);
   bar.appendChild(addBtn);
 
@@ -9882,7 +9995,7 @@ function renderTeamHomeMembers() {
   if (!cont) return;
   cont.innerHTML = '';
   if (!DB.teamOrder.length) {
-    cont.innerHTML = '<div style="color:var(--muted);font-size:11px;font-style:italic;grid-column:1/-1">No team members yet — use ＋ Add member above</div>';
+    cont.innerHTML = '<div style="color:var(--muted);font-size:11px;font-style:italic;grid-column:1/-1">No team members yet — use + Add member above</div>';
     return;
   }
   DB.teamOrder.forEach(key => {
@@ -9947,10 +10060,6 @@ function buildSearchIndex() {
     label: e.label, sub: (e.y? e.y+'-'+String(e.m).padStart(2,'0')+'-'+String(e.d).padStart(2,'0') : '') + (e.author? ' · '+e.author : ''),
     kind: 'Content', text: [e.label,e.author,e.type].join(' ').toLowerCase(),
     go: () => showPage('calendar', navBtnFor('calendar')) }); });
-  (DB.pitches||[]).forEach(p => { if (p.title) ix.push({
-    label: p.title, sub: 'Pitch · ' + (p.stage||''), kind: 'Pitch',
-    text: [p.title,p.notes,p.outlet].join(' ').toLowerCase(),
-    go: () => showPage('pitch', navBtnFor('pitch')) }); });
   (DB.conferences||[]).forEach(c => { if (c.name) ix.push({
     label: c.name, sub: 'Conference', kind: 'Conference',
     text: [c.name,(c.interviews||[]).map(iv=>(typeof iv==='string'?iv:iv.name)||'').join(' ')].join(' ').toLowerCase(),
@@ -9966,9 +10075,6 @@ function buildSearchIndex() {
   (DB.reminders||[]).forEach(r => { if (r.text) ix.push({
     label: r.text, sub: 'Reminder · ' + (r.date||''), kind: 'Reminder', text: r.text.toLowerCase(),
     go: () => showPage('home', navBtnFor('home')) }); });
-  (DB.hotTopics||[]).forEach(t => { const lbl = t.title || t.text || t; if (typeof lbl === 'string' && lbl) ix.push({
-    label: lbl, sub: 'Hot topic', kind: 'Trend', text: String(lbl).toLowerCase(),
-    go: () => showPage('trending', navBtnFor('trending')) }); });
   return ix;
 }
 
@@ -10113,12 +10219,631 @@ function showUndoPill(label, undoFn) {
   _undoTimer = setTimeout(() => toast.remove(), 6000);
 }
 
+
+// ══ VERTICALS ══════════════════════════════════════════════
+const VERTICALS = {
+  onc:    { label: 'Onc',    full: 'Oncology',       color: 'var(--v-onc)' },
+  multi:  { label: 'Multi',  full: 'Multispecialty', color: 'var(--v-multi)' },
+  retail: { label: 'Retail', full: 'Retail',         color: 'var(--v-retail)' },
+};
+if (!DB.activeVertical) DB.activeVertical = 'all';
+
+function vertOf(item) { return (item && item.vertical) || 'onc'; }
+function vertMatch(item) {
+  return DB.activeVertical === 'all' || vertOf(item) === DB.activeVertical;
+}
+function vertColor(v) { return (VERTICALS[v] || VERTICALS.onc).color; }
+function vertBadge(v) {
+  const m = VERTICALS[v] || VERTICALS.onc;
+  return '<span style="font-size:10px;padding:1px 7px;border-radius:9px;background:' + m.color +
+         '18;color:' + m.color + ';font-weight:500">' + m.label + '</span>';
+}
+
+function setVertical(v) {
+  DB.activeVertical = v;
+  document.querySelectorAll('.vert-chip').forEach(c => {
+    const on = c.dataset.vert === v;
+    c.style.background = on ? 'var(--text)' : 'transparent';
+    c.style.color = on ? 'var(--surface)' : 'var(--muted)';
+    c.style.borderColor = on ? 'var(--text)' : 'var(--border)';
+  });
+  saveState();
+  safeRun(renderMissionControl);
+  const cur = document.querySelector('.pg.active');
+  if (cur) {
+    const n = cur.id.replace('page-','');
+    if (n === 'calendar') safeRun(renderCal);
+    if (n === 'kols') safeRun(renderKOLs);
+    if (n === 'analytics') { safeRun(updateStatStrip); safeRun(renderVerticalBalance); }
+  }
+}
+
+function wireVerticalChips() {
+  document.querySelectorAll('.vert-chip').forEach(c =>
+    c.addEventListener('click', () => setVertical(c.dataset.vert)));
+  setVertical(DB.activeVertical || 'all');
+}
+
+// ══ ATTENTION QUEUE — auto-built from all data ═════════════
+function buildAttentionQueue() {
+  const out = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dayMs = 86400000;
+  const dstr = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+
+  (DB.calEvents||[]).filter(vertMatch).forEach(e => {
+    if (!e.y || (e.status||'').toLowerCase() === 'published') return;
+    const ed = new Date(e.y, e.m-1, e.d); ed.setHours(0,0,0,0);
+    const diff = Math.round((ed - today)/dayMs);
+    if (diff < 0 && diff > -60)
+      out.push({ kind:'Overdue', tone:'danger', text:(e.label||'Untitled')+' — was due '+dstr(ed), sort:diff, go:()=>showPage('calendar',null) });
+    else if (diff >= 0 && diff <= 7)
+      out.push({ kind:diff===0?'Today':diff+'d', tone:'warning', text:e.label||'Untitled', sort:100+diff, go:()=>showPage('calendar',null) });
+  });
+
+  (DB.reminders||[]).forEach(r => {
+    if (!r.date) return;
+    const rd = new Date(r.date+'T00:00'); rd.setHours(0,0,0,0);
+    const diff = Math.round((rd - today)/dayMs);
+    if (diff >= 0 && diff <= 7)
+      out.push({ kind:diff===0?'Today':diff+'d', tone:'warning', text:r.text||'Reminder', sort:100+diff, go:()=>showPage('home',null) });
+  });
+
+  const all = (typeof getAllInteractions === 'function') ? getAllInteractions() : [];
+  const last = {};
+  all.forEach(x => { const k=(x.kol||'').toLowerCase(); if(k && (!last[k]||x.date>last[k])) last[k]=x.date; });
+  const cutoff = new Date(today.getTime() - 90*dayMs);
+  const stale = (DB.kols||[]).filter(k => {
+    if (!k.name || !vertMatch(k)) return false;
+    if (getKOLTier(k) !== 'T1') return false;
+    const l = last[k.name.toLowerCase()];
+    return !l || new Date(l) < cutoff;
+  });
+  if (stale.length)
+    out.push({ kind:'KOLs', tone:'accent', text:stale.length+' tier-1 contact'+(stale.length>1?'s':'')+' past 90-day cadence', sort:300, go:()=>showPage('kols',null) });
+
+  (DB.conferences||[]).forEach(c => {
+    if (!c.start) return;
+    const cd = new Date(c.start+'T00:00');
+    const diff = Math.round((cd - today)/dayMs);
+    if (diff >= 0 && diff <= 21) {
+      const booked = (c.interviews||[]).length;
+      out.push({ kind:'Conf', tone:'pro', text:(c.name||'Conference')+' in '+diff+'d — '+booked+' interview'+(booked===1?'':'s')+' booked', sort:200+diff, go:()=>showPage('conferences',null) });
+    }
+  });
+
+  (DB.pdufa||[]).forEach(p => {
+    if (!p.date) return;
+    const pd = new Date(p.date+'T00:00');
+    const diff = Math.round((pd - today)/dayMs);
+    if (diff >= 0 && diff <= 30)
+      out.push({ kind:'PDUFA', tone:'pro', text:(p.drug||'Decision')+' — '+p.date, sort:400+diff, go:()=>showPage('calendar',null) });
+  });
+
+  // Starving vertical this month
+  const now = new Date();
+  Object.keys(VERTICALS).forEach(v => {
+    if (DB.activeVertical !== 'all' && DB.activeVertical !== v) return;
+    const n = (DB.calEvents||[]).filter(e => vertOf(e)===v && e.y===now.getFullYear() && e.m===now.getMonth()+1).length;
+    if (n === 0)
+      out.push({ kind:VERTICALS[v].label, tone:'vert-'+v, text:'nothing scheduled this month', sort:500, go:()=>showPage('calendar',null) });
+  });
+
+  return out.sort((a,b)=>a.sort-b.sort).slice(0, 12);
+}
+
+const TONE_STYLE = {
+  danger:  'background:rgba(216,90,48,.12);color:#993C1D',
+  warning: 'background:rgba(186,117,23,.13);color:#854F0B',
+  accent:  'background:rgba(24,95,165,.12);color:#0C447C',
+  pro:     'background:rgba(83,74,183,.12);color:#3C3489',
+  'vert-onc':    'background:rgba(24,95,165,.12);color:#185FA5',
+  'vert-multi':  'background:rgba(15,110,86,.12);color:#0F6E56',
+  'vert-retail': 'background:rgba(153,60,29,.12);color:#993C1D',
+};
+
+function renderAttentionQueue() {
+  const cont = document.getElementById('attention-list'); if (!cont) return;
+  const items = buildAttentionQueue();
+  cont.innerHTML = '';
+  if (!items.length) {
+    cont.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:10px 0">Nothing needs attention right now.</div>';
+    return;
+  }
+  items.forEach(it => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:9px;align-items:baseline;padding:7px 0;border-bottom:0.5px solid var(--border);cursor:pointer';
+    row.addEventListener('mouseenter', () => row.style.background='var(--hover)');
+    row.addEventListener('mouseleave', () => row.style.background='');
+    row.addEventListener('click', it.go);
+    const badge = document.createElement('span');
+    badge.style.cssText = 'font-size:10px;padding:2px 7px;border-radius:9px;white-space:nowrap;font-weight:500;' + (TONE_STYLE[it.tone]||TONE_STYLE.accent);
+    badge.textContent = it.kind;
+    const txt = document.createElement('span');
+    txt.style.cssText = 'font-size:12.5px;color:var(--text);flex:1;min-width:0';
+    txt.textContent = it.text;
+    row.appendChild(badge); row.appendChild(txt);
+    cont.appendChild(row);
+  });
+}
+
+// ══ WEEK STRIP ═════════════════════════════════════════════
+function renderWeekStrip() {
+  const cont = document.getElementById('week-strip'); if (!cont) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const monday = new Date(today); monday.setDate(today.getDate() - ((today.getDay()+6)%7));
+  cont.innerHTML = '';
+  const head = document.createElement('div');
+  head.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center';
+  ['M','T','W','T','F','S','S'].forEach(l => {
+    const s = document.createElement('div');
+    s.style.cssText = 'font-size:10px;color:var(--muted)'; s.textContent = l; head.appendChild(s);
+  });
+  cont.appendChild(head);
+  const row = document.createElement('div');
+  row.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin-top:4px';
+  for (let i=0;i<7;i++) {
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    const isToday = d.getTime() === today.getTime();
+    const cell = document.createElement('div');
+    cell.style.cssText = 'font-size:12px;padding:3px 0;border-radius:6px;cursor:pointer;' +
+      (isToday ? 'background:var(--sel);font-weight:500' : 'color:var(--muted)');
+    cell.textContent = d.getDate();
+    const evs = (DB.calEvents||[]).filter(e => vertMatch(e) && e.y===d.getFullYear() && e.m===d.getMonth()+1 && e.d===d.getDate());
+    const dots = document.createElement('div');
+    dots.style.cssText = 'display:flex;gap:2px;justify-content:center;margin-top:2px;height:5px';
+    evs.slice(0,3).forEach(e => {
+      const dot = document.createElement('span');
+      dot.style.cssText = 'width:5px;height:5px;border-radius:50%;background:'+vertColor(vertOf(e));
+      dots.appendChild(dot);
+    });
+    cell.appendChild(dots);
+    cell.addEventListener('click', () => showPage('calendar', null));
+    row.appendChild(cell);
+  }
+  cont.appendChild(row);
+}
+
+// ══ VERTICAL BALANCE ═══════════════════════════════════════
+function computeVerticalSplit() {
+  const now = new Date();
+  const counts = { onc:0, multi:0, retail:0 };
+  (DB.calEvents||[]).forEach(e => {
+    if (e.y===now.getFullYear() && e.m===now.getMonth()+1) counts[vertOf(e)] = (counts[vertOf(e)]||0)+1;
+  });
+  const total = counts.onc + counts.multi + counts.retail;
+  return { counts, total };
+}
+
+function renderVerticalBalance() {
+  ['vert-balance','vert-balance-analytics'].forEach(id => renderBalanceInto(id));
+}
+function renderBalanceInto(elId) {
+  const cont = document.getElementById(elId); if (!cont) return;
+  const { counts, total } = computeVerticalSplit();
+  cont.innerHTML = '';
+  if (!total) {
+    cont.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0">No items scheduled this month yet.</div>';
+    return;
+  }
+  const bar = document.createElement('div');
+  bar.style.cssText = 'display:flex;height:10px;border-radius:5px;overflow:hidden;margin-top:6px';
+  const legend = document.createElement('div');
+  legend.style.cssText = 'display:flex;gap:12px;margin-top:6px;font-size:11.5px;color:var(--muted);flex-wrap:wrap';
+  Object.keys(VERTICALS).forEach(v => {
+    const pct = Math.round(counts[v]/total*100);
+    if (pct > 0) {
+      const seg = document.createElement('span');
+      seg.style.cssText = 'width:'+pct+'%;background:'+VERTICALS[v].color;
+      bar.appendChild(seg);
+    }
+    const l = document.createElement('span');
+    l.textContent = VERTICALS[v].label + ' ' + pct + '%';
+    legend.appendChild(l);
+  });
+  cont.appendChild(bar); cont.appendChild(legend);
+}
+
+// ══ CONFERENCE MODE ════════════════════════════════════════
+function renderConferenceMode() {
+  const cont = document.getElementById('conf-mode'); if (!cont) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming = (DB.conferences||[])
+    .filter(c => c.start && (new Date(c.start+'T00:00') - today)/86400000 >= 0 && (new Date(c.start+'T00:00') - today)/86400000 <= 21)
+    .sort((a,b)=>a.start.localeCompare(b.start))[0];
+  if (!upcoming) {
+    cont.innerHTML = '<div style="font-size:12px;color:var(--muted)">No conference within 3 weeks.</div>';
+    return;
+  }
+  const days = Math.round((new Date(upcoming.start+'T00:00') - today)/86400000);
+  const booked = (upcoming.interviews||[]).length;
+  cont.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline">' +
+    '<span style="font-size:13px;font-weight:500">'+(upcoming.name||'Conference')+'</span>' +
+    '<span style="font-size:11.5px;color:var(--muted)">'+days+' days out</span></div>' +
+    '<div style="font-size:12.5px;margin-top:5px">'+booked+' interview'+(booked===1?'':'s')+' booked</div>';
+}
+
+// ══ MONDAY BRIEFING ════════════════════════════════════════
+function generateBriefing() {
+  const q = buildAttentionQueue();
+  const { counts, total } = computeVerticalSplit();
+  const today = new Date();
+  let out = 'Editorial briefing — ' + today.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) + '\n\n';
+  out += 'NEEDS ATTENTION\n';
+  out += q.length ? q.map(i => '- [' + i.kind + '] ' + i.text).join('\n') : '- Nothing flagged.';
+  out += '\n\nVERTICAL BALANCE (this month, ' + total + ' items)\n';
+  Object.keys(VERTICALS).forEach(v => {
+    const pct = total ? Math.round(counts[v]/total*100) : 0;
+    out += '- ' + VERTICALS[v].full + ': ' + counts[v] + ' (' + pct + '%)\n';
+  });
+  const wk = [];
+  const t0 = new Date(); t0.setHours(0,0,0,0);
+  for (let i=0;i<7;i++) {
+    const d = new Date(t0); d.setDate(t0.getDate()+i);
+    (DB.calEvents||[]).filter(e => vertMatch(e) && e.y===d.getFullYear() && e.m===d.getMonth()+1 && e.d===d.getDate())
+      .forEach(e => wk.push('- ' + d.toLocaleDateString('en-US',{weekday:'short'}) + ': ' + (e.label||'Untitled') + ' (' + (VERTICALS[vertOf(e)]||VERTICALS.onc).full + ')'));
+  }
+  out += '\nWEEK AHEAD\n' + (wk.length ? wk.join('\n') : '- Nothing scheduled.');
+  return out;
+}
+
+function copyBriefing() {
+  const text = generateBriefing();
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.cssText='position:absolute;left:-9999px';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); showPill('✓','Briefing copied to clipboard','rgba(29,158,117,.45)',2600); }
+  catch(e) { showPill('!','Copy failed — check console','rgba(216,90,48,.45)',2600); console.log(text); }
+  ta.remove();
+}
+
+
+function wireMissionControl() {
+  const b = document.getElementById('briefing-btn');
+  if (b) b.addEventListener('click', copyBriefing);
+  const r = document.getElementById('mc-refresh');
+  if (r) r.addEventListener('click', renderMissionControl);
+  const sub = document.getElementById('mc-datesub');
+  if (sub) sub.textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+}
+
+
+// ══ PER-VERTICAL ANALYTICS ON MISSION CONTROL ══════════════
+function verticalStats(v) {
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth() + 1;
+  const evs = (DB.calEvents || []).filter(e => vertOf(e) === v);
+  const thisMonth = evs.filter(e => e.y === y && e.m === m);
+  const prevM = m === 1 ? 12 : m - 1, prevY = m === 1 ? y - 1 : y;
+  const lastMonth = evs.filter(e => e.y === prevY && e.m === prevM);
+  const published = thisMonth.filter(e => (e.status || '').toLowerCase() === 'published').length;
+
+  const topics = {};
+  evs.filter(e => e.y === y).forEach(e => { if (e.cancer) topics[e.cancer] = (topics[e.cancer] || 0) + 1; });
+  const topTopics = Object.entries(topics).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const covered = new Set(Object.keys(topics));
+  const gaps = allTopicsFor(v).filter(t => !covered.has(t)).slice(0, 5);
+
+  const types = {};
+  thisMonth.forEach(e => { types[e.type || 'articles'] = (types[e.type || 'articles'] || 0) + 1; });
+
+  const kols = (DB.kols || []).filter(k => (k.vertical || 'onc') === v);
+  const all = (typeof getAllInteractions === 'function') ? getAllInteractions() : [];
+  const last = {};
+  all.forEach(x => { const n = (x.kol || '').toLowerCase(); if (n && (!last[n] || x.date > last[n])) last[n] = x.date; });
+  const cut = new Date(); cut.setDate(cut.getDate() - 90);
+  const activeKols = kols.filter(k => k.name && last[k.name.toLowerCase()] && new Date(last[k.name.toLowerCase()]) >= cut).length;
+
+  // Pace: how far through the month vs share of last month's output delivered
+  const daysIn = new Date(y, m, 0).getDate();
+  const pacePct = Math.round(now.getDate() / daysIn * 100);
+  const outputPct = lastMonth.length ? Math.round(thisMonth.length / lastMonth.length * 100) : null;
+
+  return { v, thisMonth: thisMonth.length, lastMonth: lastMonth.length, published,
+           topTopics, gaps, types, kols: kols.length, activeKols, pacePct, outputPct };
+}
+
+function statBox(label, value, sub) {
+  return '<div style="background:var(--surface-2);border-radius:8px;padding:10px 12px">' +
+    '<div style="font-size:11.5px;color:var(--muted)">' + label + '</div>' +
+    '<div style="font-size:22px;font-weight:500;color:var(--text);margin-top:1px">' + value + '</div>' +
+    (sub ? '<div style="font-size:11px;color:var(--muted)">' + sub + '</div>' : '') + '</div>';
+}
+
+function verticalPanelHTML(v) {
+  const s = verticalStats(v);
+  const meta = VERTICALS[v];
+  const trend = s.lastMonth ? (s.thisMonth >= s.lastMonth ? '▲' : '▼') + ' vs ' + s.lastMonth + ' last month' : 'no prior month';
+  let html = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
+    '<span style="width:9px;height:9px;border-radius:50%;background:' + meta.color + '"></span>' +
+    '<span style="font-size:13px;font-weight:500">' + meta.full + '</span>' +
+    (s.outputPct !== null ? '<span style="font-size:11px;color:var(--muted);margin-left:auto">' + s.pacePct + '% through month · ' + s.outputPct + '% of last month\u2019s output</span>' : '') +
+    '</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px">' +
+    statBox('This month', s.thisMonth, trend) +
+    statBox('Published', s.published, 'of ' + s.thisMonth + ' scheduled') +
+    statBox('KOLs', s.kols, s.activeKols + ' active (90d)') +
+    statBox('Topics covered', s.topTopics.length, 'this year') +
+    '</div>';
+  html += '<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px">';
+  html += '<div><div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">Top topics this year</div>';
+  html += s.topTopics.length
+    ? s.topTopics.map(([t, c]) => {
+        const pct = Math.round(c / s.topTopics[0][1] * 100);
+        return '<div style="margin-bottom:5px"><div style="display:flex;justify-content:space-between;font-size:11.5px"><span style="color:var(--text)">' + t + '</span><span style="color:var(--muted)">' + c + '</span></div>' +
+        '<div style="height:4px;background:var(--surface-2);border-radius:2px;margin-top:2px"><div style="height:4px;width:' + pct + '%;background:' + meta.color + ';border-radius:2px"></div></div></div>';
+      }).join('')
+    : '<div style="font-size:11.5px;color:var(--muted)">Tag items with a topic to see this.</div>';
+  html += '</div>';
+  html += '<div><div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">Coverage gaps</div>';
+  html += s.gaps.length
+    ? s.gaps.map(g => '<div style="font-size:11.5px;padding:3px 0;border-bottom:0.5px solid var(--border);color:var(--text)">' + g + '</div>').join('')
+    : '<div style="font-size:11.5px;color:var(--muted)">Broad coverage — no obvious gaps.</div>';
+  html += '</div></div>';
+  return html;
+}
+
+function renderVerticalAnalytics() {
+  const cont = document.getElementById('mc-vertical-analytics'); if (!cont) return;
+  const v = DB.activeVertical;
+  if (v !== 'all') { cont.innerHTML = verticalPanelHTML(v); return; }
+  // All: comparison row + each vertical stacked
+  const stats = Object.keys(VERTICALS).map(verticalStats);
+  const maxOut = Math.max(1, ...stats.map(s => s.thisMonth));
+  let html = '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px">';
+  stats.forEach(s => {
+    const meta = VERTICALS[s.v];
+    html += '<div style="background:var(--surface-2);border-radius:8px;padding:10px 12px">' +
+      '<div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:' + meta.color + '"></span>' +
+      '<span style="font-size:11.5px;color:var(--muted)">' + meta.full + '</span></div>' +
+      '<div style="font-size:22px;font-weight:500;margin-top:2px">' + s.thisMonth + '</div>' +
+      '<div style="height:4px;background:rgba(0,0,0,.06);border-radius:2px;margin-top:5px"><div style="height:4px;width:' + Math.round(s.thisMonth / maxOut * 100) + '%;background:' + meta.color + ';border-radius:2px"></div></div>' +
+      '<div style="font-size:11px;color:var(--muted);margin-top:4px">' + s.kols + ' KOLs · ' + s.topTopics.length + ' topics</div></div>';
+  });
+  html += '</div>';
+  stats.forEach(s => {
+    html += '<div style="border-top:0.5px solid var(--border);padding-top:12px;margin-top:4px">' + verticalPanelHTML(s.v) + '</div>';
+  });
+  cont.innerHTML = html;
+}
+
+function renderMissionControl() {
+  safeRun(renderAttentionQueue);
+  safeRun(renderVerticalAnalytics);
+  safeRun(renderWeekStrip);
+  safeRun(renderVerticalBalance);
+  safeRun(renderConferenceMode);
+}
+
+
+// ══ GOOGLE SHEET SYNC — Daily Tracker ══════════════════════
+const SHEET_URL_DEFAULT = 'https://docs.google.com/spreadsheets/d/16GTLmN1PmU6oKDGspogoV2j5OaRVi9d69xMkHq91vH4/edit?usp=sharing';
+if (!DB.sheetUrl) DB.sheetUrl = SHEET_URL_DEFAULT;
+if (!DB.sheetTab) DB.sheetTab = '2026 Daily Tracker';
+if (DB.sheetWindowOnly === undefined) DB.sheetWindowOnly = true;
+
+const TEAM_ALIASES = { ais:'Aislinn', aislinn:'Aislinn', ken:'Kennedy', kenedy:'Kennedy' };
+function normalizeAuthor(a) {
+  if (!a) return '';
+  const parts = a.split(/[\/&]|\band\b/).map(s => s.trim()).filter(Boolean);
+  return parts.map(p => {
+    const k = p.toLowerCase().replace(/^(sat|sun)\s*-\s*/,'').trim();
+    if (TEAM_ALIASES[k]) return TEAM_ALIASES[k];
+    return k.charAt(0).toUpperCase() + k.slice(1);
+  }).join(' / ');
+}
+
+function classifyVertical(title) {
+  const s = (title||'').toLowerCase();
+  if (/ppfo|\bonc\b|oncolog|cancer|tumor|myeloma|leukemia|lymphoma|carcinoma|melanoma|car-?\s?t\b|asco|\beha\b|sabcs|chemo|breast|lung |prostate|ovarian|bispecific|\badc\b|opc\b/.test(s)) return 'onc';
+  if (/\botc\b|retail|community pharmacy|front.?end|immuniz|flu shot|vaccine clinic|grocery|walgreens|\bcvs\b|giant|mckesson|pharmacy times tv|pos\b/.test(s)) return 'retail';
+  return 'multi';
+}
+function classifyType(title) {
+  const s = (title||'').toLowerCase();
+  if (/\bvideo\b|interview|\bseg\.?\s?\d/.test(s)) return 'video';
+  if (/\bpod\b|podcast|episode/.test(s)) return 'podcasts';
+  if (/gated/.test(s)) return 'gated';
+  if (/ppfo/.test(s)) return 'ppfo';
+  return 'articles';
+}
+
+function parseCSVText(text) {
+  const rows = []; let row = [], cur = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQ) {
+      if (ch === '"') { if (text[i+1] === '"') { cur += '"'; i++; } else inQ = false; }
+      else cur += ch;
+    } else if (ch === '"') inQ = true;
+    else if (ch === ',') { row.push(cur); cur = ''; }
+    else if (ch === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+    else if (ch !== '\r') cur += ch;
+  }
+  if (cur.length || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+// Parses the week-block layout: a header row of dates, then item rows beneath.
+function parseDailyTracker(text) {
+  const rows = parseCSVText(text);
+  const dpat = /^(\d{1,2})\/(\d{1,2})(?:\s*-\s*(\d{1,2})\/(\d{1,2}))?$/;
+  const SKIP = /youtube tracker|^content:|^name\/date:|vertical videos|fda\/news watch|^\\+$/i;
+  const dateCols = r => {
+    const map = {};
+    for (let ci = 1; ci < Math.min(r.length, 8); ci++) {
+      const m = (r[ci]||'').trim().match(dpat);
+      if (m) map[ci] = [Number(m[1]), Number(m[2])];
+    }
+    return map;
+  };
+  const events = [];
+  let year = 2026, prevMonth = null, first = true, i = 0;
+  while (i < rows.length) {
+    const cols = dateCols(rows[i]);
+    const keys = Object.keys(cols);
+    if (keys.length >= 3) {
+      const firstMonth = cols[keys[0]][0];
+      if (first) { if (firstMonth === 12) year = 2025; first = false; }
+      else if (prevMonth !== null && firstMonth < prevMonth) year++;
+      prevMonth = firstMonth;
+      let j = i + 1, blanks = 0;
+      while (j < rows.length) {
+        if (Object.keys(dateCols(rows[j])).length >= 3) break;
+        const rr = rows[j];
+        const hasAny = rr.slice(1, 8).some(c => (c||'').trim());
+        if (!hasAny) { if (++blanks >= 3) break; } else blanks = 0;
+        keys.forEach(ci => {
+          const raw = ((rr[ci] || '')).trim();
+          if (!raw || SKIP.test(raw)) return;
+          const am = raw.match(/\(([^()]{2,30})\)\s*$/);
+          const author = am ? am[1].trim() : '';
+          const title = raw.replace(/\s*\([^()]{2,30}\)\s*$/, '').trim();
+          if (!title || title.length < 2) return;
+          const [mo, da] = cols[ci];
+          events.push({
+            y: year, m: mo, d: da,
+            label: title,
+            author: normalizeAuthor(author),
+            vertical: classifyVertical(title),
+            cancer: classifyTopic(title, classifyVertical(title)),
+            type: classifyType(title),
+            status: 'planned',
+            src: 'sheet',
+          });
+        });
+        j++;
+      }
+      i = j;
+    } else i++;
+  }
+  return events;
+}
+
+function sheetCsvUrl(url, tab) {
+  if (!url) return '';
+  if (/output=csv|tqx=out:csv/.test(url)) return url;
+  const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if (!m) return '';
+  const base = 'https://docs.google.com/spreadsheets/d/' + m[1] + '/gviz/tq?tqx=out:csv';
+  return tab ? base + '&sheet=' + encodeURIComponent(tab) : base;
+}
+
+function applySheetEvents(parsed, note) {
+  const before = (DB.calEvents || []).length;
+  // Sheet-sourced events are fully replaced; manual events are never touched.
+  const manual = (DB.calEvents || []).filter(e => e.src !== 'sheet');
+  let incoming = parsed;
+  if (DB.sheetWindowOnly) {
+    const now = new Date();
+    const lo = new Date(now); lo.setDate(lo.getDate() - 60);
+    const hi = new Date(now); hi.setDate(hi.getDate() + 180);
+    incoming = parsed.filter(e => {
+      const d = new Date(e.y, e.m - 1, e.d);
+      return d >= lo && d <= hi;
+    });
+  }
+  let idc = Date.now();
+  incoming.forEach(e => { e.id = ++idc; });
+  DB.calEvents = manual.concat(incoming);
+  DB.sheetLastSync = new Date().toISOString();
+  saveState();
+  [renderCal, renderMissionControl, updateStatStrip, renderVerticalBalance].forEach(safeRun);
+  renderSyncStatus();
+  const skipped = parsed.length - incoming.length;
+  showPill('✓', 'Synced ' + incoming.length + ' items' + (skipped > 0 ? ' (' + skipped + ' outside window)' : '') + (note ? ' · ' + note : ''), 'rgba(29,158,117,.45)', 4000);
+  return incoming.length;
+}
+
+async function syncSheet() {
+  const urlInp = document.getElementById('sheet-url');
+  if (urlInp) DB.sheetUrl = urlInp.value.trim();
+  const tabInp = document.getElementById('sheet-tab');
+  if (tabInp) DB.sheetTab = tabInp.value.trim();
+  const csvUrl = sheetCsvUrl(DB.sheetUrl, DB.sheetTab);
+  if (!csvUrl) { showPill('!', 'Paste a valid Google Sheets link first', 'rgba(216,90,48,.5)', 3500); return; }
+  const btn = document.getElementById('sheet-sync-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Syncing…'; }
+  try {
+    const res = await fetch(csvUrl);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (/<html/i.test(text.slice(0, 400))) throw new Error('Sheet is not public');
+    const parsed = parseDailyTracker(text);
+    if (!parsed.length) throw new Error('No dated items found — check the tab name');
+    applySheetEvents(parsed);
+  } catch (e) {
+    showPill('!', 'Sync failed: ' + e.message + ' — use Paste CSV instead', 'rgba(216,90,48,.5)', 6000);
+    window.dbgLog && dbgLog('Sheet sync failed: ' + e.message, false);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Sync now'; }
+  }
+}
+
+function importSheetPaste() {
+  const ta = document.getElementById('sheet-paste');
+  const text = (ta && ta.value || '').trim();
+  if (!text) { showPill('!', 'Paste the CSV contents first', 'rgba(216,90,48,.5)', 3000); return; }
+  const parsed = parseDailyTracker(text);
+  if (!parsed.length) { showPill('!', 'No dated items found in that CSV', 'rgba(216,90,48,.5)', 4000); return; }
+  applySheetEvents(parsed, 'from paste');
+  ta.value = '';
+  closeModal('sheet-modal');
+}
+
+function renderSyncStatus() {
+  const el = document.getElementById('sheet-status'); if (!el) return;
+  const n = (DB.calEvents || []).filter(e => e.src === 'sheet').length;
+  const when = DB.sheetLastSync ? new Date(DB.sheetLastSync).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : 'never';
+  el.textContent = n + ' synced item' + (n === 1 ? '' : 's') + ' · last sync ' + when;
+}
+
+function openSheetModal() {
+  const u = document.getElementById('sheet-url'); if (u) u.value = DB.sheetUrl || '';
+  const t = document.getElementById('sheet-tab'); if (t) t.value = DB.sheetTab || '';
+  const w = document.getElementById('sheet-window'); if (w) w.checked = !!DB.sheetWindowOnly;
+  renderSyncStatus();
+  openModal('sheet-modal');
+}
+
+
+function wireVerticalDependentSelects() {
+  const cv = document.getElementById('cevt-vertical');
+  if (cv) cv.addEventListener('change', () => {
+    buildCancerSelect('cevt-cancer', '', cv.value);
+    const l = document.getElementById('cevt-topic-label');
+    if (l) l.textContent = TOPIC_LABEL[cv.value] || 'Topic';
+  });
+  const kv = document.getElementById('km-vertical');
+  if (kv) kv.addEventListener('change', () => {
+    const sel = document.getElementById('km-primary'); if (!sel) return;
+    sel.innerHTML = '<option value="">— Select —</option>';
+    Object.entries(topicGroupsFor(kv.value)).forEach(([group, types]) => {
+      const og = document.createElement('optgroup'); og.label = group;
+      types.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; og.appendChild(o); });
+      sel.appendChild(og);
+    });
+  });
+}
+
+function wireSheetSync() {
+  const b = document.getElementById('sheet-open-btn'); if (b) b.addEventListener('click', openSheetModal);
+  const s = document.getElementById('sheet-sync-btn'); if (s) s.addEventListener('click', syncSheet);
+  const p = document.getElementById('sheet-paste-btn'); if (p) p.addEventListener('click', importSheetPaste);
+  const w = document.getElementById('sheet-window');
+  if (w) w.addEventListener('change', () => { DB.sheetWindowOnly = w.checked; saveState(); });
+  const c = document.getElementById('sheet-close'); if (c) c.addEventListener('click', () => closeModal('sheet-modal'));
+  const ov = document.getElementById('sheet-modal');
+  if (ov) ov.addEventListener('click', e => { if (e.target === ov) closeModal('sheet-modal'); });
+  renderSyncStatus();
+}
+
 // ══════════════════════════════════════════
 // STARTUP
 // ══════════════════════════════════════════
 async function startup() {
   try { if(localStorage.getItem('pt_dark_mode')==='1'){document.body.classList.add('dark');DB.darkMode=true;} } catch(_){}
-  applyBackground(); // instant color before loadState
+
   await loadState();
   await (window._loadBgPhoto ? window._loadBgPhoto() : Promise.resolve());
   applyDark();
@@ -10158,8 +10883,7 @@ async function startup() {
     };
     saveState();
   }
-  [renderTodos, renderUpcomingArticles, renderSeries, updateHomeDateSub,
-   renderDailySchedule, renderGoalsPreview, refreshDailyInspiration, loadPubMedFeed].forEach(safeRun);
+  [renderMissionControl, updateHomeDateSub, refreshDailyInspiration, loadPubMedFeed].forEach(safeRun);
   setTimeout(() => { setupOfflineDetection(); }, 100);
   renderKOLs();
   renderKanban();
@@ -10173,12 +10897,17 @@ async function startup() {
   if (!DB.calMonth) DB.calMonth = new Date().getMonth();
   // Trigger cal stats when calendar first renders
   if (typeof renderCalMonthStats === 'function') renderCalMonthStats();
-  applyBackground();
-  setupThemePicker();
+
+
   renderReminders();
   startReminderChecker();
   wireEngagementTabs();
   wireGlobalSearch();
+  wireFeedTabs();
+  wireVerticalChips();
+  wireSheetSync();
+  wireVerticalDependentSelects();
+  wireMissionControl();
   setTimeout(() => { applyTileOrder('home'); wireDragAndDrop(); }, 300);
   // Live clock in topbar
   function updateTopClock() {
@@ -10305,7 +11034,6 @@ async function checkCurrentSave() {
   } catch(e) { dbgLog('Error: ' + e.message, false); }
 }
 </script>
-<div id="bg-layer"></div>
 <div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;background:#993c1d;color:#fff;text-align:center;font-size:12px;font-weight:600;padding:6px;z-index:999"><i class="ti ti-wifi-off"></i> Working offline — changes saved locally</div>
 
 <!-- Theme picker -->
@@ -10313,43 +11041,7 @@ async function checkCurrentSave() {
 
 
 <!-- ══ THEME PICKER ══ -->
-<button id="theme-picker-btn" title="Change background">🎨</button>
-<div id="theme-picker">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <span style="font-size:13px;font-weight:600">Background</span>
-    <button id="tp-close" style="background:none;border:none;cursor:pointer;font-size:16px;color:#888;padding:0">✕</button>
-  </div>
 
-  <div class="tp-label">Choose a color</div>
-  <div class="color-swatches" id="tp-colors"></div>
-
-  <div class="tp-label" style="margin-top:14px">Or upload a photo</div>
-  <input type="file" id="tp-file" accept="image/*" style="display:none">
-  <div style="display:flex;flex-direction:column;gap:8px">
-    <button id="tp-upload-btn" class="btn" style="width:100%;justify-content:center">
-      <i class="ti ti-upload"></i> Choose photo from device
-    </button>
-    <div id="tp-preview" style="display:none;position:relative;border-radius:8px;overflow:hidden;height:80px">
-      <img id="tp-preview-img" style="width:100%;height:100%;object-fit:cover">
-      <button id="tp-remove-btn" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;padding:2px 6px">✕ Remove</button>
-    </div>
-    <div id="tp-sliders" style="display:none">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <label style="font-size:11px;color:var(--muted);width:50px;flex-shrink:0">Zoom</label>
-        <input type="range" id="tp-zoom" min="100" max="300" value="100" style="flex:1;accent-color:var(--gold)">
-        <span id="tp-zoom-val" style="font-size:10px;color:var(--muted);width:30px">100%</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <label style="font-size:11px;color:var(--muted);width:50px;flex-shrink:0">Horiz</label>
-        <input type="range" id="tp-pos-x" min="0" max="100" value="50" style="flex:1;accent-color:var(--gold)">
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <label style="font-size:11px;color:var(--muted);width:50px;flex-shrink:0">Vert</label>
-        <input type="range" id="tp-pos-y" min="0" max="100" value="50" style="flex:1;accent-color:var(--gold)">
-      </div>
-    </div>
-  </div>
-</div>
 
 
 <!-- ══ GLOBAL SEARCH ══ -->
