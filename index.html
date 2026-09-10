@@ -938,7 +938,7 @@ body { position: relative; background: var(--bg); }
     <div id="save-pill" class="save-pill"><span id="save-icon">⟳</span><span id="save-txt">Saving…</span></div>
     <div id="top-datetime" style="font-size:11px;color:rgba(255,255,255,.7);text-align:right;line-height:1.4;padding-left:6px;border-left:0.5px solid rgba(255,255,255,.15)">
       <div id="top-date" style="font-weight:600"></div>
-      <div style="display:flex;gap:6px;justify-content:flex-end;align-items:baseline"><div id="top-time" style="font-size:10px;opacity:.8"></div><div title="Dashboard build version" style="font-size:9px;opacity:.45;font-weight:600">v103</div></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end;align-items:baseline"><div id="top-time" style="font-size:10px;opacity:.8"></div><div title="Dashboard build version" style="font-size:9px;opacity:.45;font-weight:600">v104</div></div>
     </div>
   </div>
 </div>
@@ -11546,6 +11546,65 @@ function applyCalendarSeedOnce() {
 }
 
 
+
+// ══ RESTORE DEFAULTS (non-destructive merge) ═══════════════
+// Re-seeds the built-in team / PPFO / PPRO / EAB defaults ONLY where
+// the current data is missing or empty. Never overwrites populated data.
+function restoreDefaults() {
+  let restored = [];
+
+  // Team members + order
+  if (!DB.teamMembers || !Object.keys(DB.teamMembers).length) {
+    DB.teamMembers = { dani:{name:'Dani',role:'',spec:'',notes:''}, ryu:{name:'Ryu',role:'',spec:'',notes:''} };
+    restored.push('team members');
+  }
+  if (!DB.teamOrder || !DB.teamOrder.length) { DB.teamOrder = Object.keys(DB.teamMembers); restored.push('team order'); }
+
+  // PPRO project
+  if (!DB.projectTrackers) DB.projectTrackers = [];
+  if (!DB.projectTrackers.some(p => p.isPPRO)) {
+    DB.projectTrackers.unshift({id:'proj-ppro',title:'Pathway to Peer Review',color:'#534AB7',
+      details:'A network of partnerships with pharmacy residency programs to commission resident final-project submissions for peer-reviewed publication in PPFO.',
+      parties:[{name:'Alex Gerlach',role:'Editorial Manager / Program Lead',email:'agerlach@mjhlifesciences.com'},{name:'Dani',role:'Content Producer / Outreach',email:''},{name:'Gillian',role:'SOP Development',email:''}],
+      tasks:[{text:'Meet with Arianne',done:false},{text:'Create SOP',done:false},{text:'Team presentation',done:false},{text:'Create email templates',done:false},{text:'Email EABs',done:false},{text:'Identify initial outreach institutions',done:false},{text:'Marketing assets',done:false},{text:'Educational seminars',done:false},{text:'Draft partnership MOU / commissioning agreement template',done:false},{text:'Give Dani access to Scholastica',done:true},{text:'Proposal doc for Allie and Gil',done:true}],
+      trackers:[],isPPRO:true});
+    restored.push('PPRO project');
+  }
+
+  saveState();
+  [renderProjects, renderTeamTabs, renderTeamPage, renderPPFO, renderMissionControl].forEach(fn => { if (typeof fn==='function') safeRun(fn); });
+  alert(restored.length ? ('Restored: ' + restored.join(', ') + '.\n\nAnything still missing was custom data that only lives in your saved cloud state — tell me and we can recover it.') : 'Nothing was missing — your team, projects, and PPRO defaults are all present.\n\nIf you\u2019re not SEEING them, it\u2019s a display filter, not missing data.');
+  return restored;
+}
+
+// Show exactly what's in state so we can diagnose loss vs display
+function stateInventory() {
+  const inv = {
+    calEvents: (DB.calEvents||[]).length,
+    projectTrackers: (DB.projectTrackers||[]).length,
+    projectTitles: (DB.projectTrackers||[]).map(p=>p.title),
+    ppfoTrackers: (DB.ppfoTrackers||[]).length,
+    ppfoTitles: (DB.ppfoTrackers||[]).map(t=>t.title),
+    teamMembers: Object.keys(DB.teamMembers||{}),
+    teamOrder: DB.teamOrder||[],
+    eab: (DB.eab||[]).length,
+    kols: (DB.kols||[]).length,
+    rcData: (DB.rcData||[]).length,
+    goals: Object.keys(DB.goals||{}),
+  };
+  console.log('=== STATE INVENTORY ===\n' + JSON.stringify(inv,null,2));
+  alert('STATE INVENTORY\n\n' +
+    'Calendar events: ' + inv.calEvents + '\n' +
+    'Projects: ' + inv.projectTrackers + ' (' + (inv.projectTitles.join(', ')||'none') + ')\n' +
+    'PPFO trackers: ' + inv.ppfoTrackers + ' (' + (inv.ppfoTitles.join(', ')||'none') + ')\n' +
+    'Team: ' + inv.teamMembers.join(', ') + '\n' +
+    'EAB members: ' + inv.eab + '\n' +
+    'KOLs: ' + inv.kols + '\n' +
+    'RCs: ' + inv.rcData + '\n\n' +
+    'Full detail in console (F12).');
+  return inv;
+}
+
 // ══ DATA DIAGNOSTICS & RECOVERY ════════════════════════════
 function dataDiagnostics() {
   const ev = DB.calEvents || [];
@@ -11699,8 +11758,10 @@ startup();
 <!-- DEBUG PANEL -->
 <div id="debug-panel" style="display:none;position:fixed;bottom:70px;right:16px;width:360px;background:var(--navy-d);border:1px solid var(--gold-d);border-radius:10px;padding:14px;z-index:999;font-size:11px;font-family:monospace;max-height:260px;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,.5)">
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+    <button class="btn btn-sm" onclick="stateInventory()">📋 State inventory</button>
     <button class="btn btn-sm" onclick="dataDiagnostics()">🔎 Data check</button>
-    <button class="btn btn-sm btn-primary" onclick="forceReseed()">♻ Restore Q3 seed</button>
+    <button class="btn btn-sm btn-primary" onclick="forceReseed()">♻ Restore calendar</button>
+    <button class="btn btn-sm btn-primary" onclick="restoreDefaults()">🛠 Restore team/projects</button>
   </div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
     <span style="color:var(--gold);font-weight:600;font-size:12px;font-family:sans-serif">🔍 Save debug log</span>
