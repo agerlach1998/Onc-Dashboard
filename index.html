@@ -923,6 +923,7 @@ body { position: relative; background: var(--bg); }
     <div class="logo-sub">Content Intelligence</div>
   </div>
   <div class="topbar-r" style="display:flex;align-items:center;gap:6px">
+    <span id="sync-dot" title="Sync status" style="width:9px;height:9px;border-radius:50%;background:#9c9a92;cursor:pointer;margin-right:10px;flex-shrink:0"></span>
     <div style="display:flex;gap:4px;margin-right:6px">
       <span class="vert-chip" data-vert="all" style="font-size:11px;padding:3px 10px;border-radius:12px;border:0.5px solid var(--border);cursor:pointer;user-select:none">All</span>
       <span class="vert-chip" data-vert="onc" style="font-size:11px;padding:3px 10px;border-radius:12px;border:0.5px solid var(--border);cursor:pointer;user-select:none">Onc</span>
@@ -937,7 +938,7 @@ body { position: relative; background: var(--bg); }
     <div id="save-pill" class="save-pill"><span id="save-icon">⟳</span><span id="save-txt">Saving…</span></div>
     <div id="top-datetime" style="font-size:11px;color:rgba(255,255,255,.7);text-align:right;line-height:1.4;padding-left:6px;border-left:0.5px solid rgba(255,255,255,.15)">
       <div id="top-date" style="font-weight:600"></div>
-      <div style="display:flex;gap:6px;justify-content:flex-end;align-items:baseline"><div id="top-time" style="font-size:10px;opacity:.8"></div><div title="Dashboard build version" style="font-size:9px;opacity:.45;font-weight:600">v100</div></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end;align-items:baseline"><div id="top-time" style="font-size:10px;opacity:.8"></div><div title="Dashboard build version" style="font-size:9px;opacity:.45;font-weight:600">v103</div></div>
     </div>
   </div>
 </div>
@@ -972,7 +973,10 @@ body { position: relative; background: var(--bg); }
     <div style="font-size:20px;font-weight:500;color:var(--text)" id="mc-greeting">Today</div>
     <div style="font-size:12px;color:var(--muted);margin-top:2px" id="mc-datesub"></div>
   </div>
-  <button class="btn btn-sm" id="briefing-btn" style="margin-left:auto">Copy briefing</button>
+  <div style="margin-left:auto;display:flex;gap:6px">
+    <button class="btn btn-sm" id="assign-copy-btn">Copy assignments</button>
+    <button class="btn btn-sm" id="briefing-btn">Copy briefing</button>
+  </div>
 </div>
 
 <div style="display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:12px;margin-bottom:12px">
@@ -981,6 +985,11 @@ body { position: relative; background: var(--bg); }
     <div class="card-hdr"><div class="card-title">Needs attention</div>
       <button class="btn btn-sm" id="mc-refresh" style="font-size:10px">Refresh</button></div>
     <div id="attention-list" style="max-height:330px;overflow-y:auto"></div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="card-hdr"><div class="card-title">Suggested assignments</div>
+      <span style="font-size:10px;color:var(--muted)">what to commission next</span></div>
+    <div id="assign-list" style="max-height:300px;overflow-y:auto"></div>
   </div>
 
   <div style="display:flex;flex-direction:column;gap:12px">
@@ -1465,9 +1474,15 @@ body { position: relative; background: var(--bg); }
   <label style="display:flex;align-items:center;gap:7px;font-size:12px;margin-bottom:10px;cursor:pointer">
     <input type="checkbox" id="sheet-window" style="width:auto"> Only import the last 60 / next 180 days (recommended)
   </label>
-  <div style="display:flex;gap:8px;margin-bottom:14px">
+  <label style="display:flex;align-items:center;gap:7px;font-size:12px;margin-bottom:6px;cursor:pointer">
+    <input type="checkbox" id="auto-sync-toggle" style="width:auto"> Auto-sync from this sheet on load and every few hours
+  </label>
+  <div style="font-size:11px;color:var(--muted);margin-bottom:10px">The dot in the topbar turns green when synced. Click it any time to refresh now.</div>
+  <div style="display:flex;gap:8px;margin-bottom:6px">
+    <button class="btn" id="sheet-test-btn">Test connection</button>
     <button class="btn btn-primary" id="sheet-sync-btn">Sync now</button>
   </div>
+  <div id="sheet-test-result" style="font-size:11.5px;margin-bottom:12px;line-height:1.5"></div>
   <div style="border-top:0.5px solid var(--border);padding-top:12px">
     <div style="font-size:12px;font-weight:500;margin-bottom:6px">Upload a CSV</div>
     <div id="csv-drop" style="border:1.5px dashed var(--border-s);border-radius:8px;padding:14px;text-align:center;transition:border-color .15s">
@@ -1968,6 +1983,7 @@ body { position: relative; background: var(--bg); }
   <div class="modal-hdr">
     <h3><span id="kol-modal-title">KOL</span></h3>
     <div style="display:flex;gap:8px;align-items:center">
+      <button id="kol-email-btn" title="Draft outreach email" style="background:none;border:0.5px solid var(--border-s);border-radius:6px;cursor:pointer;color:var(--muted);font-size:13px;padding:4px 10px">✉ Draft email</button>
       <button id="kol-edit-btn" title="Edit" style="background:none;border:0.5px solid var(--border-s);border-radius:6px;cursor:pointer;color:var(--muted);font-size:13px;padding:4px 10px;display:none">✎ Edit</button>
       <button class="modal-close" onclick="closeModal('kol-modal')">✕</button>
     </div>
@@ -4055,6 +4071,7 @@ function openKOLModal(idx) {
     document.getElementById('kol-edit-mode').style.display = 'none';
     document.getElementById('kol-edit-foot').style.display = 'none';
     document.getElementById('kol-edit-btn').style.display = '';
+    { const eb=document.getElementById('kol-email-btn'); if(eb) eb.style.display=''; }
   } else {
     // ── New KOL → straight to edit mode ─────────────
     document.getElementById('kol-modal-title').textContent = 'Add KOL';
@@ -4085,6 +4102,7 @@ function switchKOLModalToEdit() {
   document.getElementById('kol-edit-mode').style.display = '';
   document.getElementById('kol-edit-foot').style.display = '';
   document.getElementById('kol-edit-btn').style.display = 'none';
+  { const eb=document.getElementById('kol-email-btn'); if(eb) eb.style.display='none'; }
   document.getElementById('kol-modal-title').textContent = 'Edit KOL';
 }
 function saveKOL() {
@@ -9852,6 +9870,8 @@ function renderEngagement() {
 function wireEngagementTabs() {
   const editBtn = document.getElementById('kol-edit-btn');
   if (editBtn) editBtn.addEventListener('click', switchKOLModalToEdit);
+  const emailBtn = document.getElementById('kol-email-btn');
+  if (emailBtn) emailBtn.addEventListener('click', draftKOLEmail);
   // Interaction filters
   ['int-filter-kol','int-filter-from','int-filter-to'].forEach(id => {
     const el = document.getElementById(id);
@@ -10296,6 +10316,163 @@ function wireVerticalChips() {
   setVertical(DB.activeVertical || 'all');
 }
 
+
+// ══ ASSIGNMENT ENGINE ══════════════════════════════════════
+// Turns calendar + taxonomy + team data into "what to assign & to whom".
+
+function monthEventsFor(vertical, y, m) {
+  return (DB.calEvents||[]).filter(e =>
+    (e.vertical||'onc') === vertical && e.y===y && e.m===m && !['conf','pdufa'].includes(e.type));
+}
+
+// Average monthly output for a vertical over the trailing N months (excludes current partial month)
+function trailingMonthlyAvg(vertical, months) {
+  const now = new Date();
+  let total = 0;
+  for (let i=1; i<=months; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    total += monthEventsFor(vertical, d.getFullYear(), d.getMonth()+1).length;
+  }
+  return total / months;
+}
+
+function buildAssignments() {
+  const out = [];
+  const now = new Date(); now.setHours(0,0,0,0);
+  const y = now.getFullYear(), m = now.getMonth()+1;
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const monthProgress = now.getDate() / daysInMonth;   // 0..1
+
+  // 1) PACE GAP per vertical — are we behind our own trailing average?
+  Object.keys(VERTICALS).forEach(v => {
+    const avg = trailingMonthlyAvg(v, 3);
+    if (avg < 2) return; // too little history to judge
+    const soFar = monthEventsFor(v, y, m).length;
+    const expected = avg * monthProgress;
+    if (soFar < expected * 0.7) {   // >30% behind pace
+      const short = Math.max(1, Math.round(expected - soFar));
+      out.push({
+        kind: 'Pace', vertical: v, priority: 90,
+        text: VERTICALS[v].full + ' is behind pace — ~' + short + ' more piece' + (short>1?'s':'') + ' needed to hit the usual ' + Math.round(avg) + '/mo',
+        action: 'assign', topic: '', });
+    }
+  });
+
+  // 2) STALE TOPICS — taxonomy areas with no coverage in 60+ days
+  const lastTopic = {};
+  (DB.calEvents||[]).forEach(e => {
+    if (!e.cancer) return;
+    const key = (e.vertical||'onc') + '|' + e.cancer;
+    const d = new Date(e.y, e.m-1, e.d);
+    if (!lastTopic[key] || d > lastTopic[key]) lastTopic[key] = d;
+  });
+  const sixtyAgo = new Date(now.getTime() - 60*86400000);
+  Object.keys(TOPIC_GROUPS).forEach(v => {
+    // only surface "core" topics (those that have EVER been covered) so we don't spam every taxonomy leaf
+    const everCovered = {};
+    Object.keys(lastTopic).forEach(k => { if (k.startsWith(v+'|')) everCovered[k.split('|')[1]] = lastTopic[k]; });
+    Object.entries(everCovered)
+      .filter(([t,d]) => d < sixtyAgo)
+      .sort((a,b)=>a[1]-b[1])
+      .slice(0,3)
+      .forEach(([t,d]) => {
+        const days = Math.round((now - d)/86400000);
+        const kol = suggestKOLForTopic(t, v);
+        out.push({
+          kind: 'Stale topic', vertical: v, priority: 70,
+          text: t + ' — ' + days + ' days since last piece' + (kol ? ' · KOL: ' + kol : ''),
+          action: 'assign', topic: t });
+      });
+  });
+
+  // 3) TEAM LOAD BALANCE — who has capacity this/next 14 days
+  const soon = new Date(now.getTime() + 14*86400000);
+  const load = {};
+  (DB.teamOrder||[]).forEach(k => load[k] = 0);
+  (DB.calEvents||[]).forEach(e => {
+    if (!e.author) return;
+    const d = new Date(e.y, e.m-1, e.d);
+    if (d < now || d > soon) return;
+    e.author.split(/[\/&]|\band\b/).forEach(a => {
+      const key = matchMemberKey(a.trim());
+      if (key) load[key] = (load[key]||0) + 1;
+    });
+  });
+  const loads = Object.entries(load);
+  if (loads.length >= 2) {
+    loads.sort((a,b)=>a[1]-b[1]);
+    const [lightKey, lightN] = loads[0];
+    const [heavyKey, heavyN] = loads[loads.length-1];
+    if (heavyN - lightN >= 3) {
+      const nm = k => (DB.teamMembers[k]||{}).name || k;
+      out.push({
+        kind: 'Balance', vertical: null, priority: 60,
+        text: nm(heavyKey) + ' has ' + heavyN + ' items in the next 2 weeks; ' + nm(lightKey) + ' has ' + lightN + ' — consider rebalancing',
+        action: 'none', topic: '' });
+    }
+  }
+
+  return out.sort((a,b)=>b.priority-a.priority).slice(0, 10);
+}
+
+function matchMemberKey(name) {
+  if (!name) return null;
+  const n = name.toLowerCase().replace(/^(sat|sun)\s*-\s*/,'').trim();
+  const aliases = { ais:'dani' };  // won't match unless a member key exists; safe
+  const found = (DB.teamOrder||[]).find(k => {
+    const mn = ((DB.teamMembers[k]||{}).name || k).toLowerCase();
+    return mn === n || mn.split(' ')[0] === n || k === n;
+  });
+  return found || null;
+}
+
+function suggestKOLForTopic(topic, vertical) {
+  const t = (topic||'').toLowerCase();
+  const cand = (DB.kols||[]).filter(k => {
+    if ((k.vertical||'onc') !== vertical) return false;
+    const areas = [(k.primarySpec||''), (k.subSpec||''), (k.spec||'')].join(' ').toLowerCase();
+    return areas.includes(t) || t.includes((k.primarySpec||'').toLowerCase());
+  });
+  return cand.length ? (cand[0].name + (cand.length>1 ? ' +'+(cand.length-1) : '')) : '';
+}
+
+function renderAssignments() {
+  const cont = document.getElementById('assign-list'); if (!cont) return;
+  const items = buildAssignments().filter(it => DB.activeVertical === 'all' || it.vertical === null || it.vertical === DB.activeVertical);
+  cont.innerHTML = '';
+  if (!items.length) {
+    cont.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:10px 0">Nothing to assign — coverage and pace look healthy.</div>';
+    return;
+  }
+  const TONE = { 'Pace':'#B3401C', 'Stale topic':'#854F0B', 'Balance':'#0C447C' };
+  items.forEach(it => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid var(--border)';
+    const badge = document.createElement('span');
+    const c = TONE[it.kind] || '#555';
+    badge.style.cssText = 'font-size:10px;padding:2px 7px;border-radius:9px;white-space:nowrap;font-weight:500;background:'+c+'18;color:'+c;
+    badge.textContent = it.kind;
+    const txt = document.createElement('span');
+    txt.style.cssText = 'font-size:12.5px;color:var(--text);flex:1;line-height:1.5';
+    txt.textContent = it.text;
+    row.appendChild(badge); row.appendChild(txt);
+    if (it.action === 'assign') {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-sm'; btn.textContent = 'Add'; btn.style.cssText='font-size:10px;flex-shrink:0';
+      btn.addEventListener('click', () => {
+        _evtFromDay = false;
+        openCalEvtModal({ y:new Date().getFullYear(), m:new Date().getMonth()+1, d:new Date().getDate() });
+        setTimeout(() => {
+          const vs=document.getElementById('cevt-vertical'); if(vs && it.vertical){ vs.value=it.vertical; vs.dispatchEvent(new Event('change')); }
+          if (it.topic) { const cs=document.getElementById('cevt-cancer'); if(cs) cs.value=it.topic; }
+        }, 60);
+      });
+      row.appendChild(btn);
+    }
+    cont.appendChild(row);
+  });
+}
+
 // ══ ATTENTION QUEUE — auto-built from all data ═════════════
 function buildAttentionQueue() {
   const out = [];
@@ -10496,6 +10673,74 @@ function renderConferenceMode() {
 }
 
 // ══ MONDAY BRIEFING ════════════════════════════════════════
+
+// ══ DRAFT GENERATION ═══════════════════════════════════════
+function copyToClipboard(text, okMsg) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.cssText='position:absolute;left:-9999px';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); showPill('✓', okMsg||'Copied to clipboard', 'rgba(29,158,117,.45)', 2600); }
+  catch(e) { showPill('!', 'Copy failed — see console', 'rgba(216,90,48,.45)', 2600); console.log(text); }
+  ta.remove();
+}
+
+// Per-member assignment summary (paste into Slack/email)
+function generateTeamAssignments() {
+  const now = new Date(); now.setHours(0,0,0,0);
+  const soon = new Date(now.getTime() + 14*86400000);
+  const byMember = {};
+  (DB.teamOrder||[]).forEach(k => byMember[k] = []);
+  (DB.calEvents||[]).forEach(e => {
+    if (!e.author) return;
+    const d = new Date(e.y, e.m-1, e.d);
+    if (d < now || d > soon) return;
+    e.author.split(/[\/&]|\band\b/).forEach(a => {
+      const key = matchMemberKey(a.trim());
+      if (key) byMember[key].push({ d, e });
+    });
+  });
+  let out = 'Assignments — next 2 weeks (' + now.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ')\n\n';
+  (DB.teamOrder||[]).forEach(k => {
+    const nm = (DB.teamMembers[k]||{}).name || k;
+    const items = byMember[k].sort((a,b)=>a.d-b.d);
+    out += nm.toUpperCase() + ' (' + items.length + ')\n';
+    out += items.length
+      ? items.map(x => '  • ' + x.d.toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'}) + ' — ' + (x.e.label||'Untitled') + ' [' + (VERTICALS[x.e.vertical||'onc']||VERTICALS.onc).label + ']').join('\n')
+      : '  • (nothing scheduled)';
+    out += '\n\n';
+  });
+  const sug = buildAssignments().filter(a=>a.action==='assign');
+  if (sug.length) {
+    out += 'SUGGESTED — needs an owner\n' + sug.map(s=>'  • ' + s.text).join('\n') + '\n';
+  }
+  return out;
+}
+
+// KOL outreach email draft, pre-filled from the KOL's record + associations
+function generateKOLEmail(k) {
+  const first = (k.name||'').split(' ')[0] || 'there';
+  const assoc = (typeof getKOLAssociations==='function') ? getKOLAssociations(k.name) : {projects:[],content:[]};
+  const area = k.primarySpec || k.spec || 'your area';
+  const recent = (assoc.content||[])[0];
+  const subject = 'Pharmacy Times — invitation to contribute (' + area + ')';
+  const body =
+    'Hi Dr. ' + (k.name ? k.name.split(' ').slice(-1)[0] : '') + ',\n\n' +
+    'I hope you\u2019re well. I\u2019m reaching out from Pharmacy Times / Pharmacy Practice in Focus about an opportunity in ' + area + '.\n\n' +
+    (recent ? 'Your perspective on ' + (recent.title||area) + ' would resonate with our pharmacist audience, and ' : 'Given your work in ' + area + ', ') +
+    'we\u2019d love to feature your insight in an upcoming piece.\n\n' +
+    'Would you have 20\u201330 minutes in the next couple of weeks for a brief recorded interview? I can work around your schedule.\n\n' +
+    'Warm regards,\nAlex Gerlach\nEditorial Manager, Pharmacy Times';
+  return { subject, body };
+}
+
+function draftKOLEmail() {
+  const idx = parseInt(document.getElementById('km-id').value);
+  const k = (!isNaN(idx) && DB.kols[idx]) ? DB.kols[idx] : null;
+  if (!k) { showPill('!','Open a KOL first','rgba(216,90,48,.4)',2500); return; }
+  const { subject, body } = generateKOLEmail(k);
+  copyToClipboard('Subject: ' + subject + '\n\n' + body, 'Outreach email copied — paste into your mail client');
+}
+
 function generateBriefing() {
   const q = buildAttentionQueue();
   const { counts, total } = computeVerticalSplit();
@@ -10533,6 +10778,8 @@ function copyBriefing() {
 function wireMissionControl() {
   const b = document.getElementById('briefing-btn');
   if (b) b.addEventListener('click', copyBriefing);
+  const ac = document.getElementById('assign-copy-btn');
+  if (ac) ac.addEventListener('click', () => copyToClipboard(generateTeamAssignments(), 'Team assignments copied — paste into Slack'));
   const r = document.getElementById('mc-refresh');
   if (r) r.addEventListener('click', renderMissionControl);
   const sub = document.getElementById('mc-datesub');
@@ -10764,6 +11011,7 @@ function wireAnalyticsVertical() {
 
 function renderMissionControl() {
   safeRun(renderAttentionQueue);
+  safeRun(renderAssignments);
   safeRun(renderVerticalAnalytics);
   safeRun(renderWeekStrip);
   safeRun(renderVerticalBalance);
@@ -10771,9 +11019,113 @@ function renderMissionControl() {
 }
 
 
+
+// ══ AUTO-SYNC (background) ═════════════════════════════════
+if (DB.autoSyncEnabled === undefined) DB.autoSyncEnabled = true;
+if (!DB.autoSyncHours) DB.autoSyncHours = 6;
+let _autoSyncTimer = null;
+
+// Try both the daily-tracker layout and a column CSV; use whichever yields more rows.
+function parseAnySheet(text) {
+  let wk = [], col = [];
+  try { wk  = parseDailyTracker(text); } catch(e) {}
+  try { col = parseColumnCSV(text); } catch(e) {}
+  return (col.length > wk.length) ? col : wk;
+}
+
+
+// ══ TEST SYNC (fetch + parse, no apply) ════════════════════
+async function testSheetConnection() {
+  const urlInp = document.getElementById('sheet-url');
+  if (urlInp && urlInp.value.trim()) DB.sheetUrl = urlInp.value.trim();
+  const out = document.getElementById('sheet-test-result');
+  if (out) out.innerHTML = '<span style="color:var(--muted)">Testing…</span>';
+  const csvUrl = sheetCsvUrl(DB.sheetUrl, DB.sheetTab);
+  if (!csvUrl) { if (out) out.innerHTML = '<span style="color:#B3401C">No valid URL.</span>'; return; }
+  try {
+    const res = await fetch(csvUrl, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (/<html/i.test(text.slice(0,400))) throw new Error('Got a login/HTML page — the sheet is not published to web.');
+    const wk = (()=>{try{return parseDailyTracker(text);}catch(e){return [];}})();
+    const col = (()=>{try{return parseColumnCSV(text);}catch(e){return [];}})();
+    const best = col.length > wk.length ? col : wk;
+    const fmt = col.length > wk.length ? 'column layout' : 'weekly-tracker layout';
+    if (!best.length) {
+      if (out) out.innerHTML = '<span style="color:#B3401C">Reached the sheet, but found 0 dated items. Wrong tab (check the gid) or unexpected layout. First line seen:<br><code style="font-size:10px">' + (text.split(/\r?\n/)[0]||'').slice(0,120).replace(/</g,'&lt;') + '</code></span>';
+      return;
+    }
+    const byV = {}; best.forEach(e => byV[e.vertical] = (byV[e.vertical]||0)+1);
+    const dates = best.map(e=>new Date(e.y,e.m-1,e.d)).sort((a,b)=>a-b);
+    const f = d => d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    if (out) out.innerHTML = '<span style="color:#0F7B54">✓ Connected — ' + best.length + ' items (' + fmt + ')<br>' +
+      f(dates[0]) + ' → ' + f(dates[dates.length-1]) + ' · ' +
+      Object.entries(byV).map(([k,v])=>(VERTICALS[k]?VERTICALS[k].label:k)+' '+v).join(' · ') + '</span>';
+  } catch (e) {
+    if (out) out.innerHTML = '<span style="color:#B3401C">Failed: ' + e.message + '</span>';
+  }
+}
+
+async function autoSyncNow(opts) {
+  opts = opts || {};
+  if (!DB.sheetUrl) return false;
+  const csvUrl = sheetCsvUrl(DB.sheetUrl, DB.sheetTab);
+  if (!csvUrl) return false;
+  setSyncDot('syncing');
+  try {
+    const res = await fetch(csvUrl, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (/<html/i.test(text.slice(0, 400))) throw new Error('not public');
+    const parsed = parseAnySheet(text);
+    if (parsed.length < 5) throw new Error('only ' + parsed.length + ' rows parsed — check tab/format');
+    const applied = applySheetEvents(parsed, opts.manual ? 'manual refresh' : null);
+    if (applied === 0 && !opts.manual) { setSyncDot('err', 'kept existing data'); return false; }
+    DB.lastAutoSync = new Date().toISOString();
+    setSyncDot('ok');
+    if (opts.manual) showPill('✓', 'Synced ' + parsed.length + ' items from the sheet', 'rgba(29,158,117,.45)', 3000);
+    return true;
+  } catch (e) {
+    setSyncDot('err', e.message);
+    if (opts.manual) showPill('!', 'Auto-sync failed (' + e.message + '). You can still upload a CSV.', 'rgba(216,90,48,.5)', 5000);
+    window.dbgLog && dbgLog('autoSync: ' + e.message, false);
+    return false;
+  }
+}
+
+function scheduleAutoSync() {
+  if (_autoSyncTimer) clearInterval(_autoSyncTimer);
+  if (!DB.autoSyncEnabled) { setSyncDot('off'); return; }
+  const ms = Math.max(1, DB.autoSyncHours) * 3600 * 1000;
+  _autoSyncTimer = setInterval(() => autoSyncNow(), ms);
+}
+
+function setSyncDot(state, detail) {
+  const dot = document.getElementById('sync-dot'); if (!dot) return;
+  const map = {
+    ok:      ['#1D9E75', 'Synced'],
+    syncing: ['#BA7517', 'Syncing…'],
+    err:     ['#D85A30', 'Sync error' + (detail ? ': ' + detail : '')],
+    off:     ['#9c9a92', 'Auto-sync off'],
+  };
+  const [color, label] = map[state] || map.off;
+  dot.style.background = color;
+  const when = DB.lastAutoSync ? ' · ' + new Date(DB.lastAutoSync).toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'}) : '';
+  dot.title = label + (state === 'ok' ? when : '');
+}
+
+function wireAutoSync() {
+  const dot = document.getElementById('sync-dot');
+  if (dot) dot.addEventListener('click', () => autoSyncNow({ manual: true }));
+  setSyncDot(DB.autoSyncEnabled ? 'ok' : 'off');
+  // Kick a sync shortly after load (non-blocking), then schedule.
+  if (DB.autoSyncEnabled && DB.sheetUrl) setTimeout(() => autoSyncNow(), 2500);
+  scheduleAutoSync();
+}
+
 // ══ GOOGLE SHEET SYNC — Daily Tracker ══════════════════════
-const SHEET_URL_DEFAULT = 'https://docs.google.com/spreadsheets/d/16GTLmN1PmU6oKDGspogoV2j5OaRVi9d69xMkHq91vH4/edit?usp=sharing';
-if (!DB.sheetUrl) DB.sheetUrl = SHEET_URL_DEFAULT;
+const SHEET_URL_DEFAULT = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTd9YJCKlQ7aZtvvkV2GtgiIqTX4ZaUSDK6s2a1QB90lgdLtNi9CEinbS8qPchxo8TLzOUhhp-0YL6/pub?gid=90794266&single=true&output=csv';
+if (!DB.sheetUrl || DB.sheetUrl.indexOf('/edit')>-1) DB.sheetUrl = SHEET_URL_DEFAULT;
 if (!DB.sheetTab) DB.sheetTab = '2026 Daily Tracker';
 if (DB.sheetWindowOnly === undefined) DB.sheetWindowOnly = true;
 
@@ -10884,7 +11236,17 @@ function sheetCsvUrl(url, tab) {
   return tab ? base + '&sheet=' + encodeURIComponent(tab) : base;
 }
 
-function applySheetEvents(parsed, note) {
+function applySheetEvents(parsed, note, opts) {
+  opts = opts || {};
+  const existingSheet = (DB.calEvents || []).filter(e => e.src === 'sheet');
+  // GUARD: refuse a replace that would wipe a healthy calendar with a tiny/empty result.
+  // (Protects against a mis-published sheet or a parser miss returning near-nothing.)
+  if (!opts.force && existingSheet.length >= 20 && parsed.length < existingSheet.length * 0.5) {
+    setSyncDot && setSyncDot('err', 'sync returned only ' + parsed.length + ' rows — kept existing ' + existingSheet.length);
+    showPill('!', 'Sync returned only ' + parsed.length + ' items vs ' + existingSheet.length + ' on file — kept your data. Check the sheet/tab.', 'rgba(216,90,48,.55)', 8000);
+    return 0;
+  }
+  window._lastSheetBackup = existingSheet.slice();  // one-deep undo
   const before = (DB.calEvents || []).length;
   // Sheet-sourced events are fully replaced; manual events are never touched.
   const manual = (DB.calEvents || []).filter(e => e.src !== 'sheet');
@@ -10905,6 +11267,14 @@ function applySheetEvents(parsed, note) {
   saveState();
   [renderCal, renderMissionControl, updateStatStrip, renderVerticalBalance].forEach(safeRun);
   renderSyncStatus();
+  if (window._lastSheetBackup && window._lastSheetBackup.length && incoming.length) {
+    showUndoPill('Replaced ' + incoming.length + ' synced items', () => {
+      const manualNow = (DB.calEvents||[]).filter(e => e.src !== 'sheet');
+      DB.calEvents = manualNow.concat(window._lastSheetBackup);
+      [renderCal, renderMissionControl].forEach(safeRun); saveState();
+    });
+  }
+  window._lastSheetBackup = (DB.calEvents||[]).filter(e=>false); // cleared; set below pre-replace
   const skipped = parsed.length - incoming.length;
   showPill('✓', 'Synced ' + incoming.length + ' items' + (skipped > 0 ? ' (' + skipped + ' outside window)' : '') + (note ? ' · ' + note : ''), 'rgba(29,158,117,.45)', 4000);
   return incoming.length;
@@ -10956,6 +11326,8 @@ function renderSyncStatus() {
 function openSheetModal() {
   const u = document.getElementById('sheet-url'); if (u) u.value = DB.sheetUrl || '';
   const t = document.getElementById('sheet-tab'); if (t) t.value = DB.sheetTab || '';
+  const at = document.getElementById('auto-sync-toggle');
+  if (at) { at.checked = !!DB.autoSyncEnabled; at.addEventListener('change', () => { DB.autoSyncEnabled = at.checked; saveState(); scheduleAutoSync(); setSyncDot(at.checked?'ok':'off'); }); }
   const w = document.getElementById('sheet-window'); if (w) w.checked = !!DB.sheetWindowOnly;
   renderSyncStatus();
   openModal('sheet-modal');
@@ -11145,6 +11517,7 @@ function wireCsvImport() {
 function wireSheetSync() {
   const b = document.getElementById('sheet-open-btn'); if (b) b.addEventListener('click', openSheetModal);
   const s = document.getElementById('sheet-sync-btn'); if (s) s.addEventListener('click', syncSheet);
+  const tb = document.getElementById('sheet-test-btn'); if (tb) tb.addEventListener('click', testSheetConnection);
   const w = document.getElementById('sheet-window');
   if (w) w.addEventListener('change', () => { DB.sheetWindowOnly = w.checked; saveState(); });
   const c = document.getElementById('sheet-close'); if (c) c.addEventListener('click', () => closeModal('sheet-modal'));
@@ -11160,7 +11533,7 @@ function applyCalendarSeedOnce() {
   try {
     // Backfill vertical on any pre-existing events
     (DB.calEvents||[]).forEach(e => { if (!e.vertical) e.vertical = (typeof classifyVertical==='function' ? classifyVertical(e.label) : 'onc'); });
-    if (localStorage.getItem(LS_KEY + '_seeded_v2')) return;      // one-time
+    if (localStorage.getItem(LS_KEY + '_seeded_v3')) return;      // one-time
     if (window.CALENDAR_SEED && window.CALENDAR_SEED.length) {
       // Keep anything the user added by hand; replace the imported set with the fresh seed
       const manual = (DB.calEvents||[]).filter(e => e.src !== 'sheet');
@@ -11168,7 +11541,7 @@ function applyCalendarSeedOnce() {
       DB.sheetLastSync = new Date().toISOString();
       DB.activeVertical = 'all';   // make sure nothing is hidden by a stale filter
     }
-    try { localStorage.setItem(LS_KEY + '_seeded_v2', '1'); } catch(e) {}
+    try { localStorage.setItem(LS_KEY + '_seeded_v3', '1'); } catch(e) {}
   } catch(e) { window.dbgLog && dbgLog('seed error: ' + e.message, false); }
 }
 
@@ -11303,6 +11676,7 @@ async function startup() {
   wireVerticalChips();
   wireAnalyticsVertical();
   wireSheetSync();
+  wireAutoSync();
   wireCsvImport();
   wireVerticalDependentSelects();
   wireMissionControl();
