@@ -6,6 +6,26 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:;">
 <title>PT Oncology — Home</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script>
+// GLOBAL ERROR CATCHER — surfaces runtime errors on screen instead of silent blank
+window.addEventListener('error', function(ev){
+  try {
+    var bar = document.getElementById('err-bar') || (function(){
+      var b = document.createElement('div'); b.id='err-bar';
+      b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#7a1f0c;color:#fff;font:12px/1.5 system-ui;padding:8px 14px;max-height:40vh;overflow:auto;white-space:pre-wrap';
+      document.body.appendChild(b); return b;
+    })();
+    bar.textContent = '⚠ Runtime error (this is what\'s blanking the page):\n' + (ev.message||'') + '\n' + (ev.filename||'') + ':' + (ev.lineno||'') + ':' + (ev.colno||'') + (ev.error && ev.error.stack ? '\n\n'+ev.error.stack : '');
+  } catch(_){}
+});
+window.addEventListener('unhandledrejection', function(ev){
+  try {
+    var bar = document.getElementById('err-bar') || document.createElement('div');
+    if(!bar.id){ bar.id='err-bar'; bar.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#7a1f0c;color:#fff;font:12px/1.5 system-ui;padding:8px 14px;max-height:40vh;overflow:auto;white-space:pre-wrap'; document.body.appendChild(bar);}
+    bar.textContent = '⚠ Promise rejection: ' + (ev.reason && (ev.reason.stack||ev.reason.message) || ev.reason);
+  } catch(_){}
+});
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -938,7 +958,7 @@ body { position: relative; background: var(--bg); }
     <div id="save-pill" class="save-pill"><span id="save-icon">⟳</span><span id="save-txt">Saving…</span></div>
     <div id="top-datetime" style="font-size:11px;color:rgba(255,255,255,.7);text-align:right;line-height:1.4;padding-left:6px;border-left:0.5px solid rgba(255,255,255,.15)">
       <div id="top-date" style="font-weight:600"></div>
-      <div style="display:flex;gap:6px;justify-content:flex-end;align-items:baseline"><div id="top-time" style="font-size:10px;opacity:.8"></div><div title="Dashboard build version" style="font-size:9px;opacity:.45;font-weight:600">v104</div></div>
+      <div style="display:flex;gap:6px;justify-content:flex-end;align-items:baseline"><div id="top-time" style="font-size:10px;opacity:.8"></div><div title="Dashboard build version" style="font-size:9px;opacity:.45;font-weight:600">v108</div></div>
     </div>
   </div>
 </div>
@@ -1464,6 +1484,13 @@ body { position: relative; background: var(--bg); }
 </div><!-- /app -->
 
 <!-- ═══ MODALS ═══ -->
+
+<div id="tm-modal" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('tm-modal')">
+<div class="modal modal-md">
+  <div class="modal-hdr"><h3>Time machine — restore a backup</h3><button class="modal-close" onclick="closeModal('tm-modal')">✕</button></div>
+  <div id="tm-body" style="max-height:420px;overflow-y:auto"></div>
+</div></div>
+
 
 <div id="sheet-modal" class="overlay" style="display:none">
 <div class="modal modal-md">
@@ -2271,7 +2298,11 @@ body { position: relative; background: var(--bg); }
 <script>
 
 // Run a renderer without letting its failure break siblings
-function safeRun(fn) { try { fn(); } catch(e) { window.dbgLog && dbgLog('safeRun ' + (fn.name||'fn') + ': ' + e.message, false); } }
+function safeRun(fn) { try { fn(); } catch(e) {
+  window.dbgLog && dbgLog('safeRun ' + (fn.name||'fn') + ': ' + e.message, false);
+  window._lastRenderError = (fn.name||'fn') + ': ' + e.message;
+  console.error('Render error in ' + (fn.name||'fn') + ':', e);
+} }
 // Safe dbgLog stub — real implementation loads later in the debug panel block.
 // Queues messages so nothing is lost and, critically, nothing throws.
 window._dbgQueue = [];
@@ -2720,6 +2751,18 @@ async function _doSave() {
 
   // Always mirror to localStorage first — instant, zero-risk backup
   try { localStorage.setItem(LS_KEY, dataStr); } catch(_) {}
+  // Rolling backups: keep the last 5 HEALTHY saves so we can roll back in time.
+  try {
+    const looksHealthy = (DB.calEvents && DB.calEvents.length > 20) ||
+                         (DB.projectTrackers && DB.projectTrackers.length > 0) ||
+                         (DB.kols && DB.kols.length > 5);
+    if (looksHealthy) {
+      const stamp = new Date().toISOString();
+      localStorage.setItem(LS_KEY + '_bak_' + stamp, dataStr);
+      const baks = Object.keys(localStorage).filter(k => k.startsWith(LS_KEY + '_bak_')).sort();
+      while (baks.length > 5) { localStorage.removeItem(baks.shift()); }
+    }
+  } catch(_) {}
 
   try {
     const h = {
@@ -2783,6 +2826,22 @@ async function loadState() {
         dbgLog('Skipped invalid saved state (missing expected keys)', false);
         return;
       }
+      // HEALTH GATE: if the cloud copy looks gutted but we have a richer local backup, prefer the backup.
+      try {
+        const cloudScore = (saved.calEvents||[]).length + (saved.projectTrackers||[]).length*5 + (saved.kols||[]).length;
+        const baks = Object.keys(localStorage).filter(k => k.startsWith(LS_KEY + '_bak_')).sort();
+        if (baks.length) {
+          const best = JSON.parse(localStorage.getItem(baks[baks.length-1]) || '{}');
+          const bakScore = (best.calEvents||[]).length + (best.projectTrackers||[]).length*5 + (best.kols||[]).length;
+          if (bakScore > cloudScore * 1.5 && bakScore > 30) {
+            Object.keys(best).forEach(k => { DB[k] = best[k]; });
+            dbgLog('Cloud looked gutted (' + cloudScore + ') — restored richer local backup (' + bakScore + ')', true);
+            window._restoredFromBackup = true;
+            if (DB.calEvents && DB.calEvents.length) calEvtCounter = Math.max(calEvtCounter, ...DB.calEvents.map(e => Number(e.id)||0));
+            return;
+          }
+        }
+      } catch(e) {}
       Object.keys(saved).forEach(k => { DB[k] = saved[k]; });
       // Re-sync calEvtCounter so new events never collide with saved IDs
       if (DB.calEvents && DB.calEvents.length) {
@@ -2856,10 +2915,11 @@ function showPage(name, el) {
     const sp = document.getElementById('kol-specialty-sel');if(sp) sp.value = currentKOLSpecialty;
   }
   if (name === 'conferences') { renderConferences(); }
-  if (name === 'ppfo')     { renderPPFO(); }
-  if (name === 'projects') { renderProjects(); }
-  if (name === 'goals')    { renderGoalsPage(); }
-  if (name === 'team')     { renderTeamPage(); }
+  if (name === 'ppfo')     { safeRun(renderPPFO); }
+  if (name === 'projects') { safeRun(renderProjects); }
+  if (name === 'goals')    { safeRun(renderGoalsPage); }
+  if (name === 'team')     { safeRun(renderTeamPage); }
+  if (name === 'conferences') { safeRun(renderConferences); }
 }
 let calRendered = false, trendRendered = false, analyticsRendered = false;
 
@@ -11021,7 +11081,7 @@ function renderMissionControl() {
 
 
 // ══ AUTO-SYNC (background) ═════════════════════════════════
-if (DB.autoSyncEnabled === undefined) DB.autoSyncEnabled = true;
+if (DB.autoSyncEnabled === undefined) DB.autoSyncEnabled = false;
 if (!DB.autoSyncHours) DB.autoSyncHours = 6;
 let _autoSyncTimer = null;
 
@@ -11068,6 +11128,7 @@ async function testSheetConnection() {
 
 async function autoSyncNow(opts) {
   opts = opts || {};
+  if (!opts.manual && !DB.autoSyncEnabled) return false;  // never auto-fire unless explicitly enabled
   if (!DB.sheetUrl) return false;
   const csvUrl = sheetCsvUrl(DB.sheetUrl, DB.sheetTab);
   if (!csvUrl) return false;
@@ -11119,8 +11180,10 @@ function wireAutoSync() {
   if (dot) dot.addEventListener('click', () => autoSyncNow({ manual: true }));
   setSyncDot(DB.autoSyncEnabled ? 'ok' : 'off');
   // Kick a sync shortly after load (non-blocking), then schedule.
-  if (DB.autoSyncEnabled && DB.sheetUrl) setTimeout(() => autoSyncNow(), 2500);
-  scheduleAutoSync();
+  // Auto-sync on load DISABLED — it was replacing state on every load and could blank pages.
+  // Sync is now strictly manual: click the topbar dot. Interval auto-sync also off by default.
+  DB.autoSyncEnabled = false;
+  setSyncDot('off');
 }
 
 // ══ GOOGLE SHEET SYNC — Daily Tracker ══════════════════════
@@ -11547,6 +11610,60 @@ function applyCalendarSeedOnce() {
 
 
 
+
+// ══ TIME MACHINE — restore a previous local backup ═════════
+function listBackups() {
+  const keys = Object.keys(localStorage).filter(k => k.startsWith(LS_KEY + '_bak_')).sort().reverse();
+  return keys.map(k => {
+    let d = {};
+    try { d = JSON.parse(localStorage.getItem(k) || '{}'); } catch(e) {}
+    const stamp = k.replace(LS_KEY + '_bak_', '');
+    return {
+      key: k,
+      when: new Date(stamp).toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}),
+      events: (d.calEvents||[]).length,
+      projects: (d.projectTrackers||[]).length,
+      kols: (d.kols||[]).length,
+      ppfo: (d.ppfoTrackers||[]).length,
+    };
+  });
+}
+
+function openTimeMachine() {
+  const baks = listBackups();
+  // also offer the current localStorage main + cloud
+  let html = '';
+  if (!baks.length) {
+    html = '<div style="font-size:12px;color:var(--muted)">No local backups found yet. Backups start accumulating from healthy saves on this browser. If this is a fresh machine, there may be none — but your calendar seed is always recoverable via "Restore calendar".</div>';
+  } else {
+    html = '<div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">Pick a point to roll back to. Each is a healthy save from this browser.</div>';
+    baks.forEach(b => {
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">' +
+        '<div><div style="font-size:12.5px;font-weight:500;color:var(--text)">' + b.when + '</div>' +
+        '<div style="font-size:11px;color:var(--muted)">' + b.events + ' events · ' + b.projects + ' projects · ' + b.kols + ' KOLs · ' + b.ppfo + ' PPFO</div></div>' +
+        '<button class="btn btn-sm btn-primary" onclick="restoreBackup(\'' + b.key + '\')">Restore</button></div>';
+    });
+  }
+  const box = document.getElementById('tm-body'); if (box) box.innerHTML = html;
+  openModal('tm-modal');
+}
+
+function restoreBackup(key) {
+  const raw = localStorage.getItem(key);
+  if (!raw) { alert('That backup is no longer available.'); return; }
+  let d;
+  try { d = JSON.parse(raw); } catch(e) { alert('That backup is unreadable.'); return; }
+  if (!confirm('Roll back to this backup? Your current state will be replaced (a fresh backup of the current state is kept first).')) return;
+  // Back up current state before overwriting, so this is itself undoable
+  try { localStorage.setItem(LS_KEY + '_bak_' + new Date().toISOString(), JSON.stringify(DB, (k,v)=>k.startsWith('_')?undefined:v)); } catch(e) {}
+  Object.keys(d).forEach(k => { DB[k] = d[k]; });
+  DB.activeVertical = 'all';
+  saveState();
+  ['renderProjects','renderPPFO','renderTeamTabs','renderTeamPage','renderKOLs','renderConferences','renderCal','renderMissionControl','renderGoalsPage'].forEach(fn => { if (typeof window[fn]==='function') safeRun(window[fn]); });
+  closeModal('tm-modal');
+  alert('Restored backup from ' + key.replace(LS_KEY+'_bak_','') + '. Everything should be back. If it looks right, it will re-save to the cloud automatically.');
+}
+
 // ══ RESTORE DEFAULTS (non-destructive merge) ═══════════════
 // Re-seeds the built-in team / PPFO / PPRO / EAB defaults ONLY where
 // the current data is missing or empty. Never overwrites populated data.
@@ -11758,6 +11875,8 @@ startup();
 <!-- DEBUG PANEL -->
 <div id="debug-panel" style="display:none;position:fixed;bottom:70px;right:16px;width:360px;background:var(--navy-d);border:1px solid var(--gold-d);border-radius:10px;padding:14px;z-index:999;font-size:11px;font-family:monospace;max-height:260px;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,.5)">
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+    <button class="btn btn-sm" onclick="alert(window._lastRenderError ? ('Last render error:\n\n'+window._lastRenderError) : 'No render errors recorded — pages are rendering fine. If one looks blank, click the All chip (vertical filter).')">⚠ What broke?</button>
+    <button class="btn btn-sm btn-primary" onclick="openTimeMachine()">⏰ Time machine</button>
     <button class="btn btn-sm" onclick="stateInventory()">📋 State inventory</button>
     <button class="btn btn-sm" onclick="dataDiagnostics()">🔎 Data check</button>
     <button class="btn btn-sm btn-primary" onclick="forceReseed()">♻ Restore calendar</button>
