@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pharmacy Times — Editorial Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1f2b48; --gold:#c8a227; --text:#1f1f1d; --muted:#73726c;
+  --bg:#faf9f7; --surface:#fff; --surface-2:#f4f2ee;
+  --hover:rgba(0,0,0,.035); --sel:rgba(0,0,0,.06);
+  --border:rgba(0,0,0,.10); --border-s:rgba(0,0,0,.18);
+  --v-onc:#185FA5; --v-multi:#0F6E56;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+.app{display:flex;height:100vh}
+.sidebar{width:210px;background:var(--surface);border-right:0.5px solid var(--border);padding:14px 0;overflow-y:auto;flex-shrink:0}
+.brand{font-weight:800;font-size:16px;padding:0 18px 14px;color:var(--navy)}
+.brand span{color:var(--gold)}
+.nav-sec{font-size:10px;font-weight:700;letter-spacing:.08em;color:#fff;background:var(--navy);margin:12px 12px 4px;padding:5px 10px;border-radius:6px}
+.nav-i{padding:9px 18px;font-size:13px;color:var(--muted);cursor:pointer;margin:1px 8px;border-radius:7px}
+.nav-i:hover{background:var(--hover);color:var(--text)}
+.nav-i.active{background:var(--sel);color:var(--text);font-weight:600}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:52px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:14px;padding:0 20px;background:var(--surface);flex-shrink:0}
+.chip{font-size:11px;padding:3px 11px;border-radius:12px;border:0.5px solid var(--border);cursor:pointer;user-select:none;color:var(--muted)}
+.chip.active{background:var(--text);color:var(--surface);border-color:var(--text)}
+.clock{font-size:11px;color:var(--muted)}
+.ver{font-size:9px;color:#bbb;font-weight:600}
+.content{flex:1;overflow-y:auto;padding:22px 26px}
+.pg{display:none}
+.pg.active{display:block}
+.pg-h{font-size:20px;font-weight:600;margin-bottom:3px}
+.pg-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.card-t{font-size:14px;font-weight:600;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.metric{background:var(--surface-2);border-radius:10px;padding:14px 16px}
+.metric-l{font-size:11.5px;color:var(--muted)}
+.metric-v{font-size:28px;font-weight:600;margin-top:3px;letter-spacing:-.02em}
+.btn{font-size:12px;padding:6px 12px;border-radius:7px;border:0.5px solid var(--border-s);background:var(--surface);color:var(--text);cursor:pointer}
+.btn:hover{background:var(--hover)}
+.btn-p{background:var(--navy);color:#fff;border-color:var(--navy)}
+.dot{width:9px;height:9px;border-radius:50%;background:#9c9a92;cursor:pointer}
+.pill{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:rgba(20,22,34,.92);color:#fff;font-size:12px;padding:9px 16px;border-radius:9px;z-index:900;opacity:0;transition:opacity .2s}
+.pill.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="brand">pharmacy<span>times</span></div>
+    <div class="nav-sec">MAIN</div>
+    <div class="nav-i active" data-pg="home">Home</div>
+    <div class="nav-i" data-pg="projects">Projects</div>
+    <div class="nav-i" data-pg="calendar">Content Calendar</div>
+    <div class="nav-i" data-pg="analytics">Analytics</div>
+    <div class="nav-i" data-pg="kols">KOLs</div>
+    <div class="nav-i" data-pg="conferences">Conferences</div>
+    <div class="nav-sec">PUBLICATIONS</div>
+    <div class="nav-i" data-pg="ppfo">PPFO</div>
+    <div class="nav-sec">PERSONAL</div>
+    <div class="nav-i" data-pg="goals">My Goals</div>
+    <div class="nav-i" data-pg="team">My Team</div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <span class="dot" id="sync-dot" title="Data status"></span>
+      <span class="chip active" data-v="all">All</span>
+      <span class="chip" data-v="onc">Onc</span>
+      <span class="chip" data-v="multi">Multi</span>
+      <span class="clock" id="clock"></span>
+      <span class="ver">v207</span>
+    </div>
+    <div class="content">
+      <div class="pg active" id="page-home">
+        <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:16px">
+          <div>
+            <div class="pg-h">Today</div>
+            <div class="pg-sub" id="home-date" style="margin-bottom:0"></div>
+          </div>
+          <button class="btn" id="briefing-btn" style="margin-left:auto">Copy briefing</button>
+        </div>
+
+        <div class="g4" id="home-metrics" style="margin-bottom:14px"></div>
+
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card" style="margin-bottom:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <div class="card-t" style="margin-bottom:0">Needs attention</div>
+            </div>
+            <div id="attention-list" style="max-height:320px;overflow-y:auto"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="card" style="margin-bottom:0">
+              <div class="card-t">This week</div>
+              <div id="week-strip"></div>
+            </div>
+            <div class="card" style="margin-bottom:0">
+              <div class="card-t">Vertical balance</div>
+              <div id="vbal"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:0">
+          <div class="card-t" id="home-status-t">Your data</div>
+          <div id="home-status" style="font-size:12px;color:var(--muted)"></div>
+        </div>
+      </div>
+      <div class="pg" id="page-projects">
+        <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:16px">
+          <div><div class="pg-h">Projects</div><div class="pg-sub" style="margin-bottom:0">Click a project to open it · status at a glance</div></div>
+          <button class="btn btn-p" id="proj-add-btn" style="margin-left:auto">+ New project</button>
+        </div>
+        <div id="proj-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px"></div>
+      </div>
+      <div class="pg" id="page-calendar">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+          <div><div class="pg-h">Content Calendar</div><div class="pg-sub" id="cal-sub" style="margin-bottom:0"></div></div>
+          <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+            <button class="btn" id="cal-prev">‹</button>
+            <div id="cal-month-lbl" style="font-size:14px;font-weight:600;min-width:130px;text-align:center"></div>
+            <button class="btn" id="cal-next">›</button>
+            <button class="btn" id="cal-today">Today</button>
+            <button class="btn" id="cal-import">↓ Import CSV</button>
+            <button class="btn btn-p" id="cal-add">+ Add</button>
+          </div>
+        </div>
+        <div id="cal-grid"></div>
+      </div>
+      <div class="pg" id="page-analytics">
+        <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:14px">
+          <div><div class="pg-h">Analytics</div><div class="pg-sub" id="an-scope-note" style="margin-bottom:0">Showing all verticals</div></div>
+          <div style="margin-left:auto;display:flex;gap:5px">
+            <button class="an-vert active" data-av="all" style="font-size:11px;padding:5px 12px;border-radius:7px;border:none;cursor:pointer;background:var(--text);color:var(--surface);font-weight:600">All</button>
+            <button class="an-vert" data-av="onc" style="font-size:11px;padding:5px 12px;border-radius:7px;border:none;cursor:pointer;background:transparent;color:var(--muted);font-weight:400">Oncology</button>
+            <button class="an-vert" data-av="multi" style="font-size:11px;padding:5px 12px;border-radius:7px;border:none;cursor:pointer;background:transparent;color:var(--muted);font-weight:400">Multispecialty</button>
+          </div>
+        </div>
+
+        <div class="g4" id="ga-metrics" style="margin-bottom:14px"></div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div class="card-t" style="margin-bottom:0">Output over time</div>
+            <div style="display:flex;gap:5px">
+              <button class="trend-r active" data-n="6" style="font-size:11px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border-s);cursor:pointer;background:var(--sel);color:var(--text)">6 mo</button>
+              <button class="trend-r" data-n="12" style="font-size:11px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border-s);cursor:pointer;background:var(--surface);color:var(--muted)">12 mo</button>
+            </div>
+          </div>
+          <div style="height:230px;position:relative"><canvas id="trendChart"></canvas></div>
+        </div>
+
+        <div class="g2" style="margin-bottom:14px">
+          <div class="card" style="margin-bottom:0">
+            <div class="card-t">Content mix</div>
+            <div style="height:200px;position:relative"><canvas id="mixChart"></canvas></div>
+          </div>
+          <div class="card" style="margin-bottom:0">
+            <div class="card-t">Top topics <span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:4px">this year</span></div>
+            <div id="top-topics" style="padding-top:2px;max-height:220px;overflow-y:auto"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-t">RC pacing <span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:4px">tagged events vs target</span></div>
+          <div id="pacing"></div>
+        </div>
+
+        <div class="g2">
+          <div class="card" style="margin-bottom:0">
+            <div class="card-t">Disease / topic coverage</div>
+            <div style="height:220px;position:relative"><canvas id="diseaseChart"></canvas></div>
+          </div>
+          <div class="card" style="margin-bottom:0">
+            <div class="card-t">Coverage gaps <span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:4px">taxonomy areas with no coverage</span></div>
+            <div id="gaps" style="max-height:220px;overflow-y:auto;padding-top:2px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="pg" id="page-kols"><div class="pg-h">KOLs</div><div class="pg-sub">Coming in the rebuild.</div></div>
+      <div class="pg" id="page-conferences"><div class="pg-h">Conferences</div><div class="pg-sub">Coming in the rebuild.</div></div>
+      <div class="pg" id="page-ppfo">
+        <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:16px">
+          <div><div class="pg-h">PPFO issues</div><div class="pg-sub" style="margin-bottom:0">Click an issue to edit its article list · progress + countdown at a glance</div></div>
+          <button class="btn btn-p" id="ppfo-add-btn" style="margin-left:auto">+ New issue</button>
+        </div>
+        <div id="ppfo-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px"></div>
+      </div>
+      <div class="pg" id="page-goals"><div class="pg-h">My Goals</div><div class="pg-sub">Coming in the rebuild.</div></div>
+      <div class="pg" id="page-team"><div class="pg-h">My Team</div><div class="pg-sub">Coming in the rebuild.</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="proj-modal" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.35)">
+  <div style="max-width:640px;margin:56px auto 0;background:var(--surface);border-radius:14px;max-height:85vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.28)">
+    <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:0.5px solid var(--border)">
+      <span id="pm-dot" style="width:14px;height:14px;border-radius:50%;flex-shrink:0"></span>
+      <input id="pm-title" style="flex:1;font-size:17px;font-weight:600;border:none;outline:none;background:none;color:var(--text)">
+      <select id="pm-status" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--border-s);border-radius:6px;background:var(--surface)">
+        <option value="planning">Planning</option><option value="active">Active</option><option value="blocked">Blocked</option><option value="done">Done</option>
+      </select>
+      <button id="pm-close" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div style="padding:18px 20px">
+      <input type="hidden" id="pm-id">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--muted);margin-bottom:5px">DESCRIPTION</div>
+      <textarea id="pm-desc" placeholder="What is this project?" style="width:100%;min-height:70px;font-size:13px;font-family:inherit;border:0.5px solid var(--border);border-radius:8px;padding:9px;outline:none;background:var(--surface);color:var(--text);line-height:1.6;resize:vertical"></textarea>
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--muted);margin:16px 0 5px">INVOLVED PARTIES</div>
+      <div id="pm-parties"></div>
+      <button class="btn" id="pm-add-party" style="font-size:11px;margin-top:6px">+ Add person</button>
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--muted);margin:16px 0 5px">TASKS</div>
+      <div id="pm-tasks"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input id="pm-task-inp" placeholder="Add a task…" style="flex:1;font-size:12px;padding:6px 9px;border:0.5px solid var(--border-s);border-radius:6px;outline:none;background:var(--surface);color:var(--text)">
+        <button class="btn btn-p" id="pm-task-add" style="font-size:11px">Add</button>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:14px 20px;border-top:0.5px solid var(--border)">
+      <button class="btn" id="pm-delete" style="color:#b3401c;border-color:#e0b3a5">Delete project</button>
+      <button class="btn btn-p" id="pm-done">Done</button>
+    </div>
+  </div>
+</div>
+
+<div id="cev-modal" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.35)">
+  <div style="max-width:500px;margin:64px auto 0;background:var(--surface);border-radius:14px;box-shadow:0 12px 48px rgba(0,0,0,.28)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:0.5px solid var(--border)">
+      <span id="cev-mtitle" style="font-size:16px;font-weight:600">Add event</span>
+      <button id="cev-close" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div style="padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+      <input type="hidden" id="cev-id">
+      <div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">TITLE</label>
+        <input id="cev-title" style="width:100%;font-size:13px;padding:8px 10px;border:0.5px solid var(--border-s);border-radius:7px;background:var(--surface);color:var(--text)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">DATE</label>
+          <input type="date" id="cev-date" style="width:100%;font-size:13px;padding:8px 10px;border:0.5px solid var(--border-s);border-radius:7px;background:var(--surface);color:var(--text)"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">VERTICAL</label>
+          <select id="cev-vert" style="width:100%;font-size:13px;padding:8px 10px;border:0.5px solid var(--border-s);border-radius:7px;background:var(--surface);color:var(--text)"><option value="onc">Oncology</option><option value="multi">Multispecialty</option></select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">TYPE</label>
+          <select id="cev-type" style="width:100%;font-size:13px;padding:8px 10px;border:0.5px solid var(--border-s);border-radius:7px;background:var(--surface);color:var(--text)"><option value="articles">Article</option><option value="video">Video</option><option value="podcasts">Podcast</option><option value="gated">Gated</option><option value="ppfo">PPFO</option></select></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">STATUS</label>
+          <select id="cev-status" style="width:100%;font-size:13px;padding:8px 10px;border:0.5px solid var(--border-s);border-radius:7px;background:var(--surface);color:var(--text)"><option value="planned">Planned</option><option value="in progress">In progress</option><option value="scheduled">Scheduled</option><option value="published">Published</option></select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">AUTHOR</label>
+          <input id="cev-author" style="width:100%;font-size:13px;padding:8px 10px;border:0.5px solid var(--border-s);border-radius:7px;background:var(--surface);color:var(--text)"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px">TOPIC</label>
+          <input id="cev-topic" style="width:100%;font-size:13px;padding:8px 10px;border:0.5px solid var(--border-s);border-radius:7px;background:var(--surface);color:var(--text)"></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:14px 20px;border-top:0.5px solid var(--border)">
+      <button class="btn" id="cev-delete" style="color:#b3401c;border-color:#e0b3a5">Delete</button>
+      <div style="display:flex;gap:8px"><button class="btn" id="cev-cancel">Cancel</button><button class="btn btn-p" id="cev-save">Save</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="pp-modal" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.35)">
+  <div style="max-width:960px;margin:44px auto 0;background:var(--surface);border-radius:14px;max-height:88vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.28)">
+    <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:0.5px solid var(--border);flex-wrap:wrap">
+      <span id="pp-dot" style="width:14px;height:14px;border-radius:50%;flex-shrink:0"></span>
+      <input id="pp-title" placeholder="Issue title (e.g. October 2026)" style="flex:1;min-width:180px;font-size:17px;font-weight:600;border:none;outline:none;background:none;color:var(--text)">
+      <select id="pp-status" style="font-size:12px;padding:5px 8px;border:0.5px solid var(--border-s);border-radius:6px;background:var(--surface)">
+        <option value="planning">Planning</option><option value="production">In production</option><option value="press">At press</option><option value="published">Published</option>
+      </select>
+      <label style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px">Ship date <input type="date" id="pp-ship" style="font-size:12px;padding:4px 6px;border:0.5px solid var(--border-s);border-radius:6px;background:var(--surface);color:var(--text)"></label>
+      <button id="pp-close" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div style="padding:12px 20px;background:var(--surface-2);font-size:12px;color:var(--muted);display:flex;gap:20px;flex-wrap:wrap">
+      <span>Articles ready: <b id="pp-ready" style="color:var(--text)">0/0</b></span>
+      <span id="pp-countdown"></span>
+    </div>
+    <div style="padding:12px 20px">
+      <input type="hidden" id="pp-id">
+      <div id="pp-table-wrap" style="border:0.5px solid var(--border);border-radius:8px;overflow:hidden">
+        <table id="pp-table" style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead style="background:var(--surface-2)"><tr>
+            <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.05em">ARTICLE</th>
+            <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.05em;width:130px">AUTHOR</th>
+            <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.05em;width:160px">TOPIC</th>
+            <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.05em;width:120px">STATUS</th>
+            <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.05em">NOTES</th>
+            <th style="width:32px"></th>
+          </tr></thead>
+          <tbody id="pp-tbody"></tbody>
+        </table>
+      </div>
+      <button class="btn" id="pp-add-row" style="font-size:11px;margin-top:8px">+ Add row</button>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:14px 20px;border-top:0.5px solid var(--border)">
+      <button class="btn" id="pp-delete" style="color:#b3401c;border-color:#e0b3a5">Delete issue</button>
+      <button class="btn btn-p" id="pp-done">Done</button>
+    </div>
+  </div>
+</div>
+
+<div id="imp-modal" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.35)">
+  <div style="max-width:640px;margin:56px auto 0;background:var(--surface);border-radius:14px;box-shadow:0 12px 48px rgba(0,0,0,.28)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:0.5px solid var(--border)">
+      <span style="font-size:16px;font-weight:600">Import CSV</span>
+      <button id="imp-close" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div style="padding:18px 20px">
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">
+        Upload a CSV with columns: <b>Publish Date, Title, Author, Vertical, Specialty/Disease Area, Type, Status</b>.<br>
+        Date accepts <code>YYYY-MM-DD</code>, <code>M/D/YYYY</code>, or <code>M/D/YY</code>. Vertical: <code>onc</code> or <code>multi</code>. Type: <code>articles</code>, <code>video</code>, <code>podcasts</code>, <code>gated</code>, <code>ppfo</code>.
+      </div>
+
+      <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px">CHOOSE FILE</label>
+      <input type="file" id="imp-file" accept=".csv,text/csv" style="width:100%;font-size:12px;padding:8px;border:0.5px dashed var(--border-s);border-radius:8px;background:var(--surface-2);color:var(--text)">
+
+      <div id="imp-preview" style="margin-top:14px;font-size:12px;color:var(--muted);min-height:20px"></div>
+
+      <div style="margin-top:14px;padding:12px;background:var(--surface-2);border-radius:8px;font-size:11.5px;color:var(--muted);line-height:1.6">
+        <b style="color:var(--text)">How it merges:</b> imported rows are marked as sheet-sourced. Anything you added by hand in the dashboard is kept. If you re-import the same file, sheet-sourced items are replaced (not duplicated).<br>
+        <span style="color:#b3401c">Safety guard:</span> if the file has less than half your current sheet-imported items, the import is refused and your data stays intact.
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:0.5px solid var(--border)">
+      <button class="btn" id="imp-cancel">Cancel</button>
+      <button class="btn btn-p" id="imp-go" disabled style="opacity:.5">Import</button>
+    </div>
+  </div>
+</div>
+<div class="pill" id="pill"></div>
+
+<script>
+"use strict";
+const SUPA_URL='https://unrbpiaivdnblikunosz.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVucmJwaWFpdmRuYmxpa3Vub3N6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwOTU1OTAsImV4cCI6MjA5NjY3MTU5MH0.fA_b0COFkbtwbmIOhFEFwLIm2iBeA6C7SP2vietLWs4';
+const SUPA_TABLE='dashboard_state';
+const LS_KEY='pt_onc_home_v1';
+
+let DB={};
+let activeV='all';
+
+function pill(msg){const p=document.getElementById('pill');p.textContent=msg;p.classList.add('show');setTimeout(()=>p.classList.remove('show'),2200);}
+function setDot(color,title){const d=document.getElementById('sync-dot');if(d){d.style.background=color;d.title=title||'';}}
+
+async function loadState(){
+  // Try Supabase first, fall back to localStorage
+  try{
+    const res=await fetch(SUPA_URL+'/rest/v1/'+SUPA_TABLE+'?statekey=eq.main&select=data',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}});
+    if(res.ok){
+      const rows=await res.json();
+      if(rows.length&&rows[0].data){DB=JSON.parse(rows[0].data);setDot('#1D9E75','Loaded from cloud');return 'cloud';}
+    }
+  }catch(e){console.warn('cloud load failed',e);}
+  try{const ls=localStorage.getItem(LS_KEY);if(ls){DB=JSON.parse(ls);setDot('#BA7517','Loaded from local backup');return 'local';}}catch(e){}
+  DB={};setDot('#9c9a92','No saved data found');return 'empty';
+}
+
+let saveTimer=null;
+function saveState(){clearTimeout(saveTimer);saveTimer=setTimeout(doSave,800);}
+async function doSave(){
+  const dataStr=JSON.stringify(DB,(k,v)=>k.startsWith('_')?undefined:v);
+  try{localStorage.setItem(LS_KEY,dataStr);}catch(e){}
+  try{
+    await fetch(SUPA_URL+'/rest/v1/'+SUPA_TABLE,{method:'POST',headers:{'Content-Type':'application/json',apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({statekey:'main',data:dataStr})});
+    setDot('#1D9E75','Saved '+new Date().toLocaleTimeString());
+  }catch(e){setDot('#D85A30','Save failed');}
+}
+
+function showPage(name,el){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-i').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+name);if(pg)pg.classList.add('active');
+  if(el)el.classList.add('active');
+  try{ if(name==='home') renderHome(); if(name==='projects') renderProjects(); if(name==='calendar') renderCal(); if(name==='analytics') renderAnalytics(); if(name==='ppfo') renderPPFO(); }catch(e){ if(pg) pg.innerHTML='<div style="padding:20px;color:#7a1f0c;white-space:pre-wrap">Error: '+e.message+'</div>'; }
+}
+
+function vertOf(e){return (e&&e.vertical)||'onc';}
+function scopedEvents(){return (DB.calEvents||[]).filter(e=>activeV==='all'||vertOf(e)===activeV);}
+
+const VLABEL={onc:'Onc',multi:'Multi'};
+const VFULL={onc:'Oncology',multi:'Multispecialty'};
+const VCOLOR={onc:'var(--v-onc)',multi:'var(--v-multi)'};
+function vMatch(e){return activeV==='all'||vertOf(e)===activeV;}
+
+function renderHome(){
+  document.getElementById('home-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  renderHomeMetrics();
+  renderAttention();
+  renderWeekStrip();
+  renderVBal();
+  renderHomeStatus();
+}
+
+function metric(l,v,sub){return '<div class="metric"><div class="metric-l">'+l+'</div><div class="metric-v">'+v+'</div>'+(sub?'<div class="metric-l" style="margin-top:2px">'+sub+'</div>':'')+'</div>';}
+
+function renderHomeMetrics(){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth()+1;
+  const ev=scopedEvents().filter(e=>!['conf','pdufa'].includes(e.type));
+  const thisMonth=ev.filter(e=>e.y===y&&e.m===m);
+  const pub=thisMonth.filter(e=>(e.status||'')==='published').length;
+  const ytd=ev.filter(e=>e.y===y).length;
+  const kols=(DB.kols||[]).filter(k=>activeV==='all'||(k.vertical||'onc')===activeV).length;
+  document.getElementById('home-metrics').innerHTML=
+    metric('Published this month',pub)+
+    metric('Total this month',thisMonth.length)+
+    metric('YTD output',ytd)+
+    metric('KOLs',kols);
+}
+
+function buildAttention(){
+  const out=[];const today=new Date();today.setHours(0,0,0,0);const day=86400000;
+  const ds=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  scopedEvents().forEach(e=>{
+    if(!e.y||(e.status||'')==='published'||['conf','pdufa'].includes(e.type))return;
+    const ed=new Date(e.y,e.m-1,e.d);ed.setHours(0,0,0,0);
+    const diff=Math.round((ed-today)/day);
+    if(diff<0&&diff>-45)out.push({k:'Overdue',tone:'d',t:(e.label||'Untitled')+' — was due '+ds(ed),s:diff});
+    else if(diff>=0&&diff<=7)out.push({k:diff===0?'Today':diff+'d',tone:'w',t:e.label||'Untitled',s:100+diff});
+  });
+  (DB.reminders||[]).forEach(r=>{
+    if(!r.date)return;const rd=new Date(r.date+'T00:00');rd.setHours(0,0,0,0);
+    const diff=Math.round((rd-today)/day);
+    if(diff>=0&&diff<=7)out.push({k:diff===0?'Today':diff+'d',tone:'w',t:r.text||'Reminder',s:100+diff});
+  });
+  // stale T1 KOLs (in scope)
+  const inter=(DB.interactions||[]);const last={};
+  inter.forEach(x=>{const n=(x.kol||'').toLowerCase();if(n&&(!last[n]||x.date>last[n]))last[n]=x.date;});
+  (DB.conferences||[]).forEach(c=>(c.interviews||[]).forEach(iv=>{const nm=((typeof iv==='string'?iv:iv.name)||'').toLowerCase();if(nm&&c.start&&(!last[nm]||c.start>last[nm]))last[nm]=c.start;}));
+  const cut=new Date(today.getTime()-90*day);
+  const stale=(DB.kols||[]).filter(k=>{if(!k.name||!(activeV==='all'||(k.vertical||'onc')===activeV))return false;if((k.tier||'')!=='T1')return false;const l=last[k.name.toLowerCase()];return !l||new Date(l)<cut;});
+  if(stale.length)out.push({k:'KOLs',tone:'a',t:stale.length+' tier-1 contact'+(stale.length>1?'s':'')+' past 90-day cadence',s:300});
+  // upcoming conferences
+  (DB.conferences||[]).forEach(c=>{if(!c.start)return;const cd=new Date(c.start+'T00:00');const diff=Math.round((cd-today)/day);if(diff>=0&&diff<=21){const b=(c.interviews||[]).length;out.push({k:'Conf',tone:'p',t:(c.name||'Conference')+' in '+diff+'d — '+b+' interview'+(b===1?'':'s')+' booked',s:200+diff});}});
+  return out.sort((a,b)=>a.s-b.s).slice(0,12);
+}
+const TONE={d:'background:rgba(216,90,48,.12);color:#993C1D',w:'background:rgba(186,117,23,.13);color:#854F0B',a:'background:rgba(24,95,165,.12);color:#0C447C',p:'background:rgba(83,74,183,.12);color:#3C3489'};
+function renderAttention(){
+  const c=document.getElementById('attention-list');if(!c)return;
+  const items=buildAttention();c.innerHTML='';
+  if(!items.length){c.innerHTML='<div style="font-size:12px;color:var(--muted);padding:10px 0">Nothing needs attention right now.</div>';return;}
+  items.forEach(it=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;gap:9px;align-items:baseline;padding:7px 0;border-bottom:0.5px solid var(--border)';
+    row.innerHTML='<span style="font-size:10px;padding:2px 7px;border-radius:9px;white-space:nowrap;font-weight:500;'+(TONE[it.tone]||TONE.a)+'">'+it.k+'</span><span style="font-size:12.5px;flex:1">'+it.t+'</span>';
+    c.appendChild(row);
+  });
+}
+
+function renderWeekStrip(){
+  const c=document.getElementById('week-strip');if(!c)return;
+  const today=new Date();today.setHours(0,0,0,0);
+  const mon=new Date(today);mon.setDate(today.getDate()-((today.getDay()+6)%7));
+  let h='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center">';
+  ['M','T','W','T','F','S','S'].forEach(l=>h+='<div style="font-size:10px;color:var(--muted)">'+l+'</div>');
+  h+='</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin-top:4px">';
+  for(let i=0;i<7;i++){
+    const d=new Date(mon);d.setDate(mon.getDate()+i);
+    const isT=d.getTime()===today.getTime();
+    const evs=scopedEvents().filter(e=>e.y===d.getFullYear()&&e.m===d.getMonth()+1&&e.d===d.getDate());
+    let dots='';evs.slice(0,3).forEach(e=>dots+='<span style="width:5px;height:5px;border-radius:50%;background:'+(VCOLOR[vertOf(e)]||'var(--v-onc)')+'"></span>');
+    h+='<div style="font-size:12px;padding:3px 0;border-radius:6px;'+(isT?'background:var(--sel);font-weight:600':'color:var(--muted)')+'">'+d.getDate()+'<div style="display:flex;gap:2px;justify-content:center;margin-top:2px;height:5px">'+dots+'</div></div>';
+  }
+  c.innerHTML=h+'</div>';
+}
+
+function renderVBal(){
+  const c=document.getElementById('vbal');if(!c)return;
+  const now=new Date();const counts={onc:0,multi:0};
+  (DB.calEvents||[]).forEach(e=>{if(e.y===now.getFullYear()&&e.m===now.getMonth()+1){const v=vertOf(e);if(counts[v]!==undefined)counts[v]++;}});
+  const total=counts.onc+counts.multi;
+  if(!total){c.innerHTML='<div style="font-size:12px;color:var(--muted);padding:6px 0">Nothing scheduled this month yet.</div>';return;}
+  let bar='<div style="display:flex;height:10px;border-radius:5px;overflow:hidden;margin-top:6px">';
+  let leg='<div style="display:flex;gap:12px;margin-top:6px;font-size:11.5px;color:var(--muted)">';
+  ['onc','multi'].forEach(v=>{const pct=Math.round(counts[v]/total*100);if(pct>0)bar+='<span style="width:'+pct+'%;background:'+VCOLOR[v]+'"></span>';leg+='<span>'+VLABEL[v]+' '+pct+'%</span>';});
+  c.innerHTML=bar+'</div>'+leg+'</div>';
+}
+
+function renderHomeStatus(){
+  const st=document.getElementById('home-status');if(!st)return;
+  st.innerHTML='Calendar events: <b>'+((DB.calEvents||[]).length)+'</b> · Projects: <b>'+((DB.projectTrackers||[]).length)+'</b> · KOLs: <b>'+((DB.kols||[]).length)+'</b> · PPFO trackers: <b>'+((DB.ppfoTrackers||[]).length)+'</b> · Team: <b>'+(Object.keys(DB.teamMembers||{}).length)+'</b>';
+}
+
+function generateBriefing(){
+  const q=buildAttention();const now=new Date();
+  let o='Editorial briefing — '+now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'\n\nNEEDS ATTENTION\n';
+  o+=q.length?q.map(i=>'- ['+i.k+'] '+i.t).join('\n'):'- Nothing flagged.';
+  const wk=[];const t0=new Date();t0.setHours(0,0,0,0);
+  for(let i=0;i<7;i++){const d=new Date(t0);d.setDate(t0.getDate()+i);scopedEvents().filter(e=>e.y===d.getFullYear()&&e.m===d.getMonth()+1&&e.d===d.getDate()).forEach(e=>wk.push('- '+d.toLocaleDateString('en-US',{weekday:'short'})+': '+(e.label||'Untitled')));}
+  o+='\n\nWEEK AHEAD\n'+(wk.length?wk.join('\n'):'- Nothing scheduled.');
+  return o;
+}
+function copyBriefing(){
+  const t=generateBriefing();const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='position:absolute;left:-9999px';document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');pill('Briefing copied ✓');}catch(e){pill('Copy failed');}ta.remove();
+}
+
+function setV(v,el){activeV=v;DB.activeVertical=v;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));if(el)el.classList.add('active');const cur=document.querySelector('.pg.active');try{if(cur&&cur.id==='page-home')renderHome();if(cur&&cur.id==='page-calendar')renderCal();}catch(e){}saveState();}
+
+
+// ══ PROJECTS ═══════════════════════════════════════════════
+const PSTATUS={planning:{label:'Planning',color:'#6b7280'},active:{label:'Active',color:'#0F7B54'},blocked:{label:'Blocked',color:'#b3401c'},done:{label:'Done',color:'#185FA5'}};
+let _pmId=null;
+
+function renderProjects(){
+  const grid=document.getElementById('proj-grid');if(!grid)return;
+  const projs=DB.projectTrackers||[];
+  grid.innerHTML='';
+  if(!projs.length){
+    grid.innerHTML='<div style="font-size:13px;color:var(--muted);grid-column:1/-1;padding:20px 0">No projects yet. Click "New project" to start.</div>';
+  }
+  projs.forEach(p=>{
+    const st=PSTATUS[p.status||'active']||PSTATUS.active;
+    const tasks=p.tasks||[];const done=tasks.filter(t=>t.done).length;
+    const parties=(p.parties||[]).length;
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--surface);border:0.5px solid var(--border);border-left:4px solid '+(p.color||st.color)+';border-radius:12px;padding:15px 16px;cursor:pointer;transition:box-shadow .12s';
+    card.onmouseenter=()=>card.style.boxShadow='0 4px 16px rgba(0,0,0,.08)';
+    card.onmouseleave=()=>card.style.boxShadow='none';
+    card.innerHTML=
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">'+
+        '<div style="font-size:14px;font-weight:600;line-height:1.3">'+(p.title||'Untitled')+'</div>'+
+        '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap;background:'+st.color+'18;color:'+st.color+'">'+st.label+'</span>'+
+      '</div>'+
+      (p.details?'<div style="font-size:11.5px;color:var(--muted);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+p.details+'</div>':'')+
+      '<div style="display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:6px">'+
+        (tasks.length?'<span>✓ '+done+'/'+tasks.length+' tasks</span>':'')+
+        (parties?'<span>'+parties+' involved</span>':'')+
+      '</div>';
+    card.onclick=()=>openProject(p.id);
+    grid.appendChild(card);
+  });
+}
+
+function openProject(id){
+  const p=(DB.projectTrackers||[]).find(x=>x.id===id);if(!p)return;
+  _pmId=id;
+  document.getElementById('pm-id').value=id;
+  document.getElementById('pm-title').value=p.title||'';
+  document.getElementById('pm-desc').value=p.details||'';
+  document.getElementById('pm-status').value=p.status||'active';
+  document.getElementById('pm-dot').style.background=p.color||(PSTATUS[p.status||'active'].color);
+  renderPMParties(p);renderPMTasks(p);
+  document.getElementById('proj-modal').style.display='block';
+}
+function closeProject(){document.getElementById('proj-modal').style.display='none';_pmId=null;renderProjects();}
+
+function curProj(){return (DB.projectTrackers||[]).find(x=>x.id===_pmId);}
+
+function renderPMParties(p){
+  const c=document.getElementById('pm-parties');if(!c)return;
+  if(!p.parties)p.parties=[];
+  c.innerHTML='';
+  p.parties.forEach((pt,i)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:5px';
+    row.innerHTML='<input value="'+(pt.name||'').replace(/"/g,'&quot;')+'" placeholder="Name" style="flex:1;font-size:12px;padding:5px 8px;border:0.5px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text)"><input value="'+(pt.role||'').replace(/"/g,'&quot;')+'" placeholder="Role" style="flex:1;font-size:12px;padding:5px 8px;border:0.5px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text)"><button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">✕</button>';
+    const [nm,rl,del]=row.children;
+    nm.onchange=()=>{pt.name=nm.value;saveState();};
+    rl.onchange=()=>{pt.role=rl.value;saveState();};
+    del.onclick=()=>{p.parties.splice(i,1);renderPMParties(p);saveState();};
+    c.appendChild(row);
+  });
+}
+function renderPMTasks(p){
+  const c=document.getElementById('pm-tasks');if(!c)return;
+  if(!p.tasks)p.tasks=[];
+  c.innerHTML='';
+  p.tasks.forEach((t,i)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;gap:8px;align-items:center;padding:4px 0';
+    const cb=document.createElement('input');cb.type='checkbox';cb.checked=!!t.done;cb.style.cssText='width:15px;height:15px;flex-shrink:0;cursor:pointer';
+    cb.onchange=()=>{t.done=cb.checked;saveState();renderPMTasks(p);};
+    const tx=document.createElement('span');tx.textContent=t.text;tx.style.cssText='flex:1;font-size:12.5px'+(t.done?';text-decoration:line-through;color:var(--muted)':'');
+    const del=document.createElement('button');del.textContent='✕';del.style.cssText='background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px';
+    del.onclick=()=>{p.tasks.splice(i,1);renderPMTasks(p);saveState();};
+    row.appendChild(cb);row.appendChild(tx);row.appendChild(del);c.appendChild(row);
+  });
+}
+
+function wireProjects(){
+  const g=document.getElementById('proj-add-btn');
+  if(g)g.onclick=()=>{
+    const id='proj-'+Date.now();
+    (DB.projectTrackers=DB.projectTrackers||[]).push({id,title:'New project',status:'planning',color:'#185FA5',details:'',parties:[],tasks:[]});
+    saveState();openProject(id);
+  };
+  const close=document.getElementById('pm-close');if(close)close.onclick=closeProject;
+  const done=document.getElementById('pm-done');if(done)done.onclick=closeProject;
+  const modal=document.getElementById('proj-modal');if(modal)modal.onclick=e=>{if(e.target===modal)closeProject();};
+  const title=document.getElementById('pm-title');if(title)title.onchange=()=>{const p=curProj();if(p){p.title=title.value;saveState();}};
+  const desc=document.getElementById('pm-desc');if(desc)desc.onchange=()=>{const p=curProj();if(p){p.details=desc.value;saveState();}};
+  const stat=document.getElementById('pm-status');if(stat)stat.onchange=()=>{const p=curProj();if(p){p.status=stat.value;document.getElementById('pm-dot').style.background=p.color||PSTATUS[p.status].color;saveState();}};
+  const ap=document.getElementById('pm-add-party');if(ap)ap.onclick=()=>{const p=curProj();if(p){(p.parties=p.parties||[]).push({name:'',role:''});renderPMParties(p);}};
+  const ta=document.getElementById('pm-task-add');const ti=document.getElementById('pm-task-inp');
+  const addT=()=>{const p=curProj();if(p&&ti.value.trim()){(p.tasks=p.tasks||[]).push({text:ti.value.trim(),done:false});ti.value='';renderPMTasks(p);saveState();}};
+  if(ta)ta.onclick=addT;
+  if(ti)ti.onkeydown=e=>{if(e.key==='Enter')addT();};
+  const del=document.getElementById('pm-delete');if(del)del.onclick=()=>{const p=curProj();if(p&&confirm('Delete "'+(p.title||'this project')+'"?')){DB.projectTrackers=DB.projectTrackers.filter(x=>x.id!==_pmId);saveState();closeProject();}};
+}
+
+
+// ══ CONTENT CALENDAR ═══════════════════════════════════════
+const TYPE_COLOR={articles:'#185FA5',video:'#b3401c',podcasts:'#7c3aed',gated:'#0F7B54',ppfo:'#c8a227',conf:'#6b7280',pdufa:'#6b7280'};
+let _calY,_calM; // year, month(0-11)
+
+function renderCal(){
+  const now=new Date();
+  if(_calY===undefined){_calY=(DB.calYear!=null?DB.calYear:now.getFullYear());_calM=(DB.calMonth!=null?DB.calMonth:now.getMonth());}
+  const grid=document.getElementById('cal-grid');if(!grid)return;
+  document.getElementById('cal-month-lbl').textContent=new Date(_calY,_calM,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const first=new Date(_calY,_calM,1);const startDow=(first.getDay()+6)%7; // Mon=0
+  const daysIn=new Date(_calY,_calM+1,0).getDate();
+  const evs=scopedEvents().filter(e=>e.y===_calY&&e.m===_calM+1);
+  document.getElementById('cal-sub').textContent=evs.length+' item'+(evs.length===1?'':'s')+' this month'+(activeV!=='all'?' · '+activeV:'');
+  const byDay={};evs.forEach(e=>{(byDay[e.d]=byDay[e.d]||[]).push(e);});
+  let h='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border:0.5px solid var(--border);border-radius:10px;overflow:hidden">';
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d=>h+='<div style="background:var(--surface-2);padding:7px 8px;font-size:10px;font-weight:700;color:var(--muted);text-align:center">'+d+'</div>');
+  const today=new Date();const isThisMonth=today.getFullYear()===_calY&&today.getMonth()===_calM;
+  for(let i=0;i<startDow;i++)h+='<div style="background:var(--surface);min-height:96px"></div>';
+  for(let d=1;d<=daysIn;d++){
+    const items=byDay[d]||[];
+    const isToday=isThisMonth&&today.getDate()===d;
+    h+='<div class="cal-cell" data-d="'+d+'" style="background:var(--surface);min-height:96px;padding:5px 6px;cursor:pointer;position:relative">'+
+       '<div style="font-size:11px;font-weight:'+(isToday?'700':'500')+';color:'+(isToday?'var(--navy)':'var(--muted)')+';margin-bottom:3px">'+d+(isToday?' •':'')+'</div>';
+    items.slice(0,4).forEach(e=>{
+      const c=TYPE_COLOR[e.type]||'#185FA5';
+      h+='<div class="cal-ev" data-id="'+e.id+'" style="font-size:10px;line-height:1.3;padding:2px 5px;margin-bottom:2px;border-radius:4px;background:'+c+'18;color:'+c+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid '+c+'">'+(e.label||'Untitled')+'</div>';
+    });
+    if(items.length>4)h+='<div style="font-size:9px;color:var(--muted);padding-left:4px">+'+(items.length-4)+' more</div>';
+    h+='</div>';
+  }
+  grid.innerHTML=h+'</div>';
+  // wire cells + events
+  grid.querySelectorAll('.cal-cell').forEach(cell=>{
+    cell.onclick=e=>{
+      const evEl=e.target.closest('.cal-ev');
+      if(evEl){openEvent(evEl.dataset.id);e.stopPropagation();return;}
+      openEventNew(Number(cell.dataset.d));
+    };
+  });
+}
+
+function calNav(delta){_calM+=delta;if(_calM<0){_calM=11;_calY--;}if(_calM>11){_calM=0;_calY++;}DB.calYear=_calY;DB.calMonth=_calM;saveState();renderCal();}
+function calToday(){const n=new Date();_calY=n.getFullYear();_calM=n.getMonth();DB.calYear=_calY;DB.calMonth=_calM;saveState();renderCal();}
+
+function openEventNew(day){
+  document.getElementById('cev-mtitle').textContent='Add event';
+  document.getElementById('cev-id').value='';
+  document.getElementById('cev-title').value='';
+  const mm=String(_calM+1).padStart(2,'0');const dd=String(day||1).padStart(2,'0');
+  document.getElementById('cev-date').value=_calY+'-'+mm+'-'+dd;
+  document.getElementById('cev-vert').value=activeV!=='all'?activeV:'onc';
+  document.getElementById('cev-type').value='articles';
+  document.getElementById('cev-status').value='planned';
+  document.getElementById('cev-author').value='';
+  document.getElementById('cev-topic').value='';
+  document.getElementById('cev-delete').style.display='none';
+  document.getElementById('cev-modal').style.display='block';
+}
+function openEvent(id){
+  const e=(DB.calEvents||[]).find(x=>String(x.id)===String(id));if(!e)return;
+  document.getElementById('cev-mtitle').textContent='Edit event';
+  document.getElementById('cev-id').value=e.id;
+  document.getElementById('cev-title').value=e.label||'';
+  document.getElementById('cev-date').value=e.y+'-'+String(e.m).padStart(2,'0')+'-'+String(e.d).padStart(2,'0');
+  document.getElementById('cev-vert').value=e.vertical||'onc';
+  document.getElementById('cev-type').value=e.type||'articles';
+  document.getElementById('cev-status').value=e.status||'planned';
+  document.getElementById('cev-author').value=e.author||'';
+  document.getElementById('cev-topic').value=e.cancer||'';
+  document.getElementById('cev-delete').style.display='';
+  document.getElementById('cev-modal').style.display='block';
+}
+function closeEvent(){document.getElementById('cev-modal').style.display='none';}
+function saveEvent(){
+  const id=document.getElementById('cev-id').value;
+  const dv=document.getElementById('cev-date').value;if(!dv){pill('Pick a date');return;}
+  const[y,m,d]=dv.split('-').map(Number);
+  const obj={label:document.getElementById('cev-title').value.trim()||'Untitled',y,m,d,
+    vertical:document.getElementById('cev-vert').value,type:document.getElementById('cev-type').value,
+    status:document.getElementById('cev-status').value,author:document.getElementById('cev-author').value.trim(),
+    cancer:document.getElementById('cev-topic').value.trim()};
+  if(!DB.calEvents)DB.calEvents=[];
+  if(id){const e=DB.calEvents.find(x=>String(x.id)===String(id));if(e)Object.assign(e,obj);}
+  else{obj.id=Date.now();obj.src='manual';DB.calEvents.push(obj);}
+  saveState();closeEvent();renderCal();
+}
+function deleteEvent(){
+  const id=document.getElementById('cev-id').value;if(!id)return;
+  DB.calEvents=(DB.calEvents||[]).filter(x=>String(x.id)!==String(id));
+  saveState();closeEvent();renderCal();
+}
+
+function wireCal(){
+  const p=document.getElementById('cal-prev');if(p)p.onclick=()=>calNav(-1);
+  const n=document.getElementById('cal-next');if(n)n.onclick=()=>calNav(1);
+  const t=document.getElementById('cal-today');if(t)t.onclick=calToday;
+  const a=document.getElementById('cal-add');if(a)a.onclick=()=>openEventNew(1);
+  const cl=document.getElementById('cev-close');if(cl)cl.onclick=closeEvent;
+  const cc=document.getElementById('cev-cancel');if(cc)cc.onclick=closeEvent;
+  const cs=document.getElementById('cev-save');if(cs)cs.onclick=saveEvent;
+  const cd=document.getElementById('cev-delete');if(cd)cd.onclick=deleteEvent;
+  const m=document.getElementById('cev-modal');if(m)m.onclick=e=>{if(e.target===m)closeEvent();};
+}
+
+
+// ══ ANALYTICS ══════════════════════════════════════════════
+const ONC_CORE=['Breast Cancer','Lung Cancer','Prostate Cancer','Colorectal Cancer','Multiple Myeloma','Lymphoma','Leukemia','Melanoma','Ovarian Cancer','Pancreatic Cancer','Bladder Cancer','Kidney Cancer','Head and Neck Cancer','Gastric Cancer','Endometrial Cancer','Sarcoma','Glioblastoma','Cervical Cancer','Hepatocellular Carcinoma','Thyroid Cancer'];
+const MULTI_CORE=['Heart failure','Hypertension','Type 2 diabetes','Chronic Kidney Disease','Depression','Anxiety disorders','COPD','Asthma','GLP-1 therapies','Alzheimer disease','Rheumatoid arthritis','Psoriasis','Migraine','COVID-19','Influenza','RSV','HIV','MASH / fatty liver','Osteoporosis','Obesity'];
+let _trendM=6,_trendChart=null,_mixChart=null,_disChart=null,_anScope='all';
+
+function anEvents(){
+  return (DB.calEvents||[]).filter(e=>{
+    if(['conf','pdufa'].includes(e.type))return false;
+    if(_anScope==='all')return true;
+    return (e.vertical||'onc')===_anScope;
+  });
+}
+
+function renderAnalytics(){
+  document.getElementById('an-scope-note').textContent=_anScope==='all'?'Showing all verticals':'Filtered to '+(_anScope==='onc'?'Oncology':'Multispecialty');
+  renderGAMetrics();renderTrend();renderMix();renderTopTopics();renderPacing();renderDisease();renderGaps();
+}
+
+function renderGAMetrics(){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth()+1;
+  const ev=anEvents();
+  const tm=ev.filter(e=>e.y===y&&e.m===m);
+  const pm=m===1?12:m-1,py=m===1?y-1:y;
+  const lm=ev.filter(e=>e.y===py&&e.m===pm);
+  const pub=tm.filter(e=>(e.status||'')==='published').length;
+  const pubL=lm.filter(e=>(e.status||'')==='published').length;
+  const ytd=ev.filter(e=>e.y===y).length;
+  const inter=(DB.interactions||[]);const last={};
+  inter.forEach(x=>{const n=(x.kol||'').toLowerCase();if(n&&(!last[n]||x.date>last[n]))last[n]=x.date;});
+  const cut=new Date();cut.setDate(cut.getDate()-90);
+  const active=(DB.kols||[]).filter(k=>{if(!k.name)return false;if(_anScope!=='all'&&(k.vertical||'onc')!==_anScope)return false;const l=last[k.name.toLowerCase()];return l&&new Date(l)>=cut;}).length;
+  document.getElementById('ga-metrics').innerHTML=
+    gm('Published this month',pub,delta(pub,pubL))+
+    gm('Total this month',tm.length,delta(tm.length,lm.length))+
+    gm('YTD output',ytd,y+' to date')+
+    gm('Active KOLs (90d)',active,'contacted in 90 days');
+}
+function gm(l,v,sub){return '<div class="metric"><div class="metric-l">'+l+'</div><div class="metric-v">'+v+'</div><div class="metric-l" style="margin-top:2px">'+sub+'</div></div>';}
+function delta(cur,prev){if(!prev)return 'no prior month';const p=Math.round((cur-prev)/prev*100);return (p>=0?'▲ ':'▼ ')+Math.abs(p)+'% vs last month';}
+
+function monthLabel(y,m){return new Date(y,m-1,1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});}
+
+function renderTrend(){
+  if(typeof Chart==='undefined')return;
+  const cv=document.getElementById('trendChart');if(!cv)return;
+  const now=new Date();const labels=[],total=[],pub=[];
+  const ev=anEvents();
+  for(let i=_trendM-1;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const y=d.getFullYear(),m=d.getMonth()+1;
+    labels.push(monthLabel(y,m));
+    const inM=ev.filter(e=>e.y===y&&e.m===m);
+    total.push(inM.length);pub.push(inM.filter(e=>(e.status||'')==='published').length);
+  }
+  if(_trendChart)_trendChart.destroy();
+  const c=_anScope==='multi'?'#0F6E56':'#185FA5';
+  _trendChart=new Chart(cv.getContext('2d'),{type:'line',data:{labels,datasets:[
+    {label:'Total',data:total,borderColor:c,backgroundColor:c+'22',fill:true,tension:.3,borderWidth:2,pointRadius:3},
+    {label:'Published',data:pub,borderColor:'#0F7B54',backgroundColor:'transparent',fill:false,tension:.3,borderWidth:2,borderDash:[4,3],pointRadius:2}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}},scales:{y:{beginAtZero:true,ticks:{precision:0}},x:{grid:{display:false}}}}});
+}
+
+function renderMix(){
+  if(typeof Chart==='undefined')return;
+  const cv=document.getElementById('mixChart');if(!cv)return;
+  const now=new Date(),y=now.getFullYear();
+  const counts={};anEvents().filter(e=>e.y===y).forEach(e=>{const t=e.type||'articles';counts[t]=(counts[t]||0)+1;});
+  const labels=Object.keys(counts),data=labels.map(l=>counts[l]),colors=labels.map(l=>TYPE_COLOR[l]||'#888');
+  if(_mixChart)_mixChart.destroy();
+  if(!labels.length){cv.parentElement.innerHTML='<div style="font-size:12px;color:var(--muted);padding:60px 0;text-align:center">No content yet this year.</div>';return;}
+  _mixChart=new Chart(cv.getContext('2d'),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{boxWidth:10,padding:6,font:{size:10}}}}}});
+}
+
+function renderTopTopics(){
+  const cont=document.getElementById('top-topics');if(!cont)return;
+  const now=new Date(),y=now.getFullYear();
+  const topics={};anEvents().filter(e=>e.y===y&&e.cancer).forEach(e=>{topics[e.cancer]=(topics[e.cancer]||0)+1;});
+  const ranked=Object.entries(topics).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  cont.innerHTML='';
+  if(!ranked.length){cont.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0">No topics tagged yet.</div>';return;}
+  const max=ranked[0][1];const c=_anScope==='multi'?'#0F6E56':'#185FA5';
+  ranked.forEach(([t,n])=>{
+    const row=document.createElement('div');row.style.cssText='margin-bottom:7px';
+    row.innerHTML='<div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:2px"><span>'+t+'</span><span style="color:var(--muted)">'+n+'</span></div><div style="height:5px;background:var(--surface-2);border-radius:3px"><div style="height:5px;width:'+Math.round(n/max*100)+'%;background:'+c+';border-radius:3px"></div></div>';
+    cont.appendChild(row);
+  });
+}
+
+function renderPacing(){
+  const cont=document.getElementById('pacing');if(!cont)return;
+  const rcs=(DB.rcData||[]).filter(r=>_anScope==='all'||(r.vertical||'onc')===_anScope);
+  if(!rcs.length){cont.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0">No RCs for '+(_anScope==='all'?'any vertical':_anScope)+'. Add them from the old RC editor once we rebuild that page.</div>';return;}
+  const counts={};
+  (DB.calEvents||[]).forEach(e=>{if(e.rcId)counts[e.rcId]=(counts[e.rcId]||0)+1;});
+  cont.innerHTML='';
+  rcs.forEach(r=>{
+    const n=(counts[r.id]||0)+(r.baseCount||0);const tgt=r.target||1;const pct=Math.min(100,Math.round(n/tgt*100));
+    const row=document.createElement('div');row.style.cssText='margin-bottom:9px';
+    row.innerHTML='<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span><strong>'+(r.name||'Untitled RC')+'</strong> <span style="color:var(--muted);font-weight:400">· '+(r.cancer||'')+'</span></span><span style="color:var(--muted)">'+n+'/'+tgt+' · '+pct+'%</span></div><div style="height:6px;background:var(--surface-2);border-radius:3px"><div style="height:6px;width:'+pct+'%;background:'+(r.color||'#185FA5')+';border-radius:3px"></div></div>';
+    cont.appendChild(row);
+  });
+}
+
+function renderDisease(){
+  if(typeof Chart==='undefined')return;
+  const cv=document.getElementById('diseaseChart');if(!cv)return;
+  const now=new Date(),y=now.getFullYear();
+  const counts={};anEvents().filter(e=>e.y===y&&e.cancer).forEach(e=>{counts[e.cancer]=(counts[e.cancer]||0)+1;});
+  const ranked=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const labels=ranked.map(([t])=>t),data=ranked.map(([,n])=>n);
+  if(_disChart)_disChart.destroy();
+  if(!labels.length){cv.parentElement.innerHTML='<div style="font-size:12px;color:var(--muted);padding:70px 0;text-align:center">No topic tags yet.</div>';return;}
+  const c=_anScope==='multi'?'#0F6E56':'#185FA5';
+  _disChart=new Chart(cv.getContext('2d'),{type:'bar',data:{labels,datasets:[{data,backgroundColor:c,borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{precision:0}},y:{ticks:{font:{size:10}}}}}});
+}
+
+function renderGaps(){
+  const cont=document.getElementById('gaps');if(!cont)return;
+  const now=new Date(),y=now.getFullYear();
+  const covered=new Set();anEvents().filter(e=>e.y===y&&e.cancer).forEach(e=>covered.add(e.cancer));
+  const core=_anScope==='multi'?MULTI_CORE:_anScope==='onc'?ONC_CORE:ONC_CORE.concat(MULTI_CORE);
+  const gaps=core.filter(t=>!covered.has(t));
+  cont.innerHTML='';
+  if(!gaps.length){cont.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0">Broad coverage — no core topics missing this year.</div>';return;}
+  gaps.slice(0,20).forEach(t=>{
+    const r=document.createElement('div');r.style.cssText='font-size:11.5px;padding:4px 0;border-bottom:0.5px solid var(--border);color:var(--text)';r.textContent=t;cont.appendChild(r);
+  });
+}
+
+function switchAnScope(v){
+  _anScope=v;
+  document.querySelectorAll('.an-vert').forEach(b=>{
+    const on=b.dataset.av===v;
+    b.style.background=on?'var(--text)':'transparent';
+    b.style.color=on?'var(--surface)':'var(--muted)';
+    b.style.fontWeight=on?'600':'400';
+  });
+  renderAnalytics();
+}
+
+function wireAnalytics(){
+  document.querySelectorAll('.an-vert').forEach(b=>b.addEventListener('click',()=>switchAnScope(b.dataset.av)));
+  document.querySelectorAll('.trend-r').forEach(b=>b.addEventListener('click',()=>{
+    _trendM=Number(b.dataset.n);
+    document.querySelectorAll('.trend-r').forEach(x=>{x.classList.remove('active');x.style.background='var(--surface)';x.style.color='var(--muted)';});
+    b.classList.add('active');b.style.background='var(--sel)';b.style.color='var(--text)';
+    renderTrend();
+  }));
+}
+
+
+// ══ PPFO ═══════════════════════════════════════════════════
+const PPSTATUS={planning:{label:'Planning',color:'#6b7280'},production:{label:'In production',color:'#0F7B54'},press:{label:'At press',color:'#b3401c'},published:{label:'Published',color:'#185FA5'}};
+const PPART_STATUS=['Planning','Drafting','In review','Approved','Sent to layout'];
+let _ppId=null;
+
+function migratePPFO(){
+  // Accept both new schema (rows[{article,author,topic,status,notes}]) and old
+  (DB.ppfoTrackers=DB.ppfoTrackers||[]).forEach(t=>{
+    if(!t.id)t.id='ppfo-'+Math.random().toString(36).slice(2,9);
+    if(!t.status)t.status='planning';
+    if(!Array.isArray(t.rows)){
+      // If it had legacy cell/tab data, best-effort convert; otherwise start empty
+      t.rows=[];
+    }
+  });
+}
+
+function articlesReady(t){
+  const rows=t.rows||[];const total=rows.length;
+  const done=rows.filter(r=>['Approved','Sent to layout'].includes(r.status)).length;
+  return {total,done};
+}
+
+function renderPPFO(){
+  migratePPFO();
+  const grid=document.getElementById('ppfo-grid');if(!grid)return;
+  const issues=DB.ppfoTrackers||[];
+  grid.innerHTML='';
+  if(!issues.length){
+    grid.innerHTML='<div style="font-size:13px;color:var(--muted);grid-column:1/-1;padding:20px 0">No issues yet. Click "New issue" to add one.</div>';return;
+  }
+  const today=new Date();today.setHours(0,0,0,0);
+  issues.forEach(t=>{
+    const st=PPSTATUS[t.status||'planning']||PPSTATUS.planning;
+    const {total,done}=articlesReady(t);
+    let cd='',cdColor='var(--muted)';
+    if(t.shipDate){
+      const sd=new Date(t.shipDate+'T00:00');
+      const days=Math.round((sd-today)/86400000);
+      if(t.status==='published'){cd='Published';cdColor='#0F7B54';}
+      else if(days<0){cd=Math.abs(days)+'d overdue';cdColor='#b3401c';}
+      else if(days===0){cd='Ships today';cdColor='#b3401c';}
+      else{cd=days+'d out';cdColor=days<=7?'#b3401c':'var(--muted)';}
+    }
+    const pct=total?Math.round(done/total*100):0;
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--surface);border:0.5px solid var(--border);border-top:4px solid '+st.color+';border-radius:12px;padding:15px 16px;cursor:pointer;transition:box-shadow .12s';
+    card.onmouseenter=()=>card.style.boxShadow='0 4px 16px rgba(0,0,0,.08)';
+    card.onmouseleave=()=>card.style.boxShadow='none';
+    card.innerHTML=
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">'+
+        '<div style="font-size:15px;font-weight:600;line-height:1.3">'+(t.title||'Untitled')+'</div>'+
+        '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap;background:'+st.color+'18;color:'+st.color+'">'+st.label+'</span>'+
+      '</div>'+
+      '<div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">'+done+' of '+total+' article'+(total===1?'':'s')+' ready</div>'+
+      '<div style="height:5px;background:var(--surface-2);border-radius:3px;margin-bottom:8px"><div style="height:5px;width:'+pct+'%;background:'+st.color+';border-radius:3px"></div></div>'+
+      (cd?'<div style="font-size:11px;color:'+cdColor+';font-weight:500">'+cd+'</div>':'<div style="font-size:11px;color:var(--muted)">No ship date set</div>');
+    card.onclick=()=>openIssue(t.id);
+    grid.appendChild(card);
+  });
+}
+
+function openIssue(id){
+  migratePPFO();
+  const t=(DB.ppfoTrackers||[]).find(x=>x.id===id);if(!t)return;
+  _ppId=id;
+  document.getElementById('pp-id').value=id;
+  document.getElementById('pp-title').value=t.title||'';
+  document.getElementById('pp-status').value=t.status||'planning';
+  document.getElementById('pp-ship').value=t.shipDate||'';
+  document.getElementById('pp-dot').style.background=PPSTATUS[t.status||'planning'].color;
+  renderIssueTable(t);
+  renderIssueHeader(t);
+  document.getElementById('pp-modal').style.display='block';
+}
+function closeIssue(){document.getElementById('pp-modal').style.display='none';_ppId=null;renderPPFO();}
+function curIssue(){return (DB.ppfoTrackers||[]).find(x=>x.id===_ppId);}
+
+function renderIssueHeader(t){
+  const {total,done}=articlesReady(t);
+  document.getElementById('pp-ready').textContent=done+'/'+total;
+  const cd=document.getElementById('pp-countdown');
+  if(t.shipDate){
+    const sd=new Date(t.shipDate+'T00:00');const today=new Date();today.setHours(0,0,0,0);
+    const days=Math.round((sd-today)/86400000);
+    let msg='Ship '+sd.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    if(t.status==='published')msg+=' · Published';
+    else if(days<0)msg+=' · '+Math.abs(days)+' days overdue';
+    else if(days===0)msg+=' · Ships today';
+    else msg+=' · '+days+' days out';
+    cd.textContent=msg;
+  }else cd.textContent='No ship date set';
+}
+
+function renderIssueTable(t){
+  const tb=document.getElementById('pp-tbody');if(!tb)return;
+  if(!t.rows)t.rows=[];
+  tb.innerHTML='';
+  t.rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');tr.style.cssText='border-top:0.5px solid var(--border)';
+    const mkCell=(field,placeholder,w)=>{
+      const td=document.createElement('td');td.style.cssText='padding:0';
+      const inp=document.createElement('input');
+      inp.value=r[field]||'';inp.placeholder=placeholder||'';
+      inp.style.cssText='width:100%;border:none;outline:none;background:none;padding:8px 10px;font-size:12px;color:var(--text);font-family:inherit';
+      inp.onchange=()=>{r[field]=inp.value;saveState();renderIssueHeader(t);};
+      td.appendChild(inp);return td;
+    };
+    tr.appendChild(mkCell('article','Article title'));
+    tr.appendChild(mkCell('author','Author'));
+    tr.appendChild(mkCell('topic','Topic'));
+    // status cell = select
+    const std=document.createElement('td');std.style.cssText='padding:0';
+    const sel=document.createElement('select');
+    sel.style.cssText='width:100%;border:none;outline:none;background:none;padding:7px 8px;font-size:12px;color:var(--text);font-family:inherit;cursor:pointer';
+    ['',...PPART_STATUS].forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s||'—';if((r.status||'')===s)o.selected=true;sel.appendChild(o);});
+    sel.onchange=()=>{r.status=sel.value;saveState();renderIssueHeader(t);renderIssueTable(t);};
+    std.appendChild(sel);tr.appendChild(std);
+    tr.appendChild(mkCell('notes','Notes'));
+    // delete
+    const dtd=document.createElement('td');dtd.style.cssText='padding:0;text-align:center';
+    const del=document.createElement('button');del.textContent='✕';del.style.cssText='background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:8px 4px';
+    del.onclick=()=>{t.rows.splice(i,1);saveState();renderIssueTable(t);renderIssueHeader(t);};
+    dtd.appendChild(del);tr.appendChild(dtd);
+    tb.appendChild(tr);
+  });
+  if(!t.rows.length){
+    const tr=document.createElement('tr');tr.innerHTML='<td colspan="6" style="padding:20px;text-align:center;font-size:12px;color:var(--muted)">No articles yet — click "Add row" to start.</td>';
+    tb.appendChild(tr);
+  }
+}
+
+function wirePPFO(){
+  const g=document.getElementById('ppfo-add-btn');
+  if(g)g.onclick=()=>{
+    const id='ppfo-'+Date.now();
+    const now=new Date();const monthTitle=now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    (DB.ppfoTrackers=DB.ppfoTrackers||[]).push({id,title:monthTitle,status:'planning',shipDate:'',rows:[]});
+    saveState();openIssue(id);
+  };
+  const close=document.getElementById('pp-close');if(close)close.onclick=closeIssue;
+  const done=document.getElementById('pp-done');if(done)done.onclick=closeIssue;
+  const modal=document.getElementById('pp-modal');if(modal)modal.onclick=e=>{if(e.target===modal)closeIssue();};
+  const title=document.getElementById('pp-title');if(title)title.onchange=()=>{const t=curIssue();if(t){t.title=title.value;saveState();}};
+  const stat=document.getElementById('pp-status');if(stat)stat.onchange=()=>{const t=curIssue();if(t){t.status=stat.value;document.getElementById('pp-dot').style.background=PPSTATUS[t.status].color;saveState();renderIssueHeader(t);}};
+  const ship=document.getElementById('pp-ship');if(ship)ship.onchange=()=>{const t=curIssue();if(t){t.shipDate=ship.value;saveState();renderIssueHeader(t);}};
+  const ar=document.getElementById('pp-add-row');if(ar)ar.onclick=()=>{const t=curIssue();if(t){(t.rows=t.rows||[]).push({article:'',author:'',topic:'',status:'',notes:''});renderIssueTable(t);renderIssueHeader(t);saveState();}};
+  const del=document.getElementById('pp-delete');if(del)del.onclick=()=>{const t=curIssue();if(t&&confirm('Delete "'+(t.title||'this issue')+'"?')){DB.ppfoTrackers=DB.ppfoTrackers.filter(x=>x.id!==_ppId);saveState();closeIssue();}};
+}
+
+
+// ══ CSV IMPORT ═════════════════════════════════════════════
+let _impParsed=null;
+
+function parseCsv(text){
+  // Simple CSV parser that handles quoted fields with commas + escaped quotes
+  const rows=[];let cur=[],buf='',q=false,i=0;
+  while(i<text.length){
+    const ch=text[i];
+    if(q){
+      if(ch==='"'&&text[i+1]==='"'){buf+='"';i+=2;continue;}
+      if(ch==='"'){q=false;i++;continue;}
+      buf+=ch;i++;continue;
+    }
+    if(ch==='"'){q=true;i++;continue;}
+    if(ch===','){cur.push(buf);buf='';i++;continue;}
+    if(ch==='\r'){i++;continue;}
+    if(ch==='\n'){cur.push(buf);rows.push(cur);cur=[];buf='';i++;continue;}
+    buf+=ch;i++;
+  }
+  if(buf.length||cur.length){cur.push(buf);rows.push(cur);}
+  return rows.filter(r=>r.some(c=>c&&c.trim()));
+}
+
+function parseDate(s){
+  if(!s)return null;s=String(s).trim();
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m)return{y:+m[1],m:+m[2],d:+m[3]};
+  m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if(m){let y=+m[3];if(y<100)y+=2000;return{y,m:+m[1],d:+m[2]};}
+  const d=new Date(s);if(!isNaN(d))return{y:d.getFullYear(),m:d.getMonth()+1,d:d.getDate()};
+  return null;
+}
+
+const HDR_MAP={
+  'publish date':'date','date':'date','publishdate':'date','pub date':'date',
+  'title':'label','headline':'label','article':'label','name':'label',
+  'author':'author','writer':'author','byline':'author',
+  'vertical':'vertical','v':'vertical',
+  'specialty':'cancer','specialty/disease area':'cancer','disease area':'cancer','disease':'cancer','topic':'cancer','cancer':'cancer',
+  'type':'type','format':'type','content type':'type',
+  'status':'status','stage':'status'
+};
+
+function normVertical(v){
+  v=(v||'').toLowerCase().trim();
+  if(!v)return 'onc';
+  if(['onc','oncology','o'].includes(v))return 'onc';
+  if(['multi','multispecialty','ms','m','retail'].includes(v))return 'multi';
+  return 'onc';
+}
+function normType(t){
+  t=(t||'').toLowerCase().trim();
+  if(['article','articles','news'].includes(t))return 'articles';
+  if(['video','videos'].includes(t))return 'video';
+  if(['podcast','podcasts','audio'].includes(t))return 'podcasts';
+  if(['gated','white paper','whitepaper'].includes(t))return 'gated';
+  if(['ppfo','journal','print'].includes(t))return 'ppfo';
+  return 'articles';
+}
+function normStatus(s){
+  s=(s||'').toLowerCase().trim();
+  if(!s)return 'planned';
+  if(['on website','published','live','done'].includes(s))return 'published';
+  if(['in progress','drafting','writing','wip'].includes(s))return 'in progress';
+  if(['scheduled','ready','queued'].includes(s))return 'scheduled';
+  return 'planned';
+}
+
+function csvToEvents(rows){
+  if(rows.length<2)return{events:[],errors:['File has no rows']};
+  const hdr=rows[0].map(h=>h.trim().toLowerCase());
+  const map={};hdr.forEach((h,i)=>{if(HDR_MAP[h])map[HDR_MAP[h]]=i;});
+  if(map.date===undefined||map.label===undefined)return{events:[],errors:['Missing required "Publish Date" and "Title" columns']};
+  const events=[],errors=[];
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i];
+    const d=parseDate(r[map.date]);
+    if(!d){errors.push('Row '+(i+1)+': bad date "'+r[map.date]+'"');continue;}
+    const label=(r[map.label]||'').trim();if(!label){errors.push('Row '+(i+1)+': empty title');continue;}
+    events.push({
+      id:'imp-'+Date.now()+'-'+i,
+      y:d.y,m:d.m,d:d.d,label,
+      author:map.author!==undefined?(r[map.author]||'').trim():'',
+      vertical:normVertical(map.vertical!==undefined?r[map.vertical]:''),
+      cancer:map.cancer!==undefined?(r[map.cancer]||'').trim():'',
+      type:normType(map.type!==undefined?r[map.type]:''),
+      status:normStatus(map.status!==undefined?r[map.status]:''),
+      src:'sheet'
+    });
+  }
+  return{events,errors};
+}
+
+function openImport(){
+  _impParsed=null;
+  document.getElementById('imp-file').value='';
+  document.getElementById('imp-preview').innerHTML='';
+  const go=document.getElementById('imp-go');go.disabled=true;go.style.opacity='.5';
+  document.getElementById('imp-modal').style.display='block';
+}
+function closeImport(){document.getElementById('imp-modal').style.display='none';_impParsed=null;}
+
+function handleImpFile(file){
+  const prev=document.getElementById('imp-preview');
+  const go=document.getElementById('imp-go');
+  const rd=new FileReader();
+  rd.onload=e=>{
+    const rows=parseCsv(e.target.result);
+    const {events,errors}=csvToEvents(rows);
+    _impParsed=events;
+    if(!events.length){
+      prev.innerHTML='<span style="color:#b3401c">Could not parse any events.<br>'+errors.slice(0,3).join('<br>')+'</span>';
+      go.disabled=true;go.style.opacity='.5';return;
+    }
+    const byV={};events.forEach(e=>byV[e.vertical]=(byV[e.vertical]||0)+1);
+    const dates=events.map(e=>new Date(e.y,e.m-1,e.d)).sort((a,b)=>a-b);
+    const f=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    prev.innerHTML='<span style="color:#0F7B54;font-weight:600">✓ Parsed '+events.length+' event'+(events.length===1?'':'s')+'</span><br>'+
+      '<span style="font-size:11.5px">Range: '+f(dates[0])+' → '+f(dates[dates.length-1])+' · '+
+      Object.entries(byV).map(([k,v])=>(k==='onc'?'Onc':'Multi')+' '+v).join(' · ')+
+      (errors.length?'<br><span style="color:#b3401c">'+errors.length+' row'+(errors.length===1?'':'s')+' skipped</span>':'')+'</span>';
+    go.disabled=false;go.style.opacity='1';
+  };
+  rd.onerror=()=>{prev.innerHTML='<span style="color:#b3401c">Could not read file.</span>';go.disabled=true;go.style.opacity='.5';};
+  rd.readAsText(file);
+}
+
+function doImport(){
+  if(!_impParsed||!_impParsed.length){pill('Nothing to import');return;}
+  const existingSheet=(DB.calEvents||[]).filter(e=>e.src==='sheet');
+  // SAFETY GUARD: refuse a replace that would gut a healthy set
+  if(existingSheet.length>=20 && _impParsed.length < existingSheet.length*0.5){
+    pill('Import refused — only '+_impParsed.length+' vs '+existingSheet.length+' on file');
+    return;
+  }
+  const manual=(DB.calEvents||[]).filter(e=>e.src!=='sheet');
+  DB.calEvents=manual.concat(_impParsed);
+  saveState();
+  pill('Imported '+_impParsed.length+' event'+(_impParsed.length===1?'':'s')+' ✓');
+  closeImport();
+  renderCal();
+}
+
+function wireImport(){
+  const b=document.getElementById('cal-import');if(b)b.onclick=openImport;
+  const c=document.getElementById('imp-close');if(c)c.onclick=closeImport;
+  const x=document.getElementById('imp-cancel');if(x)x.onclick=closeImport;
+  const f=document.getElementById('imp-file');if(f)f.onchange=e=>{if(e.target.files[0])handleImpFile(e.target.files[0]);};
+  const g=document.getElementById('imp-go');if(g)g.onclick=doImport;
+  const m=document.getElementById('imp-modal');if(m)m.onclick=e=>{if(e.target===m)closeImport();};
+}
+
+function tick(){const c=document.getElementById('clock');if(c)c.textContent=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
+
+async function startup(){
+  document.querySelectorAll('.nav-i').forEach(n=>n.addEventListener('click',()=>showPage(n.dataset.pg,n)));
+  document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>setV(c.dataset.v,c)));
+  const bb=document.getElementById('briefing-btn');if(bb)bb.addEventListener('click',copyBriefing);
+  tick();setInterval(tick,30000);
+  wireProjects();
+  wireCal();
+  wireImport();
+  wireAnalytics();
+  wirePPFO();
+  const src=await loadState();
+  if(DB.activeVertical){activeV=DB.activeVertical;document.querySelectorAll('.chip').forEach(c=>{c.classList.toggle('active',c.dataset.v===activeV);});}
+  renderHome();
+  pill(src==='cloud'?'Loaded from cloud ✓':src==='local'?'Loaded local backup':'No saved data');
+}
+window.addEventListener('DOMContentLoaded',startup);
+</script>
+</body>
+</html>
